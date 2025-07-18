@@ -1,7 +1,7 @@
 function Home() {
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Sedat Demir Yapı</h1>
+      <h1>Deko Dem İnşaat</h1>
       <p>20 yıllık tecrübemizle inşaat ve yapı sektöründe güvenin adresiyiz.</p>
       <img
         src="https://via.placeholder.com/800x300"

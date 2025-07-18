@@ -3,7 +3,7 @@ function About() {
     <div style={{ padding: "20px" }}>
       <h2>Hakkımızda</h2>
       <p>
-        Sedat Demir Yapı, modern inşaat tekniklerini geleneksel işçilikle
+        Deko Dem İnşaat, modern inşaat tekniklerini geleneksel işçilikle
         buluşturarak projelerine hayat verir. Müşteri memnuniyeti ve kalite
         önceliğimizdir.
       </p>
