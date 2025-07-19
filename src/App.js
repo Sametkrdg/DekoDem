@@ -1,6 +1,22 @@
 import React, { useState, useEffect } from "react";
 import Admin from "./Admin";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer"; // Footer'ı ekle
+
+// Yeni sayfa bileşenleri (örnek)
+function Hakkimizda() {
+  return <div style={{ padding: 20 }}><h2>Hakkımızda</h2><p>Firma hakkında bilgiler burada.</p></div>;
+}
+function FaaliyetAlanlari() {
+  return <div style={{ padding: 20 }}><h2>Faaliyet Alanlarımız</h2><p>Faaliyet alanları burada.</p></div>;
+}
+function Projeler() {
+  return <div style={{ padding: 20 }}><h2>Projeler</h2><p>Projelerimiz burada.</p></div>;
+}
+function Iletisim() {
+  return <div style={{ padding: 20 }}><h2>İletişim</h2><p>İletişim bilgileri burada.</p></div>;
+}
 
 function Home({ settings }) {
   return (
@@ -32,17 +48,16 @@ function App() {
 
   return (
     <Router>
-      <nav style={{ padding: 10, backgroundColor: "#eee" }}>
-        <Link to="/" style={{ marginRight: 10 }}>
-          Anasayfa
-        </Link>
-        <Link to="/admin">Admin</Link>
-      </nav>
-
+      <Navbar />
       <Routes>
         <Route path="/" element={<Home settings={settings} />} />
+        <Route path="/hakkimizda" element={<Hakkimizda />} />
+        <Route path="/faaliyet-alanlari" element={<FaaliyetAlanlari />} />
+        <Route path="/projeler" element={<Projeler />} />
+        <Route path="/iletisim" element={<Iletisim />} />
         <Route path="/admin" element={<Admin settings={settings} setSettings={setSettings} />} />
       </Routes>
+      <Footer />
     </Router>
   );
 }

@@ -45,6 +45,28 @@ function Navbar() {
             İletişim
           </Button>
         </Box>
+
+        {/* Admin butonu sağ üst köşede ve küçük */}
+        <Box
+          sx={{
+            position: "absolute",
+            right: 16,
+            display: "flex",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          <Button
+            color="secondary"
+            variant="outlined"
+            component={Link}
+            to="/admin"
+            size="small"
+            sx={{ minWidth: 64, fontSize: 12, px: 2 }}
+          >
+            Admin
+          </Button>
+        </Box>
       </Toolbar>
     </AppBar>
   );
