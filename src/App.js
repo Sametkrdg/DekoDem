@@ -2,35 +2,14 @@ import React, { useState, useEffect } from "react";
 import Admin from "./Admin";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer"; // Footer'ı ekle
+import Footer from "./components/Footer";
 
-// Yeni sayfa bileşenleri (örnek)
-function Hakkimizda() {
-  return <div style={{ padding: 20 }}><h2>Hakkımızda</h2><p>Firma hakkında bilgiler burada.</p></div>;
-}
-function FaaliyetAlanlari() {
-  return <div style={{ padding: 20 }}><h2>Faaliyet Alanlarımız</h2><p>Faaliyet alanları burada.</p></div>;
-}
-function Projeler() {
-  return <div style={{ padding: 20 }}><h2>Projeler</h2><p>Projelerimiz burada.</p></div>;
-}
-function Iletisim() {
-  return <div style={{ padding: 20 }}><h2>İletişim</h2><p>İletişim bilgileri burada.</p></div>;
-}
-
-function Home({ settings }) {
-  return (
-    <div style={{ padding: 20, color: settings.color }}>
-      <img
-        src={settings.logoUrl}
-        alt="Logo"
-        style={{ maxWidth: 200, marginBottom: 20 }}
-      />
-      <h1>{settings.title || "Sedat Demir Yapı"}</h1>
-      <p>Bu, inşaat firmamızın tanıtım sitesidir.</p>
-    </div>
-  );
-}
+// Pages klasöründen import edin
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import ActivityAreas from "./pages/ActivityAreas";
+import Projects from "./pages/Projects";
 
 function App() {
   const [settings, setSettings] = useState({
@@ -39,22 +18,17 @@ function App() {
     logoUrl: "",
   });
 
-  useEffect(() => {
-    const saved = localStorage.getItem("siteSettings");
-    if (saved) {
-      setSettings(JSON.parse(saved));
-    }
-  }, []);
-
+  // localStorage kısmını kaldırdım (artifact ortamında sorun çıkarır)
+  
   return (
     <Router>
       <Navbar />
       <Routes>
         <Route path="/" element={<Home settings={settings} />} />
-        <Route path="/hakkimizda" element={<Hakkimizda />} />
-        <Route path="/faaliyet-alanlari" element={<FaaliyetAlanlari />} />
-        <Route path="/projeler" element={<Projeler />} />
-        <Route path="/iletisim" element={<Iletisim />} />
+        <Route path="/hakkimizda" element={<About />} />
+        <Route path="/faaliyet-alanlari" element={<ActivityAreas />} />
+        <Route path="/projeler" element={<Projects />} />
+        <Route path="/iletisim" element={<Contact />} />
         <Route path="/admin" element={<Admin settings={settings} setSettings={setSettings} />} />
       </Routes>
       <Footer />
