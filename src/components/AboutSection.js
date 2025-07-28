@@ -3,6 +3,22 @@ import { Box, Container, Typography, Button, Grid } from '@mui/material';
 import { styled, keyframes } from '@mui/material/styles';
 import { ArrowForward, CheckCircle, Engineering, Business, Star } from '@mui/icons-material';
 
+const ImageSection = styled(Box)(({ theme }) => ({
+  width: '50%',
+  display: 'flex',
+  [theme.breakpoints.down('md')]: {
+    width: '100%',
+  },
+}));
+
+const TextSection = styled(Box)(({ theme }) => ({
+  width: '50%',
+  display: 'flex',
+  [theme.breakpoints.down('md')]: {
+    width: '100%',
+  },
+}));
+
 // Animasyonlar
 const fadeInLeft = keyframes`
   from {
@@ -46,7 +62,8 @@ const shimmer = keyframes`
 
 const MainContainer = styled(Container)(({ theme }) => ({
   padding: '100px 20px',
-  background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+  background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+  minHeight: '100vh',
   position: 'relative',
   overflow: 'hidden',
   '&::before': {
@@ -56,27 +73,34 @@ const MainContainer = styled(Container)(({ theme }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'radial-gradient(circle at 30% 20%, rgba(25, 118, 210, 0.1) 0%, transparent 50%)',
+    background: 'radial-gradient(circle at 30% 20%, rgba(52, 152, 219, 0.1) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(46, 204, 113, 0.1) 0%, transparent 50%)',
     zIndex: 0,
   },
 }));
 
-const ContentWrapper = styled(Grid)(({ theme }) => ({
+const ContentWrapper = styled(Box)(({ theme }) => ({
   position: 'relative',
   zIndex: 1,
+  display: 'flex',
   alignItems: 'stretch',
   minHeight: '700px',
+  gap: '0',
+  [theme.breakpoints.down('md')]: {
+    flexDirection: 'column',
+    gap: '40px',
+  },
 }));
 
 const ImageContainer = styled(Box)(({ theme }) => ({
   position: 'relative',
   width: '100%',
-  height: '600px',
+  height: '100%',
+  minHeight: '600px',
   borderRadius: '24px',
   overflow: 'hidden',
-  boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+  boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
   animation: `${fadeInLeft} 1s ease-out, ${floatAnimation} 6s ease-in-out infinite`,
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  background: 'linear-gradient(135deg, #3498db 0%, #2ecc71 100%)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -87,7 +111,7 @@ const ImageContainer = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3))',
+    background: 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2))',
     zIndex: 1,
   },
   '&::after': {
@@ -98,14 +122,14 @@ const ImageContainer = styled(Box)(({ theme }) => ({
     transform: 'translate(-50%, -50%)',
     width: '80px',
     height: '80px',
-    background: 'rgba(255,255,255,0.2)',
+    background: 'rgba(255,255,255,0.15)',
     borderRadius: '50%',
     backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255,255,255,0.2)',
     zIndex: 2,
   },
   [theme.breakpoints.down('md')]: {
-    height: '400px',
-    marginBottom: '40px',
+    minHeight: '400px',
   },
 }));
 
@@ -144,7 +168,7 @@ const TextContainer = styled(Box)(({ theme }) => ({
 const MainTitle = styled(Typography)(({ theme }) => ({
   fontSize: 'clamp(2rem, 4vw, 3.5rem)',
   fontWeight: 800,
-  background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+  background: 'linear-gradient(135deg, #3498db, #2ecc71)',
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
   marginBottom: '1rem',
@@ -157,14 +181,14 @@ const MainTitle = styled(Typography)(({ theme }) => ({
     left: 0,
     width: '80px',
     height: '4px',
-    background: 'linear-gradient(90deg, #1976d2, #42a5f5)',
+    background: 'linear-gradient(90deg, #3498db, #2ecc71)',
     borderRadius: '2px',
   },
 }));
 
 const SubTitle = styled(Typography)(({ theme }) => ({
   fontSize: '1.3rem',
-  color: '#666',
+  color: '#bdc3c7',
   marginBottom: '2rem',
   fontWeight: 300,
   lineHeight: 1.6,
@@ -172,7 +196,7 @@ const SubTitle = styled(Typography)(({ theme }) => ({
 
 const Description = styled(Typography)(({ theme }) => ({
   fontSize: '1.1rem',
-  color: '#555',
+  color: '#ecf0f1',
   lineHeight: 1.8,
   marginBottom: '2rem',
   textAlign: 'justify',
@@ -193,26 +217,26 @@ const StatItem = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   gap: '12px',
   padding: '15px 20px',
-  background: 'rgba(25, 118, 210, 0.1)',
+  background: 'rgba(52, 152, 219, 0.15)',
   borderRadius: '50px',
-  border: '1px solid rgba(25, 118, 210, 0.2)',
+  border: '1px solid rgba(52, 152, 219, 0.3)',
   transition: 'all 0.3s ease',
   '&:hover': {
-    background: 'rgba(25, 118, 210, 0.15)',
+    background: 'rgba(52, 152, 219, 0.25)',
     transform: 'translateY(-3px)',
-    boxShadow: '0 10px 20px rgba(25, 118, 210, 0.2)',
+    boxShadow: '0 10px 20px rgba(52, 152, 219, 0.3)',
   },
 }));
 
 const StatNumber = styled(Typography)(({ theme }) => ({
   fontSize: '1.5rem',
   fontWeight: 'bold',
-  color: '#1976d2',
+  color: '#3498db',
 }));
 
 const StatLabel = styled(Typography)(({ theme }) => ({
   fontSize: '0.9rem',
-  color: '#666',
+  color: '#bdc3c7',
   fontWeight: 500,
 }));
 
@@ -234,19 +258,19 @@ const FeatureItem = styled(Box)(({ theme }) => ({
 
 const FeatureText = styled(Typography)(({ theme }) => ({
   fontSize: '1rem',
-  color: '#555',
+  color: '#ecf0f1',
   fontWeight: 500,
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+  background: 'linear-gradient(135deg, #3498db, #2ecc71)',
   color: 'white',
   padding: '15px 35px',
   borderRadius: '50px',
   fontSize: '1.1rem',
   fontWeight: 600,
   textTransform: 'none',
-  boxShadow: '0 8px 25px rgba(25, 118, 210, 0.3)',
+  boxShadow: '0 8px 25px rgba(52, 152, 219, 0.3)',
   transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
   position: 'relative',
   overflow: 'hidden',
@@ -262,7 +286,8 @@ const CTAButton = styled(Button)(({ theme }) => ({
   },
   '&:hover': {
     transform: 'translateY(-3px) scale(1.05)',
-    boxShadow: '0 15px 35px rgba(25, 118, 210, 0.4)',
+    boxShadow: '0 15px 35px rgba(52, 152, 219, 0.4)',
+    background: 'linear-gradient(135deg, #2980b9, #27ae60)',
     '&::before': {
       left: '100%',
     },
@@ -274,9 +299,9 @@ const CTAButton = styled(Button)(({ theme }) => ({
 
 const AboutSection = () => {
   const stats = [
-    { number: '15+', label: 'Yıl Deneyim', icon: <Star /> },
-    { number: '100+', label: 'Tamamlanan Proje', icon: <Engineering /> },
-    { number: '50+', label: 'Mutlu Müşteri', icon: <Business /> }
+    { number: '15+', label: 'Yıl Deneyim', icon: <Star sx={{ color: '#3498db' }} /> },
+    { number: '100+', label: 'Tamamlanan Proje', icon: <Engineering sx={{ color: '#2ecc71' }} /> },
+    { number: '50+', label: 'Mutlu Müşteri', icon: <Business sx={{ color: '#3498db' }} /> }
   ];
 
   const features = [
@@ -289,19 +314,19 @@ const AboutSection = () => {
 
   return (
     <MainContainer maxWidth="xl">
-      <ContentWrapper container spacing={4}>
+      <ContentWrapper>
         {/* Sol taraf - Resim */}
-        <Grid item xs={12} md={6}>
+        <ImageSection>
           <ImageContainer>
             <PlaceholderImage>
               {/* Buraya gerçek fotoğraf src ekleyebilirsiniz */}
               <Engineering sx={{ fontSize: 60, opacity: 0.7 }} />
             </PlaceholderImage>
           </ImageContainer>
-        </Grid>
+        </ImageSection>
 
         {/* Sağ taraf - Metin */}
-        <Grid item xs={12} md={6}>
+        <TextSection>
           <TextContainer>
             <MainTitle>
               Sedat Demir Yapı
@@ -335,7 +360,7 @@ const AboutSection = () => {
             <FeaturesList>
               {features.map((feature, index) => (
                 <FeatureItem key={index}>
-                  <CheckCircle sx={{ color: '#4caf50', fontSize: 24 }} />
+                  <CheckCircle sx={{ color: '#2ecc71', fontSize: 24 }} />
                   <FeatureText>{feature}</FeatureText>
                 </FeatureItem>
               ))}
@@ -349,7 +374,7 @@ const AboutSection = () => {
               Daha Fazla Bilgi
             </CTAButton>
           </TextContainer>
-        </Grid>
+        </TextSection>
       </ContentWrapper>
     </MainContainer>
   );
