@@ -3,6 +3,19 @@ import { Box, Container, Typography, Button, Grid } from '@mui/material';
 import { styled, keyframes } from '@mui/material/styles';
 import { ArrowForward, CheckCircle, Engineering, Business, Star } from '@mui/icons-material';
 
+// Ortak styled components'leri import et
+// Eğer import hatası alırsanız, aşağıdaki satırı yorum yapın ve manual tanımlamaları kullanın
+import {
+  StatsContainer,
+  StatItem,
+  StatNumber,
+  StatLabel,
+  FeaturesList,
+  FeatureItem,
+  CTAButton
+} from '../styles/StyledComponents';
+
+// About Section özel styled components
 const ImageSection = styled(Box)(({ theme }) => ({
   width: '50%',
   display: 'flex',
@@ -51,15 +64,6 @@ const floatAnimation = keyframes`
   }
 `;
 
-const shimmer = keyframes`
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-`;
-
 const MainContainer = styled(Container)(({ theme }) => ({
   padding: '100px 20px',
   background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
@@ -104,6 +108,11 @@ const ImageContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-8px)',
+    boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
+  },
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -202,6 +211,14 @@ const Description = styled(Typography)(({ theme }) => ({
   textAlign: 'justify',
 }));
 
+const FeatureText = styled(Typography)(({ theme }) => ({
+  fontSize: '1rem',
+  color: 'inherit',
+  fontWeight: 500,
+}));
+
+// Eğer import hatası alırsanız, bu component'leri yorum satırından çıkarın:
+/*
 const StatsContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   gap: '30px',
@@ -223,8 +240,8 @@ const StatItem = styled(Box)(({ theme }) => ({
   transition: 'all 0.3s ease',
   '&:hover': {
     background: 'rgba(52, 152, 219, 0.25)',
-    transform: 'translateY(-3px)',
-    boxShadow: '0 10px 20px rgba(52, 152, 219, 0.3)',
+    transform: 'translateY(-8px)',
+    boxShadow: '0 12px 40px rgba(52, 152, 219, 0.15)',
   },
 }));
 
@@ -250,16 +267,13 @@ const FeatureItem = styled(Box)(({ theme }) => ({
   gap: '15px',
   marginBottom: '15px',
   padding: '10px 0',
+  color: '#bdc3c7',
   transition: 'all 0.3s ease',
+  cursor: 'pointer',
   '&:hover': {
-    transform: 'translateX(10px)',
+    color: '#3498db',
+    transform: 'translateX(5px)',
   },
-}));
-
-const FeatureText = styled(Typography)(({ theme }) => ({
-  fontSize: '1rem',
-  color: '#ecf0f1',
-  fontWeight: 500,
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
@@ -285,8 +299,8 @@ const CTAButton = styled(Button)(({ theme }) => ({
     transition: 'left 0.5s',
   },
   '&:hover': {
-    transform: 'translateY(-3px) scale(1.05)',
-    boxShadow: '0 15px 35px rgba(52, 152, 219, 0.4)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
     background: 'linear-gradient(135deg, #2980b9, #27ae60)',
     '&::before': {
       left: '100%',
@@ -296,6 +310,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
     transform: 'translateY(-1px) scale(1.02)',
   },
 }));
+*/
 
 const AboutSection = () => {
   const stats = [

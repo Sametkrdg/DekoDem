@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Admin from "./Admin";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
+import theme from './styles/Theme';
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
@@ -22,6 +25,9 @@ function App() {
   
   return (
     <Router>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+      
       <Navbar />
       <Routes>
         <Route path="/" element={<Home settings={settings} />} />
@@ -32,6 +38,7 @@ function App() {
         <Route path="/admin" element={<Admin settings={settings} setSettings={setSettings} />} />
       </Routes>
       <Footer />
+      </ThemeProvider>
     </Router>
   );
 }

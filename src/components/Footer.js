@@ -1,5 +1,6 @@
+// Footer.js
 import React from 'react';
-import { Box, Typography, Container, Button, Grid, IconButton, Divider } from "@mui/material";
+import { Typography, Container, Button, Grid, Box } from "@mui/material";
 import { Link } from "react-router-dom";
 import { 
   Facebook, 
@@ -14,119 +15,24 @@ import {
   Business,
   Engineering
 } from "@mui/icons-material";
-import { styled } from '@mui/material/styles';
 
-const FooterContainer = styled(Box)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
-  color: '#fff',
-  marginTop: 'auto',
-}));
-
-const MainFooter = styled(Box)(({ theme }) => ({
-  padding: '60px 0 40px 0',
-  [theme.breakpoints.down('md')]: {
-    padding: '40px 0 30px 0',
-  },
-}));
-
-const FooterSection = styled(Box)(({ theme }) => ({
-  height: '100%',
-}));
-
-const LogoContainer = styled(Box)(({ theme }) => ({
-  marginBottom: '20px',
-}));
-
-const LogoText = styled(Typography)(({ theme }) => ({
-  fontSize: '1.8rem',
-  fontWeight: 'bold',
-  background: 'linear-gradient(135deg, #3498db, #2ecc71)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  marginBottom: '10px',
-}));
-
-const LogoSubtext = styled(Typography)(({ theme }) => ({
-  color: '#bdc3c7',
-  fontSize: '0.9rem',
-  marginBottom: '25px',
-}));
-
-const SectionTitle = styled(Typography)(({ theme }) => ({
-  fontSize: '1.3rem',
-  fontWeight: '600',
-  marginBottom: '25px',
-  color: '#ecf0f1',
-  position: 'relative',
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    bottom: '-8px',
-    left: 0,
-    width: '40px',
-    height: '3px',
-    background: 'linear-gradient(90deg, #3498db, #2ecc71)',
-    borderRadius: '2px',
-  },
-}));
-
-const SocialMediaContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: '12px',
-  marginTop: '20px',
-}));
-
-const SocialButton = styled(IconButton)(({ theme }) => ({
-  background: 'rgba(255,255,255,0.1)',
-  color: '#ecf0f1',
-  width: '45px',
-  height: '45px',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    transform: 'translateY(-3px)',
-    background: 'linear-gradient(135deg, #3498db, #2ecc71)',
-    boxShadow: '0 8px 20px rgba(52, 152, 219, 0.4)',
-  },
-}));
-
-const ServiceItem = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '12px',
-  marginBottom: '15px',
-  color: '#bdc3c7',
-  transition: 'all 0.3s ease',
-  cursor: 'pointer',
-  '&:hover': {
-    color: '#3498db',
-    transform: 'translateX(5px)',
-  },
-}));
-
-const ContactItem = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '12px',
-  marginBottom: '15px',
-  color: '#bdc3c7',
-}));
-
-const ContactText = styled(Typography)(({ theme }) => ({
-  fontSize: '0.95rem',
-  lineHeight: 1.5,
-}));
-
-const CopyrightSection = styled(Box)(({ theme }) => ({
-  background: 'rgba(0,0,0,0.2)',
-  padding: '20px 0',
-  borderTop: '1px solid rgba(255,255,255,0.1)',
-}));
-
-const CopyrightText = styled(Typography)(({ theme }) => ({
-  color: '#95a5a6',
-  fontSize: '0.9rem',
-  textAlign: 'center',
-}));
+// Ortak styled components'leri import et
+import {
+  FooterContainer,
+  MainFooter,
+  FooterSection,
+  LogoContainer,
+  LogoText,
+  LogoSubtext,
+  SectionTitle,
+  SocialMediaContainer,
+  SocialButton,
+  ServiceItem,
+  ContactItem,
+  ContactText,
+  CopyrightSection,
+  CopyrightText
+} from '../styles/StyledComponents';
 
 function Footer() {
   const services = [
@@ -194,16 +100,7 @@ function Footer() {
                   component={Link} 
                   to="/faaliyet-alanlari"
                   variant="outlined"
-                  sx={{ 
-                    mt: 2,
-                    color: '#3498db',
-                    borderColor: '#3498db',
-                    '&:hover': {
-                      borderColor: '#2ecc71',
-                      color: '#2ecc71',
-                      background: 'rgba(46, 204, 113, 0.1)',
-                    }
-                  }}
+                  sx={{ mt: 2 }}
                 >
                   Tümünü Gör
                 </Button>
@@ -248,15 +145,7 @@ function Footer() {
                   component={Link} 
                   to="/iletisim"
                   variant="contained"
-                  sx={{ 
-                    mt: 3,
-                    background: 'linear-gradient(135deg, #3498db, #2ecc71)',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #2980b9, #27ae60)',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 8px 20px rgba(52, 152, 219, 0.4)',
-                    }
-                  }}
+                  sx={{ mt: 3 }}
                 >
                   İletişime Geç
                 </Button>
