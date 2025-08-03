@@ -1,12 +1,9 @@
+import AboutPage from "../components/AboutPage";
+
 function About() {
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Hakkımızda</h2>
-      <p>
-        Deko Dem İnşaat, modern inşaat tekniklerini geleneksel işçilikle
-        buluşturarak projelerine hayat verir. Müşteri memnuniyeti ve kalite
-        önceliğimizdir.
-      </p>
+    <div className="about-page">
+      <AboutPage />
     </div>
   );
 }

@@ -21,6 +21,12 @@ import {
 } from '@mui/icons-material';
 import { Link, useLocation } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
+import { 
+  LogoText as StyledLogoText,
+  SocialButton,
+  GradientText,
+  CTAButton
+} from '../styles/StyledComponents';
 
 // 🎨 Styled Components
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
@@ -55,12 +61,8 @@ const LogoContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const LogoText = styled(Typography)(({ theme }) => ({
+const LogoText = styled(StyledLogoText)(({ theme }) => ({
   fontSize: '1.5rem',
-  fontWeight: 'bold',
-  background: 'linear-gradient(135deg, #3498db, #2ecc71)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
   display: 'none',
   [theme.breakpoints.up('md')]: {
     display: 'block',
@@ -79,6 +81,7 @@ const LogoPlaceholder = styled(Box)(({ theme }) => ({
   fontWeight: 'bold',
   fontSize: '1.2rem',
   boxShadow: '0 4px 15px rgba(52, 152, 219, 0.3)',
+  ...theme.mixins.hoverEffect,
 }));
 
 const NavMenu = styled(Box)(({ theme }) => ({
@@ -117,21 +120,14 @@ const NavButton = styled(Button)(({ theme, active }) => ({
   } : {},
 }));
 
-const AdminButton = styled(Button)(({ theme }) => ({
+const AdminButton = styled(CTAButton)(({ theme }) => ({
   background: 'linear-gradient(135deg, #e74c3c, #c0392b)',
-  color: 'white',
   borderRadius: '50px',
   padding: '6px 16px',
   fontSize: '0.85rem',
-  fontWeight: 600,
-  textTransform: 'none',
   minWidth: 'auto',
-  boxShadow: '0 4px 15px rgba(231, 76, 60, 0.3)',
-  transition: 'all 0.3s ease',
   '&:hover': {
     background: 'linear-gradient(135deg, #c0392b, #a93226)',
-    transform: 'translateY(-2px)',
-    boxShadow: '0 6px 20px rgba(231, 76, 60, 0.4)',
   },
 }));
 
@@ -146,7 +142,7 @@ const MobileMenuButton = styled(IconButton)(({ theme }) => ({
 const StyledDrawer = styled(Drawer)(({ theme }) => ({
   '& .MuiDrawer-paper': {
     width: '280px',
-    background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+    ...theme.mixins.gradientBackground,
     color: 'white',
     padding: '20px 0',
   },
@@ -201,9 +197,9 @@ function Navbar() {
           <LogoPlaceholder>
             SD
           </LogoPlaceholder>
-          <Typography variant="h6" fontWeight="bold">
+          <GradientText variant="h6" fontWeight="bold">
             Sedat Demir Yapı
-          </Typography>
+          </GradientText>
         </Box>
         <IconButton onClick={handleDrawerToggle} sx={{ color: 'white' }}>
           <CloseIcon />

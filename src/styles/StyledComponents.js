@@ -65,6 +65,16 @@ export const SectionTitle = styled(Typography)(({ theme }) => ({
   },
 }));
 
+export const LeftAlignedSectionTitle = styled(SectionTitle)(({ theme }) => ({
+  textAlign: 'left',
+  fontSize: 'clamp(1rem, 3vw, 1.6rem)',
+  marginBottom: '20px',
+  [theme.breakpoints.down('sm')]: {
+    fontSize: '1rem',
+  },
+}));
+
+
 export const PageTitle = styled(Typography)(({ theme }) => ({
   fontSize: '2.5rem',
   fontWeight: 'bold',

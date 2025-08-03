@@ -113,34 +113,34 @@ const SliderContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const SlideWrapper = styled(Box)({
+const SlideWrapper = styled(Box)(({ theme, ismobile }) => ({
   display: 'flex',
-  width: '300%',
+  width: ismobile ? '900%' : '300%', // Mobilde 9 kart için genişlik
   height: '100%',
   transition: 'transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-});
+}));
 
-const Slide = styled(Box)(({ theme }) => ({
-  width: '33.333%',
+const Slide = styled(Box)(({ theme, ismobile }) => ({
+  width: ismobile ? '11.111%' : '33.333%', // Mobilde her kart 1/9, desktop'ta 1/3
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  gap: '30px',
+  gap: ismobile ? '0' : '30px',
   padding: '40px 20px',
   [theme.breakpoints.down('md')]: {
-    gap: '20px',
+    gap: ismobile ? '0' : '20px',
     padding: '30px 15px',
   },
   [theme.breakpoints.down('sm')]: {
-    gap: '15px',
+    gap: '0',
     padding: '20px 10px',
   },
 }));
 
 // ServiceCard'ı extend ederek özelleştiriyoruz
-const ActivityCard = styled(ServiceCard)(({ theme }) => ({
-  width: '300px',
-  height: '380px',
+const ActivityCard = styled(ServiceCard)(({ theme, ismobile }) => ({
+  width: ismobile ? '280px' : '300px',
+  height: ismobile ? '320px' : '380px',
   padding: '0',
   backgroundColor: theme.palette.background.paper,
   borderRadius: '20px',
@@ -152,12 +152,12 @@ const ActivityCard = styled(ServiceCard)(({ theme }) => ({
     boxShadow: '0 20px 50px rgba(0,0,0,0.2)',
   },
   [theme.breakpoints.down('md')]: {
-    width: '260px',
-    height: '340px',
+    width: ismobile ? '260px' : '260px',
+    height: ismobile ? '300px' : '340px',
   },
   [theme.breakpoints.down('sm')]: {
-    width: '220px',
-    height: '300px',
+    width: '240px',
+    height: '280px',
   },
 }));
 
@@ -244,41 +244,57 @@ const ProgressDot = styled(Box)(({ theme, active }) => ({
   },
 }));
 
-// 🔧 Faaliyet Kartları Data
-const activitySlides = [
-  [
-    { title: 'Konut İnşaatı', image: '/images/konut.jpg' },
-    { title: 'Ticari Yapılar', image: '/images/ticari.jpg' },
-    { title: 'Tadilat & Renovasyon', image: '/images/tadilat.jpg' },
-  ],
-  [
-    { title: 'Proje Yönetimi', image: '/images/proje.jpg' },
-    { title: 'İç Mekan Tasarımı', image: '/images/icmekan.jpg' },
-    { title: 'Peyzaj Düzenleme', image: '/images/peyzaj.jpg' },
-  ],
-  [
-    { title: 'Cephe Giydirme', image: '/images/cephe.jpg' },
-    { title: 'Endüstriyel Yapılar', image: '/images/endustriyel.jpg' },
-    { title: 'Restorasyon', image: '/images/restorasyon.jpg' },
-  ],
-];
+// 🔧 Faaliyet Kartları Data - Artık component içinde tanımlandı
 
 const ActivitiesSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  // Tüm kartları tek bir dizi halinde tutuyoruz
+  const allActivities = [
+    { title: 'Konut İnşaatı', image: '/images/konut.jpg' },
+    { title: 'Ticari Yapılar', image: '/images/ticari.jpg' },
+    { title: 'Tadilat & Renovasyon', image: '/images/tadilat.jpg' },
+    { title: 'Proje Yönetimi', image: '/images/proje.jpg' },
+    { title: 'İç Mekan Tasarımı', image: '/images/icmekan.jpg' },
+    { title: 'Peyzaj Düzenleme', image: '/images/peyzaj.jpg' },
+    { title: 'Cephe Giydirme', image: '/images/cephe.jpg' },
+    { title: 'Endüstriyel Yapılar', image: '/images/endustriyel.jpg' },
+    { title: 'Restorasyon', image: '/images/restorasyon.jpg' },
+  ];
+
+  // Desktop için 3'lü gruplar, mobile için tekli
+  const activitySlides = isMobile 
+    ? allActivities.map(activity => [activity]) // Her kart ayrı bir slide
+    : [
+        allActivities.slice(0, 3),
+        allActivities.slice(3, 6),
+        allActivities.slice(6, 9)
+      ];
+
+  const maxSlides = activitySlides.length;
+
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % activitySlides.length);
+    setCurrentSlide((prev) => (prev + 1) % maxSlides);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + activitySlides.length) % activitySlides.length);
+    setCurrentSlide((prev) => (prev - 1 + maxSlides) % maxSlides);
   };
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
   };
+
+  // currentSlide sınırlarını kontrol et
+  React.useEffect(() => {
+    if (currentSlide >= maxSlides) {
+      setCurrentSlide(0);
+    }
+  }, [isMobile, maxSlides, currentSlide]);
+
+  const slideWidth = isMobile ? 11.111 : 33.333; // Mobilde 1/9, desktop'ta 1/3
 
   return (
     <ActivitiesContainer>
@@ -291,20 +307,21 @@ const ActivitiesSlider = () => {
           <NavigationButton 
             direction="left" 
             onClick={prevSlide}
-            aria-label="Önceki slayt"
+            aria-label="Önceki faaliyet"
           >
             <ChevronLeft fontSize={isMobile ? "medium" : "large"} />
           </NavigationButton>
 
           <SlideWrapper 
+            ismobile={isMobile}
             sx={{ 
-              transform: `translateX(-${currentSlide * 33.333}%)` 
+              transform: `translateX(-${currentSlide * slideWidth}%)` 
             }}
           >
             {activitySlides.map((slide, slideIndex) => (
-              <Slide key={slideIndex}>
+              <Slide key={slideIndex} ismobile={isMobile}>
                 {slide.map((activity, cardIndex) => (
-                  <ActivityCard key={cardIndex}>
+                  <ActivityCard key={cardIndex} ismobile={isMobile}>
                     <CardImage 
                       src={activity.image} 
                       alt={activity.title}
@@ -326,7 +343,7 @@ const ActivitiesSlider = () => {
           <NavigationButton 
             direction="right" 
             onClick={nextSlide}
-            aria-label="Sonraki slayt"
+            aria-label="Sonraki faaliyet"
           >
             <ChevronRight fontSize={isMobile ? "medium" : "large"} />
           </NavigationButton>
