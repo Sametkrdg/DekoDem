@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 import { Box, Container, Typography, IconButton, useTheme, useMediaQuery } from '@mui/material';
-import { ChevronLeft, ChevronRight, PlayArrow } from '@mui/icons-material';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
-import { 
-  SectionContainer,
-  PageTitle,
-  GradientText,
-  HeroSection
-} from '../styles/StyledComponents';
+
 
 // Animasyonlar
 const fadeInUp = keyframes`
@@ -385,7 +380,7 @@ const VideoSlider = () => {
             <ChevronRight fontSize="large" />
           </NavigationButton>
 
-          {/* Progress Indicator - Sadece mobilde görünür olacak şekilde ayarlandı */}
+          {/* Progress Indicator - Tüm Ekranlarda Görünür */}
           <ProgressIndicator>
             {videoSlides.map((_, index) => (
               <ProgressDot

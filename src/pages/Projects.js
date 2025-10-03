@@ -1,6 +1,5 @@
 // pages/Projects.js
 import React from 'react';
-import { Container } from '@mui/material';
 import ProjectsHeader from '../components/ProjectsHeader';
 import ProjectsGrid from '../components/ProjectsGrid';
 import StatsSection from '../components/StatsSection';

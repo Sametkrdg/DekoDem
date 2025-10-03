@@ -1,17 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import { styled, keyframes } from '@mui/material/styles';
-
-const fadeInLeft = keyframes`
-  from {
-    opacity: 0;
-    transform: translateX(-50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-`;
+import { styled } from '@mui/material/styles';
 
 const TimelineSidebarContainer = styled(Box)(({ theme }) => ({
   width: '30%',

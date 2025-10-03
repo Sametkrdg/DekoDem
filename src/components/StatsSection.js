@@ -1,7 +1,7 @@
 // components/StatsSection.js
 import React from 'react';
 import { Grid, Box } from '@mui/material';
-import { SectionTitle, StatsContainer, StatItem, StatNumber, StatLabel, GradientText } from '../styles/StyledComponents';
+import { SectionTitle, StatLabel, GradientText } from '../styles/StyledComponents';
 
 const StatsSection = () => {
   const statsData = [

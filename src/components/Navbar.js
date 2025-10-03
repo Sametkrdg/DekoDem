@@ -11,7 +11,6 @@ import {
   ListItemText,
   useTheme,
   useMediaQuery,
-  Typography,
   Divider,
 } from '@mui/material';
 import {
@@ -21,9 +20,9 @@ import {
 } from '@mui/icons-material';
 import { Link, useLocation } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
+
 import { 
   LogoText as StyledLogoText,
-  SocialButton,
   GradientText,
   CTAButton
 } from '../styles/StyledComponents';

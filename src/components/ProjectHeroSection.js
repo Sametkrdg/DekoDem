@@ -3,16 +3,6 @@ import { Box, Typography } from '@mui/material';
 import { styled, keyframes } from '@mui/material/styles';
 import { Engineering, Architecture, Business } from '@mui/icons-material';
 
-const fadeInUp = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
 
 const fadeInLeft = keyframes`
   from {

@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Container,
-  Paper,
   Typography,
   TextField,
   Button,
   Grid,
   Card,
   CardContent,
-  Divider,
-  IconButton,
   Alert,
   Snackbar,
   Avatar,
@@ -25,34 +22,6 @@ import {
   Refresh,
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
-
-// Ortak styled components'leri import et (eğer styles klasörü src içindeyse)
-// import {
-//   PageTitle,
-//   SectionContainer,
-//   GradientText
-// } from '../styles/styledComponents';
-
-// Şimdilik bu component'leri burada tanımlayalım
-const PageTitle = styled(Typography)(({ theme }) => ({
-  fontSize: "2.5rem",
-  fontWeight: "bold",
-  background: "linear-gradient(135deg, #3498db, #2ecc71)",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  marginBottom: "20px",
-  textAlign: "center",
-  [theme.breakpoints.down("md")]: {
-    fontSize: "2rem",
-  },
-}));
-
-const GradientText = styled(Typography)(({ theme }) => ({
-  background: "linear-gradient(135deg, #3498db, #2ecc71)",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  fontWeight: "bold",
-}));
 
 // Admin özel styled components
 const AdminContainer = styled(Container)(({ theme }) => ({

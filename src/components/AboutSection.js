@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Typography, Button, Grid } from '@mui/material';
+import { Box, Container, Typography } from '@mui/material';
 import { styled, keyframes } from '@mui/material/styles';
 import { ArrowForward, CheckCircle, Engineering, Business, Star } from '@mui/icons-material';
 

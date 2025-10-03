@@ -1,8 +1,8 @@
 // components/ContactInfo.js
 import React from 'react';
-import { Box, Typography } from '@mui/material';
-import { Phone, LocationOn, Email, AccessTime, Language } from '@mui/icons-material';
-import { ServiceCard, SectionTitle, ContactItem, ContactText, SocialMediaContainer, SocialButton } from '../styles/StyledComponents';
+import { Box } from '@mui/material';
+import { Phone, LocationOn, Email, AccessTime } from '@mui/icons-material';
+import { ServiceCard, SectionTitle, ContactText, SocialMediaContainer, SocialButton } from '../styles/StyledComponents';
 import { Facebook, Instagram, Twitter, LinkedIn } from '@mui/icons-material';
 
 const ContactInfo = () => {

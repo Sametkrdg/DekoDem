@@ -10,12 +10,7 @@ import {
 } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
-import { 
-  SectionContainer, 
-  PageTitle,
-  ServiceCard,
-  GradientText 
-} from '../styles/StyledComponents';
+import { ServiceCard } from '../styles/StyledComponents';
 
 // Animasyonlar
 const fadeInUp = keyframes`
