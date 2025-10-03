@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -16,7 +17,7 @@ import {
   GradientText 
 } from '../styles/StyledComponents';
 
-// 🔁 Animasyonlar
+// Animasyonlar
 const fadeInUp = keyframes`
   from {
     opacity: 0;
@@ -52,10 +53,10 @@ const glassShimmer = keyframes`
   }
 `;
 
-// 🔲 Styled bileşenler - Theme ile uyumlu
+// Styled bileşenler
 const ActivitiesContainer = styled(Box)(({ theme }) => ({
   padding: '80px 0',
-  background: theme.mixins.gradientBackground.background,
+  background: theme.mixins?.gradientBackground?.background || 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
   minHeight: '70vh',
   position: 'relative',
   overflow: 'hidden',
@@ -86,7 +87,11 @@ const SliderTitle = styled(Typography)(({ theme }) => ({
   fontWeight: 800,
   textAlign: 'center',
   marginBottom: '3rem',
-  ...theme.mixins.gradientText,
+  ...(theme.mixins?.gradientText || {
+    background: 'linear-gradient(135deg, #3498db, #2ecc71)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+  }),
   [theme.breakpoints.down('md')]: {
     marginBottom: '2rem',
   },
@@ -115,13 +120,13 @@ const SliderContainer = styled(Box)(({ theme }) => ({
 
 const SlideWrapper = styled(Box)(({ theme, ismobile }) => ({
   display: 'flex',
-  width: ismobile ? '900%' : '300%', // Mobilde 9 kart için genişlik
+  width: ismobile ? '700%' : '300%',
   height: '100%',
   transition: 'transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
 }));
 
 const Slide = styled(Box)(({ theme, ismobile }) => ({
-  width: ismobile ? '11.111%' : '33.333%', // Mobilde her kart 1/9, desktop'ta 1/3
+  width: ismobile ? '14.286%' : '33.333%',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -137,7 +142,6 @@ const Slide = styled(Box)(({ theme, ismobile }) => ({
   },
 }));
 
-// ServiceCard'ı extend ederek özelleştiriyoruz
 const ActivityCard = styled(ServiceCard)(({ theme, ismobile }) => ({
   width: ismobile ? '280px' : '300px',
   height: ismobile ? '320px' : '380px',
@@ -147,10 +151,18 @@ const ActivityCard = styled(ServiceCard)(({ theme, ismobile }) => ({
   overflow: 'hidden',
   position: 'relative',
   cursor: 'pointer',
+  transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+  
   '&:hover': {
     transform: 'translateY(-12px) scale(1.02)',
     boxShadow: '0 20px 50px rgba(0,0,0,0.2)',
   },
+  
+  // Click effect
+  '&:active': {
+    transform: 'translateY(-8px) scale(0.98)',
+  },
+  
   [theme.breakpoints.down('md')]: {
     width: ismobile ? '260px' : '260px',
     height: ismobile ? '300px' : '340px',
@@ -166,9 +178,6 @@ const CardImage = styled('img')(({ theme }) => ({
   height: '75%',
   objectFit: 'cover',
   transition: 'transform 0.4s ease',
-  '&:hover': {
-    transform: 'scale(1.05)',
-  },
 }));
 
 const CardContent = styled(Box)(({ theme }) => ({
@@ -177,22 +186,22 @@ const CardContent = styled(Box)(({ theme }) => ({
   left: 0,
   right: 0,
   background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-  color: theme.palette.text.white,
+  color: theme.palette.text?.white || '#ffffff',
   padding: '20px',
   textAlign: 'center',
+  transition: 'all 0.3s ease',
 }));
 
 const CardTitle = styled(Typography)(({ theme }) => ({
   fontWeight: 600,
   fontSize: '1.2rem',
-  color: theme.palette.text.white,
+  color: theme.palette.text?.white || '#ffffff',
   textShadow: '0 2px 4px rgba(0,0,0,0.3)',
   [theme.breakpoints.down('sm')]: {
     fontSize: '1rem',
   },
 }));
 
-// Navigation buttons - Theme ile uyumlu
 const NavigationButton = styled(IconButton)(({ theme, direction }) => ({
   position: 'absolute',
   top: '50%',
@@ -200,7 +209,7 @@ const NavigationButton = styled(IconButton)(({ theme, direction }) => ({
   transform: 'translateY(-50%)',
   background: 'rgba(255,255,255,0.15)',
   backdropFilter: 'blur(10px)',
-  color: theme.palette.text.white,
+  color: theme.palette.text?.white || '#ffffff',
   zIndex: 10,
   width: '55px',
   height: '55px',
@@ -236,37 +245,69 @@ const ProgressDot = styled(Box)(({ theme, active }) => ({
   width: active ? '32px' : '12px',
   height: '12px',
   borderRadius: '6px',
-  backgroundColor: active ? theme.palette.text.white : 'rgba(255,255,255,0.4)',
+  backgroundColor: active ? (theme.palette.text?.white || '#ffffff') : 'rgba(255,255,255,0.4)',
   transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
   cursor: 'pointer',
   '&:hover': {
-    backgroundColor: active ? theme.palette.text.white : 'rgba(255,255,255,0.7)',
+    backgroundColor: active ? (theme.palette.text?.white || '#ffffff') : 'rgba(255,255,255,0.7)',
   },
 }));
 
-// 🔧 Faaliyet Kartları Data - Artık component içinde tanımlandı
-
-const ActivitiesSlider = () => {
+const ActivitiesSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
 
-  // Tüm kartları tek bir dizi halinde tutuyoruz
+  // Faaliyet alanları - route'lar güncellendi
   const allActivities = [
-    { title: 'Konut İnşaatı', image: '/images/konut.jpg' },
-    { title: 'Ticari Yapılar', image: '/images/ticari.jpg' },
-    { title: 'Tadilat & Renovasyon', image: '/images/tadilat.jpg' },
-    { title: 'Proje Yönetimi', image: '/images/proje.jpg' },
-    { title: 'İç Mekan Tasarımı', image: '/images/icmekan.jpg' },
-    { title: 'Peyzaj Düzenleme', image: '/images/peyzaj.jpg' },
-    { title: 'Cephe Giydirme', image: '/images/cephe.jpg' },
-    { title: 'Endüstriyel Yapılar', image: '/images/endustriyel.jpg' },
-    { title: 'Restorasyon', image: '/images/restorasyon.jpg' },
+    { 
+      title: 'Yapı Hizmetleri', 
+      image: '/images/konut.jpg', 
+      route: '/yapi-hizmetleri',
+      description: 'Kaba inşaattan anahtar teslime kadar tüm yapı hizmetleri'
+    },
+    { 
+      title: 'Yapı Malzemeleri Satışı', 
+      image: '/images/ticari.jpg', 
+      route: '/malzeme-satisi',
+      description: 'Kaliteli yapı malzemeleri ve ekipman satışı'
+    },
+    { 
+      title: 'Dekorasyon ve Uygulama', 
+      image: '/images/tadilat.jpg', 
+      route: '/dekorasyon-hizmetleri',
+      description: 'İç ve dış mekan dekorasyon çözümleri'
+    },
+    { 
+      title: 'Proje Yönetimi', 
+      image: '/images/proje.jpg', 
+      route: '/proje-yonetimi',
+      description: 'Profesyonel proje planlama ve yönetim hizmetleri'
+    },
+    { 
+      title: 'İç Mekan Tasarımı', 
+      image: '/images/icmekan.jpg', 
+      route: '/ic-mekan-tasarimi',
+      description: 'Yaşam alanlarınız için özel tasarım çözümleri'
+    },
+    { 
+      title: 'Peyzaj Düzenleme', 
+      image: '/images/peyzaj.jpg', 
+      route: '/peyzaj-duzenleme',
+      description: 'Bahçe ve peyzaj düzenleme hizmetleri'
+    },
+    { 
+      title: 'Cephe Giydirme', 
+      image: '/images/cephe.jpg', 
+      route: '/cephe-giydirme',
+      description: 'Modern cephe sistemleri ve uygulamaları'
+    },
   ];
 
   // Desktop için 3'lü gruplar, mobile için tekli
   const activitySlides = isMobile 
-    ? allActivities.map(activity => [activity]) // Her kart ayrı bir slide
+    ? allActivities.map(activity => [activity])
     : [
         allActivities.slice(0, 3),
         allActivities.slice(3, 6),
@@ -287,6 +328,17 @@ const ActivitiesSlider = () => {
     setCurrentSlide(index);
   };
 
+  // Kart tıklama fonksiyonu
+  const handleCardClick = (activity) => {
+    // Eğer sayfa mevcut değilse, genel faaliyet alanları sayfasına yönlendir
+    if (activity.route === '/yapi-hizmetleri') {
+      navigate('/yapi-hizmetleri');
+    } else {
+      // Diğer sayfalar için genel faaliyet alanları sayfasına yönlendir
+      navigate('/faaliyet-alanlari', { state: { selectedActivity: activity } });
+    }
+  };
+
   // currentSlide sınırlarını kontrol et
   React.useEffect(() => {
     if (currentSlide >= maxSlides) {
@@ -294,7 +346,7 @@ const ActivitiesSlider = () => {
     }
   }, [isMobile, maxSlides, currentSlide]);
 
-  const slideWidth = isMobile ? 11.111 : 33.333; // Mobilde 1/9, desktop'ta 1/3
+  const slideWidth = isMobile ? 14.286 : 33.333;
 
   return (
     <ActivitiesContainer>
@@ -321,12 +373,23 @@ const ActivitiesSlider = () => {
             {activitySlides.map((slide, slideIndex) => (
               <Slide key={slideIndex} ismobile={isMobile}>
                 {slide.map((activity, cardIndex) => (
-                  <ActivityCard key={cardIndex} ismobile={isMobile}>
+                  <ActivityCard 
+                    key={cardIndex} 
+                    ismobile={isMobile}
+                    onClick={() => handleCardClick(activity)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        handleCardClick(activity);
+                      }
+                    }}
+                  >
                     <CardImage 
                       src={activity.image} 
                       alt={activity.title}
                       onError={(e) => {
-                        e.target.src = '/images/placeholder.jpg'; // Fallback image
+                        e.target.src = '/images/placeholder.jpg';
                       }}
                     />
                     <CardContent>
@@ -363,4 +426,4 @@ const ActivitiesSlider = () => {
   );
 };
 
-export default ActivitiesSlider;
+export default ActivitiesSection;

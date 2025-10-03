@@ -13,7 +13,7 @@ import {
   IconButton,
   Alert,
   Snackbar,
-  Avatar
+  Avatar,
 } from "@mui/material";
 import {
   Settings,
@@ -22,9 +22,9 @@ import {
   Title,
   Image,
   Preview,
-  Refresh
+  Refresh,
 } from "@mui/icons-material";
-import { styled } from '@mui/material/styles';
+import { styled } from "@mui/material/styles";
 
 // Ortak styled components'leri import et (eğer styles klasörü src içindeyse)
 // import {
@@ -35,96 +35,103 @@ import { styled } from '@mui/material/styles';
 
 // Şimdilik bu component'leri burada tanımlayalım
 const PageTitle = styled(Typography)(({ theme }) => ({
-  fontSize: '2.5rem',
-  fontWeight: 'bold',
-  background: 'linear-gradient(135deg, #3498db, #2ecc71)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  marginBottom: '20px',
-  textAlign: 'center',
-  [theme.breakpoints.down('md')]: {
-    fontSize: '2rem',
+  fontSize: "2.5rem",
+  fontWeight: "bold",
+  background: "linear-gradient(135deg, #3498db, #2ecc71)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  marginBottom: "20px",
+  textAlign: "center",
+  [theme.breakpoints.down("md")]: {
+    fontSize: "2rem",
   },
 }));
 
 const GradientText = styled(Typography)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #3498db, #2ecc71)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  fontWeight: 'bold',
+  background: "linear-gradient(135deg, #3498db, #2ecc71)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  fontWeight: "bold",
 }));
 
 // Admin özel styled components
 const AdminContainer = styled(Container)(({ theme }) => ({
-  paddingTop: '40px',
-  paddingBottom: '40px',
-  minHeight: '100vh',
-  background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+  paddingTop: "40px",
+  paddingBottom: "40px",
+  minHeight: "100vh",
+  background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
 }));
 
 const AdminCard = styled(Card)(({ theme }) => ({
-  marginBottom: '24px',
-  borderRadius: '16px',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    transform: 'translateY(-4px)',
-    boxShadow: '0 12px 48px rgba(0,0,0,0.15)',
+  marginBottom: "24px",
+  borderRadius: "16px",
+  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 12px 48px rgba(0,0,0,0.15)",
   },
 }));
 
 const AdminHeader = styled(Box)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  color: '#fff',
-  padding: '32px',
-  borderRadius: '16px 16px 0 0',
-  textAlign: 'center',
+  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+  color: "#fff",
+  padding: "32px",
+  borderRadius: "16px 16px 0 0",
+  textAlign: "center",
   marginBottom: 0,
 }));
 
 const FormSection = styled(CardContent)(({ theme }) => ({
-  padding: '32px',
+  padding: "32px",
 }));
 
 const SectionHeader = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  marginBottom: '24px',
-  gap: '12px',
+  display: "flex",
+  alignItems: "center",
+  marginBottom: "24px",
+  gap: "12px",
 }));
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
-  fontSize: '1.3rem',
-  fontWeight: '600',
-  color: '#2c3e50',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
+  fontSize: "1.3rem",
+  fontWeight: "600",
+  color: "#2c3e50",
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
 }));
 
 const PreviewBox = styled(Box)(({ theme }) => ({
-  padding: '20px',
-  border: '2px dashed #e0e0e0',
-  borderRadius: '12px',
-  textAlign: 'center',
-  background: '#f8f9fa',
-  minHeight: '120px',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '12px',
+  padding: "20px",
+  border: "2px dashed #e0e0e0",
+  borderRadius: "12px",
+  textAlign: "center",
+  background: "#f8f9fa",
+  minHeight: "120px",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "12px",
 }));
 
 const ColorPreview = styled(Box)(({ theme, color }) => ({
-  width: '100px',
-  height: '40px',
-  borderRadius: '8px',
-  background: color || '#1976d2',
-  border: '2px solid #fff',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-  margin: '0 auto',
+  width: "100px",
+  height: "40px",
+  borderRadius: "8px",
+  background: color || "#1976d2",
+  border: "2px solid #fff",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+  margin: "0 auto",
 }));
+
+const DEFAULT_SETTINGS = {
+  title: "Sedat Demir Yapı",
+  color: "#1976d2",
+  logoUrl: "",
+  description: "Profesyonel yapı çözümleri",
+};
 
 function Admin({ settings, setSettings }) {
   // Local state admin formu için
@@ -145,9 +152,13 @@ function Admin({ settings, setSettings }) {
 
   // Ayarları sıfırlama fonksiyonu
   const resetSettings = () => {
-    setTitle("Sedat Demir Yapı");
-    setColor("#1976d2");
-    setLogoUrl("");
+    const newSettings = { ...settings, ...DEFAULT_SETTINGS };
+
+    setTitle(DEFAULT_SETTINGS.title);
+    setColor(DEFAULT_SETTINGS.color);
+    setLogoUrl(DEFAULT_SETTINGS.logoUrl);
+    setSettings(newSettings);
+    localStorage.setItem("siteSettings", JSON.stringify(newSettings));
     setSnackbarMessage("Ayarlar varsayılan değerlere sıfırlandı!");
     setSnackbarOpen(true);
   };
@@ -162,7 +173,11 @@ function Admin({ settings, setSettings }) {
       <AdminCard>
         <AdminHeader>
           <Settings sx={{ fontSize: 40, mb: 2 }} />
-          <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold', mb: 1 }}>
+          <Typography
+            variant="h3"
+            component="h1"
+            sx={{ fontWeight: "bold", mb: 1 }}
+          >
             Admin Panel
           </Typography>
           <Typography variant="h6" sx={{ opacity: 0.9 }}>
@@ -178,12 +193,10 @@ function Admin({ settings, setSettings }) {
           <AdminCard>
             <FormSection>
               <SectionHeader>
-                <Title sx={{ color: '#3498db', fontSize: 28 }} />
-                <SectionTitle variant="h5">
-                  Site Başlığı
-                </SectionTitle>
+                <Title sx={{ color: "#3498db", fontSize: 28 }} />
+                <SectionTitle variant="h5">Site Başlığı</SectionTitle>
               </SectionHeader>
-              
+
               <TextField
                 fullWidth
                 label="Site Başlığı"
@@ -192,9 +205,9 @@ function Admin({ settings, setSettings }) {
                 placeholder="Örn: Sedat Demir Yapı"
                 variant="outlined"
                 sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '12px',
-                  }
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "12px",
+                  },
                 }}
               />
             </FormSection>
@@ -204,12 +217,10 @@ function Admin({ settings, setSettings }) {
           <AdminCard>
             <FormSection>
               <SectionHeader>
-                <Palette sx={{ color: '#e74c3c', fontSize: 28 }} />
-                <SectionTitle variant="h5">
-                  Renk Ayarları
-                </SectionTitle>
+                <Palette sx={{ color: "#e74c3c", fontSize: 28 }} />
+                <SectionTitle variant="h5">Renk Ayarları</SectionTitle>
               </SectionHeader>
-              
+
               <Grid container spacing={3} alignItems="center">
                 <Grid item xs={12} md={8}>
                   <TextField
@@ -225,18 +236,18 @@ function Admin({ settings, setSettings }) {
                           sx={{
                             width: 24,
                             height: 24,
-                            borderRadius: '4px',
+                            borderRadius: "4px",
                             background: color,
-                            border: '1px solid #ccc',
-                            mr: 1
+                            border: "1px solid #ccc",
+                            mr: 1,
                           }}
                         />
                       ),
                     }}
                     sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '12px',
-                      }
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "12px",
+                      },
                     }}
                   />
                 </Grid>
@@ -246,12 +257,12 @@ function Admin({ settings, setSettings }) {
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
                     style={{
-                      width: '100%',
-                      height: '56px',
-                      border: 'none',
-                      borderRadius: '12px',
-                      cursor: 'pointer',
-                      background: color
+                      width: "100%",
+                      height: "56px",
+                      border: "none",
+                      borderRadius: "12px",
+                      cursor: "pointer",
+                      background: color,
                     }}
                   />
                 </Grid>
@@ -263,12 +274,10 @@ function Admin({ settings, setSettings }) {
           <AdminCard>
             <FormSection>
               <SectionHeader>
-                <Image sx={{ color: '#9b59b6', fontSize: 28 }} />
-                <SectionTitle variant="h5">
-                  Logo Ayarları
-                </SectionTitle>
+                <Image sx={{ color: "#9b59b6", fontSize: 28 }} />
+                <SectionTitle variant="h5">Logo Ayarları</SectionTitle>
               </SectionHeader>
-              
+
               <TextField
                 fullWidth
                 label="Logo URL"
@@ -277,9 +286,9 @@ function Admin({ settings, setSettings }) {
                 placeholder="https://example.com/logo.png"
                 variant="outlined"
                 sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '12px',
-                  }
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "12px",
+                  },
                 }}
               />
             </FormSection>
@@ -297,15 +306,15 @@ function Admin({ settings, setSettings }) {
                     onClick={saveSettings}
                     startIcon={<Save />}
                     sx={{
-                      borderRadius: '12px',
-                      padding: '16px',
-                      fontSize: '1.1rem',
-                      background: 'linear-gradient(135deg, #27ae60, #2ecc71)',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #219a52, #27ae60)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 20px rgba(39, 174, 96, 0.4)',
-                      }
+                      borderRadius: "12px",
+                      padding: "16px",
+                      fontSize: "1.1rem",
+                      background: "linear-gradient(135deg, #27ae60, #2ecc71)",
+                      "&:hover": {
+                        background: "linear-gradient(135deg, #219a52, #27ae60)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 8px 20px rgba(39, 174, 96, 0.4)",
+                      },
                     }}
                   >
                     Ayarları Kaydet
@@ -319,16 +328,16 @@ function Admin({ settings, setSettings }) {
                     onClick={resetSettings}
                     startIcon={<Refresh />}
                     sx={{
-                      borderRadius: '12px',
-                      padding: '16px',
-                      fontSize: '1.1rem',
-                      borderColor: '#e74c3c',
-                      color: '#e74c3c',
-                      '&:hover': {
-                        borderColor: '#c0392b',
-                        color: '#c0392b',
-                        background: 'rgba(231, 76, 60, 0.1)',
-                      }
+                      borderRadius: "12px",
+                      padding: "16px",
+                      fontSize: "1.1rem",
+                      borderColor: "#e74c3c",
+                      color: "#e74c3c",
+                      "&:hover": {
+                        borderColor: "#c0392b",
+                        color: "#c0392b",
+                        background: "rgba(231, 76, 60, 0.1)",
+                      },
                     }}
                   >
                     Sıfırla
@@ -344,27 +353,25 @@ function Admin({ settings, setSettings }) {
           <AdminCard>
             <FormSection>
               <SectionHeader>
-                <Preview sx={{ color: '#f39c12', fontSize: 28 }} />
-                <SectionTitle variant="h5">
-                  Önizleme
-                </SectionTitle>
+                <Preview sx={{ color: "#f39c12", fontSize: 28 }} />
+                <SectionTitle variant="h5">Önizleme</SectionTitle>
               </SectionHeader>
-              
+
               {/* Başlık Önizleme */}
               <PreviewBox sx={{ mb: 3 }}>
                 <Typography variant="h6" color="textSecondary" sx={{ mb: 1 }}>
                   Site Başlığı
                 </Typography>
-                <Typography 
-                  variant="h4" 
-                  sx={{ 
-                    fontWeight: 'bold',
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: "bold",
                     background: `linear-gradient(135deg, ${color}, #2ecc71)`,
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
                   }}
                 >
-                  {title || 'Site Başlığı'}
+                  {title || "Site Başlığı"}
                 </Typography>
               </PreviewBox>
 
@@ -374,7 +381,11 @@ function Admin({ settings, setSettings }) {
                   Seçilen Renk
                 </Typography>
                 <ColorPreview color={color} />
-                <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ mt: 1 }}
+                >
                   {color}
                 </Typography>
               </PreviewBox>
@@ -387,11 +398,11 @@ function Admin({ settings, setSettings }) {
                 {logoUrl ? (
                   <Avatar
                     src={logoUrl}
-                    sx={{ 
-                      width: 80, 
-                      height: 80, 
-                      mx: 'auto',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      mx: "auto",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
                     }}
                   />
                 ) : (
@@ -410,17 +421,17 @@ function Admin({ settings, setSettings }) {
         open={snackbarOpen}
         autoHideDuration={4000}
         onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        <Alert 
-          onClose={handleSnackbarClose} 
-          severity="success" 
-          sx={{ 
-            width: '100%',
-            borderRadius: '12px',
-            '& .MuiAlert-icon': {
-              fontSize: 24
-            }
+        <Alert
+          onClose={handleSnackbarClose}
+          severity="success"
+          sx={{
+            width: "100%",
+            borderRadius: "12px",
+            "& .MuiAlert-icon": {
+              fontSize: 24,
+            },
           }}
         >
           {snackbarMessage}

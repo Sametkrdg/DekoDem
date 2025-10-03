@@ -1,39 +1,27 @@
 // components/ProjectsHeader.js
 import React from 'react';
+import { Box, Typography } from '@mui/material';
+import { PageTitle } from '../styles/StyledComponents';
 
 const ProjectsHeader = () => {
-  const styles = {
-    header: {
-      textAlign: 'center',
-      marginBottom: '60px',
-    },
-    pageTitle: {
-      fontSize: '2.5rem',
-      fontWeight: 'bold',
-      background: 'linear-gradient(135deg, #3498db, #2ecc71)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      marginBottom: '20px',
-      margin: '0 0 20px 0',
-    },
-    subtitle: {
-      color: '#7f8c8d',
-      fontSize: '1.2rem',
-      maxWidth: '600px',
-      margin: '0 auto',
-      lineHeight: '1.6',
-    },
-  };
-
   return (
-    <div style={styles.header}>
-      <h1 style={styles.pageTitle}>
+    <Box sx={{ textAlign: 'center', marginBottom: '60px' }}>
+      <PageTitle variant="h1">
         Projelerimiz
-      </h1>
-      <p style={styles.subtitle}>
+      </PageTitle>
+      <Typography 
+        variant="h6" 
+        sx={{ 
+          color: '#7f8c8d', 
+          fontSize: '1.2rem',
+          maxWidth: '600px', 
+          margin: '0 auto',
+          lineHeight: '1.6' 
+        }}
+      >
         Kaliteli tasarım ve mükemmel işçilikle hayata geçirdiğimiz projelerimizi keşfedin
-      </p>
-    </div>
+      </Typography>
+    </Box>
   );
 };
 
