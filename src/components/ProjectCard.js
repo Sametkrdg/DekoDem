@@ -4,7 +4,7 @@ import { Box, Typography, Chip } from '@mui/material';
 import { LocationOn, CalendarToday, Engineering } from '@mui/icons-material';
 import { ProjectCard as StyledProjectCard, ContactItem, GradientText, ContactText } from '../styles/StyledComponents';
 
-const ProjectCard = ({ proje }) => {
+const ProjectCard = ({ proje, onSelect }) => {
   const getStatusColor = (durum) => {
     switch(durum) {
       case 'Tamamlandı': return '#27ae60';
@@ -75,7 +75,18 @@ const ProjectCard = ({ proje }) => {
   );
 
   return (
-    <StyledProjectCard>
+    <StyledProjectCard
+      role="button"
+      tabIndex={0}
+      onClick={() => onSelect && onSelect(proje)}
+      onKeyDown={(event) => {
+        if ((event.key === 'Enter' || event.key === ' ') && onSelect) {
+          event.preventDefault();
+          onSelect(proje);
+        }
+      }}
+      sx={{ cursor: onSelect ? 'pointer' : 'default' }}
+    >
       <ProjectImage>
         {proje.icon}
       </ProjectImage>

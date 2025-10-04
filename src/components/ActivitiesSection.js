@@ -11,6 +11,7 @@ import {
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
 import { ServiceCard } from '../styles/StyledComponents';
+import activities from '../data/activities';
 
 // Animasyonlar
 const fadeInUp = keyframes`
@@ -255,59 +256,24 @@ const ActivitiesSection = () => {
   const navigate = useNavigate();
 
   // Faaliyet alanları - route'lar güncellendi
-  const allActivities = [
-    { 
-      title: 'Yapı Hizmetleri', 
-      image: '/images/konut.jpg', 
-      route: '/yapi-hizmetleri',
-      description: 'Kaba inşaattan anahtar teslime kadar tüm yapı hizmetleri'
-    },
-    { 
-      title: 'Yapı Malzemeleri Satışı', 
-      image: '/images/ticari.jpg', 
-      route: '/malzeme-satisi',
-      description: 'Kaliteli yapı malzemeleri ve ekipman satışı'
-    },
-    { 
-      title: 'Dekorasyon ve Uygulama', 
-      image: '/images/tadilat.jpg', 
-      route: '/dekorasyon-hizmetleri',
-      description: 'İç ve dış mekan dekorasyon çözümleri'
-    },
-    { 
-      title: 'Proje Yönetimi', 
-      image: '/images/proje.jpg', 
-      route: '/proje-yonetimi',
-      description: 'Profesyonel proje planlama ve yönetim hizmetleri'
-    },
-    { 
-      title: 'İç Mekan Tasarımı', 
-      image: '/images/icmekan.jpg', 
-      route: '/ic-mekan-tasarimi',
-      description: 'Yaşam alanlarınız için özel tasarım çözümleri'
-    },
-    { 
-      title: 'Peyzaj Düzenleme', 
-      image: '/images/peyzaj.jpg', 
-      route: '/peyzaj-duzenleme',
-      description: 'Bahçe ve peyzaj düzenleme hizmetleri'
-    },
-    { 
-      title: 'Cephe Giydirme', 
-      image: '/images/cephe.jpg', 
-      route: '/cephe-giydirme',
-      description: 'Modern cephe sistemleri ve uygulamaları'
-    },
-  ];
+    const allActivities = activities.map((activity) => ({
+    title: activity.title,
+    image: activity.heroImage,
+    route: `/${activity.slug}`,
+    description: activity.summary
+  }));
 
   // Desktop için 3'lü gruplar, mobile için tekli
   const activitySlides = isMobile 
     ? allActivities.map(activity => [activity])
-    : [
-        allActivities.slice(0, 3),
-        allActivities.slice(3, 6),
-        allActivities.slice(6, 9)
-      ];
+    : (() => {
+        const chunkSize = 3;
+        const chunks = [];
+        for (let i = 0; i < allActivities.length; i += chunkSize) {
+          chunks.push(allActivities.slice(i, i + chunkSize));
+        }
+        return chunks;
+      })();
 
   const maxSlides = activitySlides.length;
 
@@ -325,13 +291,7 @@ const ActivitiesSection = () => {
 
   // Kart tıklama fonksiyonu
   const handleCardClick = (activity) => {
-    // Eğer sayfa mevcut değilse, genel faaliyet alanları sayfasına yönlendir
-    if (activity.route === '/yapi-hizmetleri') {
-      navigate('/yapi-hizmetleri');
-    } else {
-      // Diğer sayfalar için genel faaliyet alanları sayfasına yönlendir
-      navigate('/faaliyet-alanlari', { state: { selectedActivity: activity } });
-    }
+    navigate(activity.route);
   };
 
   // currentSlide sınırlarını kontrol et
