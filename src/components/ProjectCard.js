@@ -14,19 +14,35 @@ const ProjectCard = ({ proje, onSelect }) => {
     }
   };
 
-  const ProjectImage = ({ children }) => (
+  const ProjectImage = ({ children, imageUrl, title }) => (
     <Box
       sx={{
         height: '200px',
-        background: 'linear-gradient(135deg, #3498db, #2ecc71)',
+          background: imageUrl
+          ? 'transparent'
+          : 'linear-gradient(135deg, #3498db, #2ecc71)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         color: 'white',
         fontSize: '4rem',
+                overflow: 'hidden',
       }}
     >
-      {children}
+      {imageUrl ? (
+        <Box
+          component="img"
+          src={imageUrl}
+          alt={title}
+          sx={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
+      ) : (
+        children
+      )}
     </Box>
   );
 
@@ -74,56 +90,73 @@ const ProjectCard = ({ proje, onSelect }) => {
     />
   );
 
+    const projectTitle = proje.ad || proje.title || 'Proje';
+  const projectStatus = proje.durum || proje.status || 'Devam Ediyor';
+  const projectDescription =
+    proje.aciklama || proje.description || 'Proje açıklaması yakında eklenecektir.';
+  const projectLocation = proje.yer || proje.location || 'Belirtilmedi';
+  const projectYear = proje.yıl || proje.year || '';
+  const projectArea = proje.alan || proje.area || '';
+  const projectIcon = proje.icon || proje.emoji || '🏗️';
+  const projectImage = proje.imageUrl || proje.coverImage || '';
+
+  const isSelectable = Boolean(onSelect && proje?.canNavigate);
+
+
   return (
     <StyledProjectCard
-      role="button"
-      tabIndex={0}
-      onClick={() => onSelect && onSelect(proje)}
+      role={isSelectable ? 'button' : undefined}
+      tabIndex={isSelectable ? 0 : -1}
+      onClick={() => isSelectable && onSelect(proje)}
       onKeyDown={(event) => {
-        if ((event.key === 'Enter' || event.key === ' ') && onSelect) {
+        if (!isSelectable) {
+          return;
+        }
+
+        if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           onSelect(proje);
         }
       }}
-      sx={{ cursor: onSelect ? 'pointer' : 'default' }}
+      sx={{ cursor: isSelectable ? 'pointer' : 'default' }}
     >
-      <ProjectImage>
-        {proje.icon}
+      <ProjectImage imageUrl={projectImage} title={projectTitle}>
+        {projectIcon}
       </ProjectImage>
       
       <ProjectContent>
         <ProjectHeader>
           <ProjectTitle>
-            {proje.ad}
+            {projectTitle}
           </ProjectTitle>
-          <StatusChip durum={proje.durum} />
+          <StatusChip durum={projectStatus} />
         </ProjectHeader>
 
         <ContactText sx={{ marginBottom: '20px', color: '#7f8c8d' }}>
-          {proje.aciklama}
+          {projectDescription}
         </ContactText>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <ContactItem>
             <LocationOn sx={{ color: '#3498db' }} />
             <ContactText>
-              <strong>Konum:</strong> {proje.yer}
+              <strong>Konum:</strong> {projectLocation}
             </ContactText>
           </ContactItem>
 
           <ContactItem>
             <CalendarToday sx={{ color: '#3498db' }} />
             <ContactText>
-              <strong>Yıl:</strong> {proje.yıl}
+              <strong>Yıl:</strong> {projectYear || 'Belirtilmedi'}
             </ContactText>
           </ContactItem>
 
           <ContactItem>
             <Engineering sx={{ color: '#3498db' }} />
             <ContactText>
-              <strong>Alan:</strong> 
+              <strong>Alan:</strong>
               <GradientText component="span" sx={{ marginLeft: '5px' }}>
-                {proje.alan}
+                {projectArea || '-'}
               </GradientText>
             </ContactText>
           </ContactItem>

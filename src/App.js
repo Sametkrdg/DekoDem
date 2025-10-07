@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ThemeProvider } from '@mui/material/styles';
-import { CssBaseline, Box } from '@mui/material';
-import theme from './styles/Theme';
+import { ThemeProvider } from "@mui/material/styles";
+import { CssBaseline, Box } from "@mui/material";
+import theme from "./styles/Theme";
 
 // Components
 import Navbar from "./components/Navbar";
@@ -29,6 +29,8 @@ import EndustriyelKompleks from "./pages/projects/EndustriyelKompleks";
 import AlisverisMerkezi from "./pages/projects/AlisverisMerkezi";
 import RezidansProjesi from "./pages/projects/RezidansProjesi";
 import Admin from "./Admin";
+import { fetchSiteContent } from "./services/contentService";
+import { createDefaultSiteContent } from "./constants/defaultSiteContent";
 
 // Constants
 const DEFAULT_SETTINGS = {
@@ -40,10 +42,15 @@ const DEFAULT_SETTINGS = {
 
 // Routes configuration - Bakım kolaylığı için
 const ROUTES = [
-  { path: "/", element: Home, requiresSettings: true },
+  {
+    path: "/",
+    element: Home,
+    requiresSettings: true,
+    requiresSiteContent: true,
+  },
   { path: "/hakkimizda", element: About },
   { path: "/faaliyet-alanlari", element: ActivityAreas },
-  { path: "/projeler", element: Projects },
+  { path: "/projeler", element: Projects, requiresSiteContent: true },
   { path: "/yapi-hizmetleri", element: ConstructionServices },
   { path: "/malzeme-satisi", element: MaterialSales },
   { path: "/dekorasyon-hizmetleri", element: DecorationServices },
@@ -63,40 +70,48 @@ const ROUTES = [
 function App() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
+  const [siteContent, setSiteContent] = useState(createDefaultSiteContent());
 
-  // Settings yükleme simülasyonu (gerçek projede API'den gelecek)
+  const loadSiteContent = useCallback(async () => {
+    try {
+      const remoteContent = await fetchSiteContent();
+      setSiteContent(remoteContent);
+    } catch (error) {
+      console.error("Site içeriği yüklenirken hata oluştu:", error);
+    }
+  }, []);
+
+  // Settings ve içerik yükleme
   useEffect(() => {
-    const loadSettings = async () => {
+    const loadInitialData = async () => {
       try {
         // API çağrısı simülasyonu
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Gerçek projede:
-        // const response = await fetch('/api/settings');
-        // const data = await response.json();
-        // setSettings(prevSettings => ({ ...prevSettings, ...data }));
-        
-        setIsLoading(false);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        await loadSiteContent();
       } catch (error) {
-        console.error('Settings yüklenirken hata:', error);
+        console.error("Başlangıç verileri yüklenirken hata oluştu:", error);
+      } finally {
         setIsLoading(false);
       }
     };
 
-    loadSettings();
-  }, []);
+    loadInitialData();
+  }, [loadSiteContent]);
 
   // Theme'i settings'e göre dinamik oluştur
-  const dynamicTheme = useMemo(() => ({
-    ...theme,
-    palette: {
-      ...theme.palette,
-      primary: {
-        ...theme.palette.primary,
-        main: settings.color,
+  const dynamicTheme = useMemo(
+    () => ({
+      ...theme,
+      palette: {
+        ...theme.palette,
+        primary: {
+          ...theme.palette.primary,
+          main: settings.color,
+        },
       },
-    },
-  }), [settings.color]);
+    }),
+    [settings.color]
+  );
 
   // Loading state
   if (isLoading) {
@@ -112,58 +127,69 @@ function App() {
     <Router>
       <ThemeProvider theme={dynamicTheme}>
         <CssBaseline />
-        
+
         {/* Ana layout container */}
-        <Box 
-          sx={{ 
-            display: 'flex', 
-            flexDirection: 'column',
-            minHeight: '100vh' 
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "100vh",
           }}
         >
           {/* Header */}
           <Navbar settings={settings} />
-          
+
           {/* Ana içerik alanı */}
           <Box component="main" sx={{ flexGrow: 1 }}>
             <Routes>
               {/* Dinamik route oluşturma */}
-              {ROUTES.map(({ path, element: Component, requiresSettings }) => (
-                <Route 
-                  key={path}
-                  path={path} 
-                  element={
-                    <Component 
-                      {...(requiresSettings && { settings })} 
-                    />
-                  } 
-                />
-              ))}
-              
-              {/* Admin route - ayrı tutuldu çünkü özel props gerektiriyor */}
-              <Route 
-                path="/admin" 
-                element={
-                  <Admin 
-                    settings={settings} 
-                    setSettings={setSettings} 
+              {ROUTES.map(
+                ({
+                  path,
+                  element: Component,
+                  requiresSettings,
+                  requiresSiteContent,
+                }) => (
+                  <Route
+                    key={path}
+                    path={path}
+                    element={
+                      <Component
+                        {...(requiresSettings && { settings })}
+                        {...(requiresSiteContent && { siteContent })}
+                      />
+                    }
                   />
-                } 
-              />
-              
-              {/* 404 sayfası */}
-              <Route 
-                path="*" 
+                )
+              )}
+
+              {/* Admin route - ayrı tutuldu çünkü özel props gerektiriyor */}
+              <Route
+                path="/admin"
                 element={
-                  <Box sx={{ p: 4, textAlign: 'center' }}>
+                  <Admin
+                    settings={settings}
+                    setSettings={setSettings}
+                    siteContent={siteContent}
+                    setSiteContent={setSiteContent}
+                    refreshSiteContent={loadSiteContent}
+                  />
+                }
+              />
+
+              {/* 404 sayfası */}
+              <Route
+                path="*"
+                element={
+                  <Box sx={{ p: 4, textAlign: "center" }}>
                     <h2>404 - Sayfa Bulunamadı</h2>
                     <p>Aradığınız sayfa mevcut değil.</p>
                   </Box>
-                } 
+                }
               />
             </Routes>
           </Box>
-          
+
           {/* Footer */}
           <Footer settings={settings} />
         </Box>

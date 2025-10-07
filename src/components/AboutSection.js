@@ -312,7 +312,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
 }));
 */
 
-const AboutSection = () => {
+const AboutSection = ({ photos = [] }) => {
   const stats = [
     { number: '15+', label: 'Yıl Deneyim', icon: <Star sx={{ color: '#3498db' }} /> },
     { number: '100+', label: 'Tamamlanan Proje', icon: <Engineering sx={{ color: '#2ecc71' }} /> },
@@ -327,16 +327,34 @@ const AboutSection = () => {
     'Profesyonel teknik destek'
   ];
 
+    const primaryPhoto = photos.find((photo) => photo?.url) || null;
+
+
   return (
     <MainContainer maxWidth="xl">
       <ContentWrapper>
         {/* Sol taraf - Resim */}
         <ImageSection>
           <ImageContainer>
-            <PlaceholderImage>
-              {/* Buraya gerçek fotoğraf src ekleyebilirsiniz */}
-              <Engineering sx={{ fontSize: 60, opacity: 0.7 }} />
-            </PlaceholderImage>
+            {primaryPhoto ? (
+              <Box
+                component="img"
+                src={primaryPhoto.url}
+                alt={primaryPhoto.title || 'Şirket görseli'}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  position: 'relative',
+                  zIndex: 3,
+                }}
+              />
+            ) : (
+              <PlaceholderImage>
+                {/* Buraya gerçek fotoğraf src ekleyebilirsiniz */}
+                <Engineering sx={{ fontSize: 60, opacity: 0.7 }} />
+              </PlaceholderImage>
+            )}
           </ImageContainer>
         </ImageSection>
 

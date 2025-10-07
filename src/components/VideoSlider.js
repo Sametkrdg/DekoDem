@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Container, Typography, IconButton, useTheme, useMediaQuery } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
+import { DEFAULT_HOME_VIDEOS } from '../constants/defaultSiteContent';
 
 
 // Animasyonlar
@@ -131,15 +132,14 @@ const SlideContent = styled(Box)(({ theme }) => ({
   },
 }));
 
-const SlideWrapper = styled(Box)(({ theme, ismobile }) => ({
+const SlideWrapper = styled(Box)(() => ({
   display: 'flex',
-  width: ismobile ? '900%' : '300%', // Mobilde 9 adet video için genişlik
   height: '100%',
   transition: 'transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
 }));
 
 const Slide = styled(Box)(({ theme, ismobile }) => ({
-  width: ismobile ? '11.111%' : '33.333%', // Mobilde her video 1/9, desktop'ta 1/3
+  width: '100%',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -272,55 +272,136 @@ const ProgressDot = styled(Box)(({ theme, active }) => ({
   } : {},
 }));
 
-const VideoSlider = () => {
+const extractYouTubeId = (value) => {
+  if (!value) return '';
+
+  const trimmedValue = value.trim();
+  const directIdRegex = /^[a-zA-Z0-9_-]{11}$/;
+
+  if (directIdRegex.test(trimmedValue)) {
+    return trimmedValue;
+  }
+
+  const urlRegex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const match = trimmedValue.match(urlRegex);
+
+  if (match && match[1]) {
+    return match[1];
+  }
+
+  return '';
+};
+
+const VideoSlider = ({ videos = DEFAULT_HOME_VIDEOS }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Video verileri - YouTube video ID'leri
-  const allVideos = [
-    { id: 'dQw4w9WgXcQ', title: 'Proje Tanıtımı 1' },
-    { id: 'L_jWHffIx5E', title: 'İnşaat Süreci' },
-    { id: '9bZkp7q19f0', title: 'Final Görünüm' },
-    { id: 'kJQP7kiw5Fk', title: 'Villa Projesi' },
-    { id: 'fJ9rUzIMcZQ', title: 'Modern Tasarım' },
-    { id: 'uelHwf8o7_U', title: 'İç Mekan' },
-    { id: 'hFZFjoX2cGg', title: 'Ofis Binası' },
-    { id: 'y6120QOlsfU', title: 'Dış Cephe' },
-    { id: 'Ct6BUPvE2sM', title: 'Peyzaj Düzenlemesi' }
-  ];
+  const normalizedVideos = React.useMemo(() => {
+    const source = videos && videos.length ? videos : DEFAULT_HOME_VIDEOS;
 
-  // Desktop için 3'lü gruplar, mobile için tekli
-  const videoSlides = isMobile 
-    ? allVideos.map(video => [video]) // Her video ayrı bir slide
-    : [
-        allVideos.slice(0, 3),
-        allVideos.slice(3, 6),
-        allVideos.slice(6, 9)
-      ];
+    return source
+      .map((video, index) => {
+        if (!video) {
+          return null;
+        }
 
-  const maxSlides = videoSlides.length;
+        if (typeof video === 'string') {
+          const id = extractYouTubeId(video);
+          return id
+            ? {
+                id,
+                title: `Video ${index + 1}`,
+              }
+            : null;
+        }
+
+        const urlOrId = video.url || video.id || video.videoId;
+        const id = extractYouTubeId(urlOrId || '');
+
+        if (!id) {
+          return null;
+        }
+
+        return {
+          id,
+          title: video.title || video.ad || `Video ${index + 1}`,
+        };
+      })
+      .filter(Boolean);
+  }, [videos]);
+
+  const videoSlides = React.useMemo(() => {
+    if (!normalizedVideos.length) {
+      return [];
+    }
+
+    const groupSize = isMobile ? 1 : Math.min(3, normalizedVideos.length);
+    const slides = [];
+
+    for (let i = 0; i < normalizedVideos.length; i += groupSize) {
+      slides.push(normalizedVideos.slice(i, i + groupSize));
+    }
+
+    return slides;
+  }, [normalizedVideos, isMobile]);
+
+  const maxSlides = videoSlides.length || 1;
+  const showNavigation = videoSlides.length > 1;
+  const slidePercentage = 100 / maxSlides;
 
   const nextSlide = () => {
+        if (!showNavigation) return;
     setCurrentSlide((prev) => (prev + 1) % maxSlides);
   };
 
   const prevSlide = () => {
+        if (!showNavigation) return;
     setCurrentSlide((prev) => (prev - 1 + maxSlides) % maxSlides);
   };
 
   const goToSlide = (index) => {
+        if (!showNavigation) return;
     setCurrentSlide(index);
   };
 
   // currentSlide sınırlarını kontrol et
   React.useEffect(() => {
+        if (videoSlides.length === 0) {
+      setCurrentSlide(0);
+      return;
+    }
+
     if (currentSlide >= maxSlides) {
       setCurrentSlide(0);
     }
-  }, [isMobile, maxSlides, currentSlide]);
+  }, [isMobile, maxSlides, currentSlide, videoSlides.length]);
 
-  const slideWidth = isMobile ? 11.111 : 33.333; // Mobilde 1/9, desktop'ta 1/3
+  if (!videoSlides.length) {
+    return (
+      <VideoSection>
+        <ContentWrapper maxWidth={false}>
+          <VideoTitle>
+            Projelerimizden Öne Çıkanlar
+          </VideoTitle>
+          <SubTitle>
+            Gerçekleştirdiğimiz başarılı projeleri keşfedin
+          </SubTitle>
+          <Box
+            sx={{
+              background: 'rgba(255,255,255,0.12)',
+              color: 'rgba(255,255,255,0.9)',
+              borderRadius: '16px',
+              padding: '24px',
+              textAlign: 'center',
+            }}
+          >
+            Henüz video eklenmedi. Lütfen admin panelinden yeni videolar ekleyin.
+          </Box>
+        </ContentWrapper>
+      </VideoSection>
+    );
+  }
 
   return (
     <VideoSection>
@@ -334,20 +415,23 @@ const VideoSlider = () => {
         
         <SliderContainer>
           {/* Sol Navigation Butonu */}
-          <NavigationButton 
-            direction="left" 
-            onClick={prevSlide}
-            aria-label="Önceki video"
-          >
-            <ChevronLeft fontSize="large" />
-          </NavigationButton>
+          {showNavigation && (
+            <NavigationButton
+              direction="left"
+              onClick={prevSlide}
+              aria-label="Önceki video"
+            >
+              <ChevronLeft fontSize="large" />
+            </NavigationButton>
+          )}
 
           {/* Slide İçeriği */}
           <SlideContent>
             <SlideWrapper 
               ismobile={isMobile}
-              sx={{ 
-                transform: `translateX(-${currentSlide * slideWidth}%)` 
+              sx={{
+                width: `${maxSlides * 100}%`,
+                transform: `translateX(-${currentSlide * slidePercentage}%)`
               }}
             >
               {videoSlides.map((slide, slideIndex) => (
@@ -372,24 +456,28 @@ const VideoSlider = () => {
           </SlideContent>
 
           {/* Sağ Navigation Butonu */}
-          <NavigationButton 
-            direction="right" 
-            onClick={nextSlide}
-            aria-label="Sonraki video"
-          >
-            <ChevronRight fontSize="large" />
-          </NavigationButton>
+          {showNavigation && (
+            <NavigationButton
+              direction="right"
+              onClick={nextSlide}
+              aria-label="Sonraki video"
+            >
+              <ChevronRight fontSize="large" />
+            </NavigationButton>
+          )}
 
           {/* Progress Indicator - Tüm Ekranlarda Görünür */}
-          <ProgressIndicator>
-            {videoSlides.map((_, index) => (
-              <ProgressDot
-                key={index}
-                active={currentSlide === index}
-                onClick={() => goToSlide(index)}
-              />
-            ))}
-          </ProgressIndicator>
+          {showNavigation && (
+            <ProgressIndicator>
+              {videoSlides.map((_, index) => (
+                <ProgressDot
+                  key={index}
+                  active={currentSlide === index}
+                  onClick={() => goToSlide(index)}
+                />
+              ))}
+            </ProgressIndicator>
+          )}
         </SliderContainer>
       </ContentWrapper>
     </VideoSection>
