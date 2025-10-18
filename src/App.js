@@ -38,6 +38,7 @@ const DEFAULT_SETTINGS = {
   color: "#1976d2",
   logoUrl: "",
   description: "Profesyonel yapı çözümleri", // SEO için
+    codeReviewEnabled: true,
 };
 
 // Routes configuration - Bakım kolaylığı için
@@ -71,6 +72,20 @@ function App() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
   const [siteContent, setSiteContent] = useState(createDefaultSiteContent());
+
+    useEffect(() => {
+    const storedSettings = localStorage.getItem("siteSettings");
+
+    if (storedSettings) {
+      try {
+        const parsed = JSON.parse(storedSettings);
+        setSettings((previous) => ({ ...previous, ...parsed }));
+      } catch (error) {
+        console.warn("Kayıtlı site ayarları okunamadı:", error);
+      }
+    }
+  }, []);
+
 
   const loadSiteContent = useCallback(async () => {
     try {

@@ -12,6 +12,8 @@ import {
   Snackbar,
   Avatar,
   CircularProgress,
+    FormControlLabel,
+  Switch,
 } from "@mui/material";
 import {
   Settings,
@@ -28,6 +30,7 @@ import {
   CloudSync,
   Add,
   Delete,
+    Code,
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import { saveSiteContent, fetchSiteContent } from "./services/contentService";
@@ -110,6 +113,7 @@ const DEFAULT_SETTINGS = {
   color: "#1976d2",
   logoUrl: "",
   description: "Profesyonel yapı çözümleri",
+    codeReviewEnabled: true,
 };
 
 const slugify = (value = "") =>
@@ -134,6 +138,9 @@ function Admin({
   const [title, setTitle] = useState(settings.title || "");
   const [color, setColor] = useState(settings.color || "#1976d2");
   const [logoUrl, setLogoUrl] = useState(settings.logoUrl || "");
+    const [codeReviewEnabled, setCodeReviewEnabled] = useState(
+    settings.codeReviewEnabled ?? DEFAULT_SETTINGS.codeReviewEnabled
+  );
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
@@ -145,8 +152,17 @@ function Admin({
   const [isRefreshingContent, setIsRefreshingContent] = useState(false);
 
   // Ayarları kaydetme fonksiyonu
+    useEffect(() => {
+    setTitle(settings.title ?? DEFAULT_SETTINGS.title);
+    setColor(settings.color ?? DEFAULT_SETTINGS.color);
+    setLogoUrl(settings.logoUrl ?? DEFAULT_SETTINGS.logoUrl);
+    setCodeReviewEnabled(
+      settings.codeReviewEnabled ?? DEFAULT_SETTINGS.codeReviewEnabled
+    );
+  }, [settings]);
+
   const saveSettings = () => {
-    const newSettings = { title, color, logoUrl };
+    const newSettings = { title, color, logoUrl, codeReviewEnabled };
     setSettings(newSettings);
     localStorage.setItem("siteSettings", JSON.stringify(newSettings));
     setSnackbarSeverity("success");
@@ -161,6 +177,7 @@ function Admin({
     setTitle(DEFAULT_SETTINGS.title);
     setColor(DEFAULT_SETTINGS.color);
     setLogoUrl(DEFAULT_SETTINGS.logoUrl);
+        setCodeReviewEnabled(DEFAULT_SETTINGS.codeReviewEnabled);
     setSettings(newSettings);
     localStorage.setItem("siteSettings", JSON.stringify(newSettings));
     setSnackbarSeverity("success");
@@ -493,6 +510,39 @@ function Admin({
                     borderRadius: "12px",
                   },
                 }}
+              />
+            </FormSection>
+          </AdminCard>
+
+                    {/* Kod İncelemesi Ayarları */}
+          <AdminCard>
+            <FormSection>
+              <SectionHeader>
+                <Code sx={{ color: "#16a085", fontSize: 28 }} />
+                <SectionTitle variant="h5">Kod İncelemesi</SectionTitle>
+              </SectionHeader>
+
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                Kod incelemesi bölümünü etkinleştirerek yazılım kalitesi,
+                güvenlik kontrolleri ve optimizasyon önerileri hakkında
+                bilgilendirici içerikleri ziyaretçilere sunabilirsiniz.
+              </Typography>
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={codeReviewEnabled}
+                    onChange={(event) =>
+                      setCodeReviewEnabled(event.target.checked)
+                    }
+                    color="primary"
+                  />
+                }
+                label={
+                  codeReviewEnabled
+                    ? "Kod incelemesi etkin"
+                    : "Kod incelemesi devre dışı"
+                }
               />
             </FormSection>
           </AdminCard>
