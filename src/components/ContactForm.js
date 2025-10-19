@@ -1,84 +1,105 @@
 // components/ContactForm.js
-import React, { useState } from 'react';
-import { Box, TextField, MenuItem, Alert } from '@mui/material';
-import { Send } from '@mui/icons-material';
-import { ServiceCard, SectionTitle, CTAButton } from '../styles/StyledComponents';
+import React, { useEffect, useRef, useState } from "react";
+import { Box, TextField, MenuItem, Alert } from "@mui/material";
+import { Send } from "@mui/icons-material";
+import {
+  ServiceCard,
+  SectionTitle,
+  CTAButton,
+} from "../styles/StyledComponents";
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: ''
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
   });
-  
+
   const [showSuccess, setShowSuccess] = useState(false);
+  const resetTimerRef = useRef(null);
 
   const subjects = [
-    'Genel Bilgi',
-    'Proje Teklifi',
-    'Teknik Destek',
-    'İş Birliği',
-    'Diğer'
+    "Genel Bilgi",
+    "Proje Teklifi",
+    "Teknik Destek",
+    "İş Birliği",
+    "Diğer",
   ];
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Form submit logic burada olacak
-    console.log('Form Data:', formData);
+    console.log("Form Data:", formData);
     setShowSuccess(true);
-    
+
     // Success mesajını 3 saniye sonra gizle
-    setTimeout(() => {
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current);
+    }
+    resetTimerRef.current = setTimeout(() => {
       setShowSuccess(false);
       // Formu temizle
       setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
       });
     }, 3000);
   };
 
+  useEffect(
+    () => () => {
+      if (resetTimerRef.current) {
+        clearTimeout(resetTimerRef.current);
+      }
+    },
+    []
+  );
+
   return (
     <ServiceCard>
-      <SectionTitle 
-        variant="h5" 
-        sx={{ 
-          fontSize: '1.5rem', 
-          marginBottom: '30px',
-          color: '#2c3e50',
-          textAlign: 'center'
+      <SectionTitle
+        variant="h5"
+        sx={{
+          fontSize: "1.5rem",
+          marginBottom: "30px",
+          color: "#2c3e50",
+          textAlign: "center",
         }}
       >
         Bize Ulaşın
       </SectionTitle>
 
       {showSuccess && (
-        <Alert 
-          severity="success" 
-          sx={{ 
-            marginBottom: '25px',
-            '& .MuiAlert-message': {
-              fontWeight: '500'
-            }
+        <Alert
+          severity="success"
+          sx={{
+            marginBottom: "25px",
+            "& .MuiAlert-message": {
+              fontWeight: "500",
+            },
           }}
         >
           Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağız.
         </Alert>
       )}
 
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ display: "flex", flexDirection: "column", gap: "20px" }}
+      >
         <TextField
           name="name"
           label="Ad Soyad"
@@ -88,16 +109,16 @@ const ContactForm = () => {
           fullWidth
           variant="outlined"
           sx={{
-            '& .MuiOutlinedInput-root': {
-              '&:hover fieldset': {
-                borderColor: '#3498db',
+            "& .MuiOutlinedInput-root": {
+              "&:hover fieldset": {
+                borderColor: "#3498db",
               },
-              '&.Mui-focused fieldset': {
-                borderColor: '#3498db',
+              "&.Mui-focused fieldset": {
+                borderColor: "#3498db",
               },
             },
-            '& .MuiInputLabel-root.Mui-focused': {
-              color: '#3498db',
+            "& .MuiInputLabel-root.Mui-focused": {
+              color: "#3498db",
             },
           }}
         />
@@ -112,16 +133,16 @@ const ContactForm = () => {
           fullWidth
           variant="outlined"
           sx={{
-            '& .MuiOutlinedInput-root': {
-              '&:hover fieldset': {
-                borderColor: '#3498db',
+            "& .MuiOutlinedInput-root": {
+              "&:hover fieldset": {
+                borderColor: "#3498db",
               },
-              '&.Mui-focused fieldset': {
-                borderColor: '#3498db',
+              "&.Mui-focused fieldset": {
+                borderColor: "#3498db",
               },
             },
-            '& .MuiInputLabel-root.Mui-focused': {
-              color: '#3498db',
+            "& .MuiInputLabel-root.Mui-focused": {
+              color: "#3498db",
             },
           }}
         />
@@ -134,16 +155,16 @@ const ContactForm = () => {
           fullWidth
           variant="outlined"
           sx={{
-            '& .MuiOutlinedInput-root': {
-              '&:hover fieldset': {
-                borderColor: '#3498db',
+            "& .MuiOutlinedInput-root": {
+              "&:hover fieldset": {
+                borderColor: "#3498db",
               },
-              '&.Mui-focused fieldset': {
-                borderColor: '#3498db',
+              "&.Mui-focused fieldset": {
+                borderColor: "#3498db",
               },
             },
-            '& .MuiInputLabel-root.Mui-focused': {
-              color: '#3498db',
+            "& .MuiInputLabel-root.Mui-focused": {
+              color: "#3498db",
             },
           }}
         />
@@ -157,20 +178,27 @@ const ContactForm = () => {
           required
           fullWidth
           variant="outlined"
+          SelectProps={{
+            displayEmpty: true,
+            renderValue: (value) => value || "Konu Seçin",
+          }}
           sx={{
-            '& .MuiOutlinedInput-root': {
-              '&:hover fieldset': {
-                borderColor: '#3498db',
+            "& .MuiOutlinedInput-root": {
+              "&:hover fieldset": {
+                borderColor: "#3498db",
               },
-              '&.Mui-focused fieldset': {
-                borderColor: '#3498db',
+              "&.Mui-focused fieldset": {
+                borderColor: "#3498db",
               },
             },
-            '& .MuiInputLabel-root.Mui-focused': {
-              color: '#3498db',
+            "& .MuiInputLabel-root.Mui-focused": {
+              color: "#3498db",
             },
           }}
         >
+          <MenuItem value="" disabled>
+            <em>Konu Seçin</em>
+          </MenuItem>
           {subjects.map((option) => (
             <MenuItem key={option} value={option}>
               {option}
@@ -189,16 +217,16 @@ const ContactForm = () => {
           fullWidth
           variant="outlined"
           sx={{
-            '& .MuiOutlinedInput-root': {
-              '&:hover fieldset': {
-                borderColor: '#3498db',
+            "& .MuiOutlinedInput-root": {
+              "&:hover fieldset": {
+                borderColor: "#3498db",
               },
-              '&.Mui-focused fieldset': {
-                borderColor: '#3498db',
+              "&.Mui-focused fieldset": {
+                borderColor: "#3498db",
               },
             },
-            '& .MuiInputLabel-root.Mui-focused': {
-              color: '#3498db',
+            "& .MuiInputLabel-root.Mui-focused": {
+              color: "#3498db",
             },
           }}
         />
@@ -207,7 +235,7 @@ const ContactForm = () => {
           type="submit"
           variant="contained"
           startIcon={<Send />}
-          sx={{ alignSelf: 'center', minWidth: '200px' }}
+          sx={{ alignSelf: "center", minWidth: "200px" }}
         >
           Mesaj Gönder
         </CTAButton>
