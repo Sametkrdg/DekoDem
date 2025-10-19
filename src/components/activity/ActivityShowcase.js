@@ -2,7 +2,7 @@ import React from 'react';
 import { Grid, Container, Typography, Card, CardMedia, CardContent, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-const ActivityShowcase = ({ activities }) => {
+const ActivityShowcase = ({ activities = [] }) => {
   const navigate = useNavigate();
 
   return (
@@ -16,9 +16,18 @@ const ActivityShowcase = ({ activities }) => {
         Faaliyet Alanlarımız
       </Typography>
 
-      <Grid container spacing={4}>
-        {activities.map((activity) => (
-          <Grid item xs={12} md={6} lg={4} key={activity.slug}>
+      {!activities.length ? (
+        <Typography color="text.secondary" align="center">
+          Şu anda listelenecek faaliyet bulunmuyor.
+        </Typography>
+      ) : (
+        <Grid container spacing={4}>
+          {activities.map((activity, index) => {
+            const image = activity.heroImage || activity.imageUrl || activity.image;
+            const canNavigate = Boolean(activity.slug);
+
+            return (
+              <Grid item xs={12} md={6} lg={4} key={activity.slug || activity.id || index}>
             <Card
               sx={{
                 height: '100%',
@@ -30,7 +39,7 @@ const ActivityShowcase = ({ activities }) => {
               <CardMedia
                 component="img"
                 height="220"
-                image={activity.heroImage}
+                 image={image || '/images/placeholder.jpg'}
                 alt={activity.title}
                 onError={(event) => {
                   event.currentTarget.src = '/images/placeholder.jpg';
@@ -41,16 +50,22 @@ const ActivityShowcase = ({ activities }) => {
                   {activity.title}
                 </Typography>
                 <Typography color="text.secondary" sx={{ mb: 3 }}>
-                  {activity.summary}
+                  {activity.summary || activity.description}
                 </Typography>
-                <Button variant="contained" onClick={() => navigate(`/${activity.slug}`)}>
-                  Detayları Gör
+                <Button
+                  variant="contained"
+                  onClick={() => canNavigate && navigate(`/${activity.slug}`)}
+                  disabled={!canNavigate}
+                >
+                  {canNavigate ? 'Detayları Gör' : 'Yakında'}
                 </Button>
               </CardContent>
             </Card>
-          </Grid>
-        ))}
-      </Grid>
+            </Grid>
+            );
+          })}
+        </Grid>
+      )}
     </Container>
   );
 };

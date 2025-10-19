@@ -1,9 +1,17 @@
-import React from 'react';
-import projects from '../../data/projects';
+import React, { useMemo } from 'react';
+import defaultProjects from '../../data/projects';
 import ProjectDetail from '../../components/project/ProjectDetail';
 
-const OfisPlaza = () => {
-  const project = projects.find((item) => item.slug === 'ofis-plaza');
+const OfisPlaza = ({ siteContent }) => {
+  const projects = siteContent?.projects?.length
+    ? siteContent.projects
+    : defaultProjects;
+
+  const project = useMemo(
+    () => projects.find((item) => item.slug === 'ofis-plaza'),
+    [projects]
+  );
+
   return <ProjectDetail project={project} />;
 };
 

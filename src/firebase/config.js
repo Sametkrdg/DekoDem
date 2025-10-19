@@ -1,14 +1,18 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "",
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "",
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "",
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "",
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "",
-  appId: process.env.REACT_APP_FIREBASE_APP_ID || "",
+  apiKey: "AIzaSyDFClVaWEG32yw9JrUILVwAl9xFyrx4joQ",
+  authDomain: "dekodem-a1ed2.firebaseapp.com",
+  projectId: "dekodem-a1ed2",
+  storageBucket: "dekodem-a1ed2.firebasestorage.app",
+  messagingSenderId: "643497521463",
+  appId: "1:643497521463:web:0d08d65ea8073d80abaab2",
+  measurementId: "G-9JFMKKMRFK"
 };
+
+
 
 const isFirebaseConfigured = Boolean(
   firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId

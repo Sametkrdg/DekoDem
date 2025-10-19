@@ -34,7 +34,7 @@ import {
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import { saveSiteContent, fetchSiteContent } from "./services/contentService";
-import { isFirebaseConfigured } from "./firebase/config";
+import { isFirebaseConfigured } from "../firebase/config";
 
 // Admin özel styled components
 const AdminContainer = styled(Container)(({ theme }) => ({

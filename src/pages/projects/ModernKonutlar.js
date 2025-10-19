@@ -1,9 +1,16 @@
-import React from 'react';
-import projects from '../../data/projects';
+import React, { useMemo } from 'react';
+import defaultProjects from '../../data/projects';
 import ProjectDetail from '../../components/project/ProjectDetail';
 
-const ModernKonutlar = () => {
-  const project = projects.find((item) => item.slug === 'modern-konutlar');
+const ModernKonutlar = ({ siteContent }) => {
+  const projects = siteContent?.projects?.length
+    ? siteContent.projects
+    : defaultProjects;
+
+  const project = useMemo(
+    () => projects.find((item) => item.slug === 'modern-konutlar'),
+    [projects]
+  );
   return <ProjectDetail project={project} />;
 };
 

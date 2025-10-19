@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -11,7 +11,6 @@ import {
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
 import { ServiceCard } from '../styles/StyledComponents';
-import activities from '../data/activities';
 
 // Animasyonlar
 const fadeInUp = keyframes`
@@ -249,57 +248,102 @@ const ProgressDot = styled(Box)(({ theme, active }) => ({
   },
 }));
 
-const ActivitiesSection = () => {
+const ActivitiesSection = ({ activities = [] }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
 
-  // Faaliyet alanları - route'lar güncellendi
-    const allActivities = activities.map((activity) => ({
-    title: activity.title,
-    image: activity.heroImage,
-    route: `/${activity.slug}`,
-    description: activity.summary
-  }));
+  const preparedActivities = useMemo(
+    () =>
+      activities
+        .filter((activity) => activity && (activity.title || activity.name))
+        .map((activity) => ({
+          title: activity.title || activity.name || 'Faaliyet',
+          image: activity.heroImage || activity.imageUrl || activity.image || '',
+          route: activity.slug ? `/${activity.slug}` : null,
+          description: activity.summary || activity.description || '',
+        })),
+    [activities]
+  );
 
-  // Desktop için 3'lü gruplar, mobile için tekli
-  const activitySlides = isMobile 
-    ? allActivities.map(activity => [activity])
-    : (() => {
-        const chunkSize = 3;
-        const chunks = [];
-        for (let i = 0; i < allActivities.length; i += chunkSize) {
-          chunks.push(allActivities.slice(i, i + chunkSize));
-        }
-        return chunks;
-      })();
+  const activitySlides = useMemo(() => {
+    if (!preparedActivities.length) {
+      return [];
+    }
 
-  const maxSlides = activitySlides.length;
+    if (isMobile) {
+      return preparedActivities.map((activity) => [activity]);
+    }
+
+    const chunkSize = 3;
+    const chunks = [];
+
+    for (let index = 0; index < preparedActivities.length; index += chunkSize) {
+      chunks.push(preparedActivities.slice(index, index + chunkSize));
+    }
+
+    return chunks;
+  }, [preparedActivities, isMobile]);
+
+  if (!preparedActivities.length) {
+    return (
+      <ActivitiesContainer>
+        <ContentWrapper maxWidth={false}>
+          <SliderTitle variant="h2">Faaliyet Alanlarımız</SliderTitle>
+          <Typography
+            variant="body1"
+            color="rgba(255,255,255,0.8)"
+            sx={{ textAlign: 'center' }}
+          >
+            Şu anda yayınlanmış faaliyet bulunmuyor.
+          </Typography>
+        </ContentWrapper>
+      </ActivitiesContainer>
+    );
+  }
+
+  const maxSlides = Math.max(activitySlides.length, 1);
+  
 
   const nextSlide = () => {
+        if (!activitySlides.length) {
+      return;
+    }
     setCurrentSlide((prev) => (prev + 1) % maxSlides);
   };
 
   const prevSlide = () => {
+        if (!activitySlides.length) {
+      return;
+    }
     setCurrentSlide((prev) => (prev - 1 + maxSlides) % maxSlides);
   };
 
   const goToSlide = (index) => {
+        if (!activitySlides.length) {
+      return;
+    }
     setCurrentSlide(index);
   };
 
-  // Kart tıklama fonksiyonu
+
   const handleCardClick = (activity) => {
-    navigate(activity.route);
+    if (activity?.route) {
+      navigate(activity.route);
+    }
   };
 
-  // currentSlide sınırlarını kontrol et
-  React.useEffect(() => {
-    if (currentSlide >= maxSlides) {
+  useEffect(() => {
+    if (!activitySlides.length) {
+      setCurrentSlide(0);
+            return;
+    }
+
+    if (currentSlide >= activitySlides.length) {
       setCurrentSlide(0);
     }
-  }, [isMobile, maxSlides, currentSlide]);
+  }, [activitySlides, currentSlide]);
 
   const slideWidth = isMobile ? 14.286 : 33.333;
 
@@ -319,41 +363,51 @@ const ActivitiesSection = () => {
             <ChevronLeft fontSize={isMobile ? "medium" : "large"} />
           </NavigationButton>
 
-          <SlideWrapper 
+          <SlideWrapper
             ismobile={isMobile}
-            sx={{ 
-              transform: `translateX(-${currentSlide * slideWidth}%)` 
+            sx={{
+              transform: `translateX(-${currentSlide * slideWidth}%)`
             }}
           >
             {activitySlides.map((slide, slideIndex) => (
               <Slide key={slideIndex} ismobile={isMobile}>
-                {slide.map((activity, cardIndex) => (
-                  <ActivityCard 
-                    key={cardIndex} 
-                    ismobile={isMobile}
-                    onClick={() => handleCardClick(activity)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        handleCardClick(activity);
-                      }
-                    }}
-                  >
-                    <CardImage 
-                      src={activity.image} 
-                      alt={activity.title}
-                      onError={(e) => {
-                        e.target.src = '/images/placeholder.jpg';
+                {slide.map((activity, cardIndex) => {
+                  const isClickable = Boolean(activity.route);
+
+                  return (
+                    <ActivityCard
+                      key={cardIndex}
+                      ismobile={isMobile}
+                      onClick={() => handleCardClick(activity)}
+                      role={isClickable ? 'button' : undefined}
+                      tabIndex={isClickable ? 0 : -1}
+                      onKeyDown={(event) => {
+                        if (!isClickable) {
+                          return;
+                        }
+
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          handleCardClick(activity);
+                        }
                       }}
-                    />
-                    <CardContent>
-                      <CardTitle variant="h6">
-                        {activity.title}
-                      </CardTitle>
-                    </CardContent>
-                  </ActivityCard>
-                ))}
+                      sx={{ cursor: isClickable ? 'pointer' : 'default' }}
+                    >
+                      <CardImage
+                        src={activity.image}
+                        alt={activity.title}
+                        onError={(event) => {
+                          event.currentTarget.src = '/images/placeholder.jpg';
+                        }}
+                      />
+                      <CardContent>
+                        <CardTitle variant="h6">
+                          {activity.title}
+                        </CardTitle>
+                      </CardContent>
+                    </ActivityCard>
+                  );
+                })}
               </Slide>
             ))}
           </SlideWrapper>
@@ -366,15 +420,17 @@ const ActivitiesSection = () => {
             <ChevronRight fontSize={isMobile ? "medium" : "large"} />
           </NavigationButton>
 
-          <ProgressIndicator>
-            {activitySlides.map((_, index) => (
-              <ProgressDot 
-                key={index} 
-                active={index === currentSlide}
-                onClick={() => goToSlide(index)}
-              />
-            ))}
-          </ProgressIndicator>
+          {activitySlides.length > 1 && (
+            <ProgressIndicator>
+              {activitySlides.map((_, index) => (
+                <ProgressDot
+                  key={index}
+                  active={index === currentSlide}
+                  onClick={() => goToSlide(index)}
+                />
+              ))}
+            </ProgressIndicator>
+          )}
         </SliderContainer>
       </ContentWrapper>
     </ActivitiesContainer>

@@ -1,4 +1,5 @@
 import projects from "../data/projects";
+import activities from "../data/activities";
 
 export const DEFAULT_HOME_VIDEOS = [
   {
@@ -62,16 +63,35 @@ export const DEFAULT_GALLERY_PHOTOS = [
 
 const cloneProjects = () => projects.map((project) => ({ ...project }));
 
+const cloneActivities = () => activities.map((activity) => ({ ...activity }));
+
+const DEFAULT_SITE_CONFIG = {
+  title: "Sedat Demir Yapı",
+  aboutTitle: "Sedat Demir Yapı",
+  aboutBody:
+    "15 yılı aşkın sektör deneyimimizle, inşaat ve yapı sektöründe güvenilir bir isim olarak hizmet vermekteyiz.",
+  logoUrl: "",
+  socials: {},
+  videos: DEFAULT_HOME_VIDEOS.map((video) => video.url),
+  updatedAt: null,
+};
+
 const defaultSiteContent = {
   homepageVideos: DEFAULT_HOME_VIDEOS.map((video) => ({ ...video })),
   galleryPhotos: DEFAULT_GALLERY_PHOTOS.map((photo) => ({ ...photo })),
   projects: cloneProjects(),
+  activities: cloneActivities(),
+  config: { ...DEFAULT_SITE_CONFIG },
+  media: [],
 };
 
 export const createDefaultSiteContent = () => ({
   homepageVideos: DEFAULT_HOME_VIDEOS.map((video) => ({ ...video })),
   galleryPhotos: DEFAULT_GALLERY_PHOTOS.map((photo) => ({ ...photo })),
   projects: cloneProjects(),
+  activities: cloneActivities(),
+  config: { ...DEFAULT_SITE_CONFIG },
+  media: [],
 });
 
 export default defaultSiteContent;

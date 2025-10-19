@@ -312,7 +312,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
 }));
 */
 
-const AboutSection = ({ photos = [] }) => {
+const AboutSection = ({ photos = [], about = {} }) => {
   const stats = [
     { number: '15+', label: 'Yıl Deneyim', icon: <Star sx={{ color: '#3498db' }} /> },
     { number: '100+', label: 'Tamamlanan Proje', icon: <Engineering sx={{ color: '#2ecc71' }} /> },
@@ -328,6 +328,11 @@ const AboutSection = ({ photos = [] }) => {
   ];
 
     const primaryPhoto = photos.find((photo) => photo?.url) || null;
+      const aboutTitle = about?.aboutTitle || 'Sedat Demir Yapı';
+  const aboutDescription =
+    about?.aboutBody ||
+    '15 yılı aşkın sektör deneyimimizle, inşaat ve yapı sektöründe güvenilir bir isim olarak hizmet vermekteyiz. Modern teknoloji ve geleneksel ustalığı bir araya getirerek, müşterilerimizin hayallerini gerçeğe dönüştürüyoruz. Kalite, güvenilirlik ve müşteri memnuniyeti önceliklerimizin başında gelir.';
+  const subtitle = about?.subtitle || 'Güvenilir İnşaat Çözümleri ve Kaliteli Hizmet';
 
 
   return (
@@ -362,18 +367,15 @@ const AboutSection = ({ photos = [] }) => {
         <TextSection>
           <TextContainer>
             <MainTitle>
-              Sedat Demir Yapı
+              {aboutTitle}
             </MainTitle>
             
             <SubTitle>
-              Güvenilir İnşaat Çözümleri ve Kaliteli Hizmet
+              {subtitle}
             </SubTitle>
 
             <Description>
-              15 yılı aşkın sektör deneyimimizle, inşaat ve yapı sektöründe güvenilir bir isim olarak 
-              hizmet vermekteyiz. Modern teknoloji ve geleneksel ustalığı bir araya getirerek, 
-              müşterilerimizin hayallerini gerçeğe dönüştürüyoruz. Kalite, güvenilirlik ve 
-              müşteri memnuniyeti önceliklerimizin başında gelir.
+              {aboutDescription}
             </Description>
 
             {/* İstatistikler */}
