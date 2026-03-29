@@ -2,10 +2,10 @@
 import React from 'react';
 import { Typography, Container, Button, Grid, Box } from "@mui/material";
 import { Link } from "react-router-dom";
-import { 
-  Facebook, 
-  Instagram, 
-  LinkedIn, 
+import {
+  Facebook,
+  Instagram,
+  LinkedIn,
   YouTube,
   Phone,
   Email,
@@ -34,7 +34,10 @@ import {
   CopyrightText
 } from '../styles/StyledComponents';
 
-function Footer() {
+function Footer({ settings }) {
+  const siteTitle = settings?.title || 'Sedat Demir Yapı';
+  const description = settings?.description || 'Güvenilir inşaat çözümleri ve kaliteli hizmet anlayışı ile 15 yıldır sektörde lider konumundayız.';
+
   const services = [
     { name: 'Konut İnşaatı', icon: <Home sx={{ fontSize: 18 }} /> },
     { name: 'Ticari Yapılar', icon: <Business sx={{ fontSize: 18 }} /> },
@@ -52,30 +55,62 @@ function Footer() {
               <FooterSection>
                 <LogoContainer>
                   <LogoText>
-                    Sedat Demir Yapı
+                    {siteTitle}
                   </LogoText>
                   <LogoSubtext>
-                    Güvenilir inşaat çözümleri ve kaliteli hizmet anlayışı ile 15 yıldır sektörde lider konumundayız.
+                    {description}
                   </LogoSubtext>
                 </LogoContainer>
 
                 <Typography variant="h6" sx={{ fontSize: '1.1rem', mb: 2, color: '#ecf0f1' }}>
                   Bizi Takip Edin
                 </Typography>
-                
+
                 <SocialMediaContainer>
-                  <SocialButton aria-label="Facebook">
-                    <Facebook />
-                  </SocialButton>
-                  <SocialButton aria-label="Instagram">
-                    <Instagram />
-                  </SocialButton>
-                  <SocialButton aria-label="LinkedIn">
-                    <LinkedIn />
-                  </SocialButton>
-                  <SocialButton aria-label="YouTube">
-                    <YouTube />
-                  </SocialButton>
+                  {settings?.facebookUrl && (
+                    <SocialButton 
+                      component="a" 
+                      href={settings.facebookUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      aria-label="Facebook"
+                    >
+                      <Facebook />
+                    </SocialButton>
+                  )}
+                  {settings?.instagramUrl && (
+                    <SocialButton 
+                      component="a" 
+                      href={settings.instagramUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      aria-label="Instagram"
+                    >
+                      <Instagram />
+                    </SocialButton>
+                  )}
+                  {settings?.linkedinUrl && (
+                    <SocialButton 
+                      component="a" 
+                      href={settings.linkedinUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      aria-label="LinkedIn"
+                    >
+                      <LinkedIn />
+                    </SocialButton>
+                  )}
+                  {settings?.youtubeUrl && (
+                    <SocialButton 
+                      component="a" 
+                      href={settings.youtubeUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      aria-label="YouTube"
+                    >
+                      <YouTube />
+                    </SocialButton>
+                  )}
                 </SocialMediaContainer>
               </FooterSection>
             </Grid>
@@ -86,7 +121,7 @@ function Footer() {
                 <SectionTitle>
                   Faaliyetlerimiz
                 </SectionTitle>
-                
+
                 {services.map((service, index) => (
                   <ServiceItem key={index}>
                     {service.icon}
@@ -95,10 +130,10 @@ function Footer() {
                     </Typography>
                   </ServiceItem>
                 ))}
-                
-                <Button 
-                  component={Link} 
-                  to="/faaliyet-alanlari"
+
+                <Button
+                  component={Link}
+                  to="/kategoriler"
                   variant="outlined"
                   sx={{ mt: 2 }}
                 >
@@ -113,36 +148,33 @@ function Footer() {
                 <SectionTitle>
                   İletişim
                 </SectionTitle>
-                
+
                 <ContactItem>
-                  <Phone sx={{ color: '#3498db' }} />
+                  <Phone color="primary" />
                   <Box>
                     <ContactText variant="body2">
                       +90 (555) 123 45 67
-                    </ContactText>
-                    <ContactText variant="body2">
-                      +90 (555) 765 43 21
                     </ContactText>
                   </Box>
                 </ContactItem>
 
                 <ContactItem>
-                  <Email sx={{ color: '#3498db' }} />
+                  <Email color="primary" />
                   <ContactText variant="body2">
                     info@sedatdemiryapi.com
                   </ContactText>
                 </ContactItem>
 
                 <ContactItem>
-                  <LocationOn sx={{ color: '#3498db' }} />
+                  <LocationOn color="primary" />
                   <ContactText variant="body2">
                     Çankaya Mahallesi, İnşaat Sokak No:15<br />
                     Ankara / TÜRKİYE
                   </ContactText>
                 </ContactItem>
 
-                <Button 
-                  component={Link} 
+                <Button
+                  component={Link}
                   to="/iletisim"
                   variant="contained"
                   sx={{ mt: 3 }}
@@ -159,7 +191,7 @@ function Footer() {
       <CopyrightSection>
         <Container maxWidth="lg">
           <CopyrightText>
-            © {new Date().getFullYear()} Sedat Demir Yapı. Tüm hakları saklıdır. | 
+            © {new Date().getFullYear()} {siteTitle}. Tüm hakları saklıdır. |
             Tasarım & Geliştirme: Web Ajansı
           </CopyrightText>
         </Container>

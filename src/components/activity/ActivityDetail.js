@@ -16,17 +16,42 @@ const ActivityDetail = ({ activity }) => {
   }
 
   return (
-    <Box sx={{ backgroundColor: '#f7f9fc' }}>
+    <Box component="article" sx={{ backgroundColor: '#f7f9fc' }}>
       <Box
         sx={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${activity.heroImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          position: 'relative',
           color: 'white',
           py: { xs: 10, md: 16 },
+          overflow: 'hidden',
         }}
       >
-        <Container maxWidth="md">
+        <Box
+          component="img"
+          src={activity.heroImage}
+          alt={activity.title}
+          fetchpriority="high"
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 0,
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55))',
+            zIndex: 1,
+          }}
+        />
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 2 }}>
           <Typography variant="h2" component="h1" sx={{ fontSize: { xs: '2.25rem', md: '3.5rem' }, fontWeight: 700 }}>
             {activity.title}
           </Typography>

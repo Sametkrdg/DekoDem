@@ -1,7 +1,8 @@
 // components/ContactForm.js
 import React, { useEffect, useRef, useState } from "react";
-import { Box, TextField, MenuItem, Alert } from "@mui/material";
+import { Box, TextField, MenuItem, Alert, CircularProgress } from "@mui/material";
 import { Send } from "@mui/icons-material";
+import emailjs from "@emailjs/browser";
 import {
   ServiceCard,
   SectionTitle,
@@ -18,6 +19,10 @@ const ContactForm = () => {
   });
 
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const resetTimerRef = useRef(null);
 
   const subjects = [
@@ -28,26 +33,79 @@ const ContactForm = () => {
     "Diğer",
   ];
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const validateEmail = (email) => {
+    return String(email)
+      .toLowerCase()
+      .match(
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      );
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Form submit logic burada olacak
-    console.log("Form Data:", formData);
-    setShowSuccess(true);
-
-    // Success mesajını 3 saniye sonra gizle
-    if (resetTimerRef.current) {
-      clearTimeout(resetTimerRef.current);
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    if (name === "email" && value.trim() !== "") {
+      if (!validateEmail(value)) {
+        setFieldErrors((prev) => ({ ...prev, email: "Geçerli bir e-posta adresi giriniz." }));
+      } else {
+        setFieldErrors((prev) => ({ ...prev, email: "" }));
+      }
     }
-    resetTimerRef.current = setTimeout(() => {
-      setShowSuccess(false);
-      // Formu temizle
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    let sanitizedValue = value;
+
+    if (name === "phone") {
+      // Remove any character that is not a digit or the plus sign
+      sanitizedValue = value.replace(/[^\d+]/g, "");
+    }
+
+    setFormData({
+      ...formData,
+      [name]: sanitizedValue,
+    });
+
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setValidationError("");
+    setShowSuccess(false);
+    setShowError(false);
+
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+      setValidationError("Lütfen zorunlu tüm alanları doldurun.");
+      return;
+    }
+
+    if (!validateEmail(formData.email)) {
+      setValidationError("Lütfen geçerli bir e-posta adresi girin.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await emailjs.send(
+        process.env.REACT_APP_EMAILJS_SERVICE_ID,
+        process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+        {
+          name: formData.name,          // Maps to {{name}}
+          from_name: formData.name,     // Maps to {{from_name}}
+          from_email: formData.email,   // Maps to {{from_email}}
+          reply_to: formData.email,     // Fallback standard usage
+          phone: formData.phone,        // Maps to {{phone}} (User needs to add this to template)
+          subject: formData.subject,    // Maps to {{subject}} (User needs to add this to template)
+          message: formData.message,    // Maps to {{message}}
+        },
+        process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+      );
+
+      setShowSuccess(true);
       setFormData({
         name: "",
         email: "",
@@ -55,7 +113,19 @@ const ContactForm = () => {
         subject: "",
         message: "",
       });
-    }, 3000);
+
+      if (resetTimerRef.current) {
+        clearTimeout(resetTimerRef.current);
+      }
+      resetTimerRef.current = setTimeout(() => {
+        setShowSuccess(false);
+      }, 5000);
+    } catch (error) {
+      console.error("EmailJS Error:", error);
+      setShowError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   useEffect(
@@ -80,6 +150,18 @@ const ContactForm = () => {
       >
         Bize Ulaşın
       </SectionTitle>
+
+      {validationError && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          {validationError}
+        </Alert>
+      )}
+
+      {showError && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          Şu an teknik bir sorun var, lütfen bizi arayın.
+        </Alert>
+      )}
 
       {showSuccess && (
         <Alert
@@ -111,14 +193,14 @@ const ContactForm = () => {
           sx={{
             "& .MuiOutlinedInput-root": {
               "&:hover fieldset": {
-                borderColor: "#3498db",
+                borderColor: "primary.main",
               },
               "&.Mui-focused fieldset": {
-                borderColor: "#3498db",
+                borderColor: "primary.main",
               },
             },
             "& .MuiInputLabel-root.Mui-focused": {
-              color: "#3498db",
+              color: "primary.main",
             },
           }}
         />
@@ -129,20 +211,23 @@ const ContactForm = () => {
           type="email"
           value={formData.email}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={!!fieldErrors.email}
+          helperText={fieldErrors.email}
           required
           fullWidth
           variant="outlined"
           sx={{
             "& .MuiOutlinedInput-root": {
               "&:hover fieldset": {
-                borderColor: "#3498db",
+                borderColor: "primary.main",
               },
               "&.Mui-focused fieldset": {
-                borderColor: "#3498db",
+                borderColor: "primary.main",
               },
             },
             "& .MuiInputLabel-root.Mui-focused": {
-              color: "#3498db",
+              color: "primary.main",
             },
           }}
         />
@@ -152,19 +237,20 @@ const ContactForm = () => {
           label="Telefon"
           value={formData.phone}
           onChange={handleChange}
+          inputProps={{ inputMode: "numeric" }}
           fullWidth
           variant="outlined"
           sx={{
             "& .MuiOutlinedInput-root": {
               "&:hover fieldset": {
-                borderColor: "#3498db",
+                borderColor: "primary.main",
               },
               "&.Mui-focused fieldset": {
-                borderColor: "#3498db",
+                borderColor: "primary.main",
               },
             },
             "& .MuiInputLabel-root.Mui-focused": {
-              color: "#3498db",
+              color: "primary.main",
             },
           }}
         />
@@ -185,14 +271,14 @@ const ContactForm = () => {
           sx={{
             "& .MuiOutlinedInput-root": {
               "&:hover fieldset": {
-                borderColor: "#3498db",
+                borderColor: "primary.main",
               },
               "&.Mui-focused fieldset": {
-                borderColor: "#3498db",
+                borderColor: "primary.main",
               },
             },
             "& .MuiInputLabel-root.Mui-focused": {
-              color: "#3498db",
+              color: "primary.main",
             },
           }}
         >
@@ -219,14 +305,14 @@ const ContactForm = () => {
           sx={{
             "& .MuiOutlinedInput-root": {
               "&:hover fieldset": {
-                borderColor: "#3498db",
+                borderColor: "primary.main",
               },
               "&.Mui-focused fieldset": {
-                borderColor: "#3498db",
+                borderColor: "primary.main",
               },
             },
             "& .MuiInputLabel-root.Mui-focused": {
-              color: "#3498db",
+              color: "primary.main",
             },
           }}
         />
@@ -234,10 +320,11 @@ const ContactForm = () => {
         <CTAButton
           type="submit"
           variant="contained"
-          startIcon={<Send />}
+          disabled={isSubmitting}
+          startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <Send />}
           sx={{ alignSelf: "center", minWidth: "200px" }}
         >
-          Mesaj Gönder
+          {isSubmitting ? "Gönderiliyor..." : "Mesaj Gönder"}
         </CTAButton>
       </Box>
     </ServiceCard>

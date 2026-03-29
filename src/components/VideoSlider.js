@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Box, Container, Typography, IconButton, useTheme, useMediaQuery } from '@mui/material';
-import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { ChevronLeft, ChevronRight, PlayCircleOutline } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
 import { DEFAULT_HOME_VIDEOS } from '../constants/defaultSiteContent';
 
@@ -199,6 +199,122 @@ const StyledIframe = styled('iframe')(({ theme }) => ({
   zIndex: 2,
 }));
 
+// ───── YouTube Facade Component ─────
+// Renders a static thumbnail instead of a heavy iframe.
+// The real player is only injected on explicit user click.
+const VideoFacade = ({ videoId, title }) => {
+  const [isPlayerLoaded, setIsPlayerLoaded] = useState(false);
+
+  const handleActivate = useCallback(() => {
+    setIsPlayerLoaded(true);
+  }, []);
+
+  if (isPlayerLoaded) {
+    return (
+      <StyledIframe
+        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&showinfo=0&rel=0&modestbranding=1`}
+        title={title}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+    );
+  }
+
+  return (
+    <Box
+      onClick={handleActivate}
+      role="button"
+      tabIndex={0}
+      aria-label={`${title} videosunu oynat`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleActivate();
+        }
+      }}
+      sx={{
+        width: '100%',
+        height: '100%',
+        cursor: 'pointer',
+        position: 'relative',
+        zIndex: 2,
+        overflow: 'hidden',
+        '&:hover .facade-play-btn': {
+          transform: 'translate(-50%, -50%) scale(1.15)',
+          filter: 'drop-shadow(0 0 20px rgba(249, 115, 22, 0.6))',
+        },
+        '&:hover .facade-overlay': {
+          background: 'rgba(0, 0, 0, 0.25)',
+        },
+      }}
+    >
+      {/* YouTube Thumbnail */}
+      <Box
+        component="img"
+        src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+        alt={title}
+        loading="lazy"
+        sx={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+        }}
+      />
+
+      {/* Hover Overlay */}
+      <Box
+        className="facade-overlay"
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(0, 0, 0, 0.15)',
+          transition: 'background 0.3s ease',
+        }}
+      />
+
+      {/* Professional Play Button */}
+      <PlayCircleOutline
+        className="facade-play-btn"
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          fontSize: { xs: 56, sm: 72 },
+          color: 'primary.main',
+          filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))',
+          transition: 'all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.95) 30%, rgba(255,255,255,0) 70%)',
+          borderRadius: '50%',
+        }}
+      />
+
+      {/* Video Title Badge */}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: 12,
+          left: 12,
+          right: 12,
+          color: 'white',
+          fontSize: '0.8rem',
+          fontWeight: 500,
+          textShadow: '0 1px 4px rgba(0,0,0,0.6)',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {title}
+      </Box>
+    </Box>
+  );
+};
+
 const NavigationButton = styled(IconButton)(({ theme, direction }) => ({
   position: 'absolute',
   top: '50%',
@@ -282,6 +398,7 @@ const extractYouTubeId = (value) => {
     return trimmedValue;
   }
 
+  // eslint-disable-next-line no-useless-escape
   const urlRegex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
   const match = trimmedValue.match(urlRegex);
 
@@ -379,7 +496,7 @@ const VideoSlider = ({ videos = DEFAULT_HOME_VIDEOS }) => {
 
   if (!videoSlides.length) {
     return (
-      <VideoSection>
+      <VideoSection component="section">
         <ContentWrapper maxWidth={false}>
           <VideoTitle>
             Projelerimizden Öne Çıkanlar
@@ -404,7 +521,7 @@ const VideoSlider = ({ videos = DEFAULT_HOME_VIDEOS }) => {
   }
 
   return (
-    <VideoSection>
+    <VideoSection component="section">
       <ContentWrapper maxWidth={false}>
         <VideoTitle>
           Projelerimizden Öne Çıkanlar
@@ -441,12 +558,9 @@ const VideoSlider = ({ videos = DEFAULT_HOME_VIDEOS }) => {
                       key={`${slideIndex}-${videoIndex}`}
                       ismobile={isMobile}
                     >
-                      <StyledIframe
-                        src={`https://www.youtube.com/embed/${video.id}?controls=1&showinfo=0&rel=0&modestbranding=1`}
+                      <VideoFacade
+                        videoId={video.id}
                         title={video.title}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        loading="lazy"
                       />
                     </VideoContainer>
                   ))}

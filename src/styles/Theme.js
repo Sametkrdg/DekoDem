@@ -3,23 +3,23 @@ import { createTheme } from '@mui/material/styles';
 // ===== COLOR CONSTANTS =====
 const colors = {
   primary: {
-    main: '#3498db',
-    dark: '#2980b9',
-    light: '#5dade2',
-    lighter: '#aed6f1',
+    main: '#1a365d',
+    dark: '#0f2862',
+    light: '#2a4365',
+    lighter: '#4a5568',
   },
   secondary: {
-    main: '#2ecc71',
-    dark: '#27ae60',
-    light: '#58d68d',
-    lighter: '#a9dfbf',
+    main: '#f97316',
+    dark: '#ea580c',
+    light: '#fdba74',
+    lighter: '#ffedd5',
   },
   gradients: {
-    primary: 'linear-gradient(135deg, #3498db, #2ecc71)',
-    primaryReverse: 'linear-gradient(135deg, #2ecc71, #3498db)',
+    primary: 'linear-gradient(135deg, #1a365d, #2a4365)',
+    primaryReverse: 'linear-gradient(135deg, #2a4365, #1a365d)',
     background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
     backgroundLight: 'linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%)',
-    hover: 'linear-gradient(135deg, #2980b9, #27ae60)',
+    hover: 'linear-gradient(135deg, #0f2862, #1a365d)',
   },
   neutral: {
     white: '#ffffff',
@@ -31,6 +31,50 @@ const colors = {
     darker: '#34495e',
     black: '#2c3e50',
   }
+};
+
+// Functions required by Admin.js
+export const hueSaturationToHex = ({ hue, saturation, lightness = 50 }) => {
+  const h = hue;
+  const s = saturation / 100;
+  const l = lightness / 100;
+
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+
+  let r = 0, g = 0, b = 0;
+
+  if (0 <= h && h < 60) {
+    r = c; g = x; b = 0;
+  } else if (60 <= h && h < 120) {
+    r = x; g = c; b = 0;
+  } else if (120 <= h && h < 180) {
+    r = 0; g = c; b = x;
+  } else if (180 <= h && h < 240) {
+    r = 0; g = x; b = c;
+  } else if (240 <= h && h < 300) {
+    r = x; g = 0; b = c;
+  } else if (300 <= h && h < 360) {
+    r = c; g = 0; b = x;
+  }
+
+  const toHex = (n) => {
+    const hex = Math.round((n + m) * 255).toString(16);
+    return hex.length === 1 ? "0" + hex : hex;
+  };
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
+export const updateThemeFromHex = (hexColor) => {
+  // Logic to update the theme context or similar could go here
+  // For now just returning defaults or logging if needed, 
+  // but keeping signature to match Admin.js usage
+  console.log("Updating theme color to:", hexColor);
+  return createDynamicTheme({
+    primary: { main: hexColor }
+  });
 };
 
 // ===== DYNAMIC THEME CREATOR =====
@@ -77,7 +121,7 @@ const createDynamicTheme = (customColors = {}) => {
       fontWeightRegular: 400,
       fontWeightMedium: 500,
       fontWeightBold: 700,
-      
+
       h1: {
         fontSize: '3.5rem',
         fontWeight: 700,
@@ -299,7 +343,7 @@ const createDynamicTheme = (customColors = {}) => {
       gradientBackgroundLight: {
         background: mergedColors.gradients.backgroundLight,
       },
-      
+
       // Text Gradients
       gradientText: {
         background: mergedColors.gradients.primary,
@@ -308,7 +352,7 @@ const createDynamicTheme = (customColors = {}) => {
         backgroundClip: 'text',
         fontWeight: 600,
       },
-      
+
       // Hover Effects
       hoverEffect: {
         transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',

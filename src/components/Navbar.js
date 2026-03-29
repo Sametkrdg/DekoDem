@@ -21,7 +21,7 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 
-import { 
+import {
   LogoText as StyledLogoText,
   GradientText,
   CTAButton
@@ -153,6 +153,7 @@ const DrawerHeader = styled(Box)(({ theme }) => ({
   justifyContent: 'space-between',
   padding: '0 20px',
   marginBottom: '20px',
+  marginTop: '10px',
 }));
 
 const DrawerNavItem = styled(ListItem)(({ theme, active }) => ({
@@ -170,20 +171,24 @@ const DrawerNavItem = styled(ListItem)(({ theme, active }) => ({
 const navigationItems = [
   { label: 'Anasayfa', path: '/' },
   { label: 'Hakkımızda', path: '/hakkimizda' },
-  { label: 'Faaliyet Alanları', path: '/faaliyet-alanlari' },
+  { label: 'Kategoriler', path: '/kategoriler' },
   { label: 'Projeler', path: '/projeler' },
   { label: 'İletişim', path: '/iletisim' },
 ];
 
-function Navbar() {
+function Navbar({ settings }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
 
+  const siteTitle = settings?.title || 'Sedat Demir Yapı';
+  const logoInitials = siteTitle.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'SD';
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
+
 
   const isActiveRoute = (path) => {
     return location.pathname === path;
@@ -194,10 +199,10 @@ function Navbar() {
       <DrawerHeader>
         <Box display="flex" alignItems="center" gap={2}>
           <LogoPlaceholder>
-            SD
+            {logoInitials}
           </LogoPlaceholder>
           <GradientText variant="h6" fontWeight="bold">
-            Sedat Demir Yapı
+            {siteTitle}
           </GradientText>
         </Box>
         <IconButton onClick={handleDrawerToggle} sx={{ color: 'white' }}>
@@ -217,12 +222,12 @@ function Navbar() {
             onClick={handleDrawerToggle}
             active={isActiveRoute(item.path)}
           >
-            <ListItemText 
+            <ListItemText
               primary={item.label}
-              sx={{ 
-                '& .MuiListItemText-primary': { 
-                  fontWeight: isActiveRoute(item.path) ? 600 : 400 
-                } 
+              sx={{
+                '& .MuiListItemText-primary': {
+                  fontWeight: isActiveRoute(item.path) ? 600 : 400
+                }
               }}
             />
           </DrawerNavItem>
@@ -252,15 +257,15 @@ function Navbar() {
           {/* Logo Section */}
           <LogoContainer component={Link} to="/">
             <LogoPlaceholder>
-              SD
+              {logoInitials}
             </LogoPlaceholder>
             <LogoText variant="h6">
-              Sedat Demir Yapı
+              {siteTitle}
             </LogoText>
           </LogoContainer>
 
           {/* Desktop Navigation */}
-          <NavMenu>
+          <NavMenu component="nav" aria-label="Ana menü">
             {navigationItems.map((item) => (
               <NavButton
                 key={item.path}

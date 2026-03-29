@@ -5,8 +5,11 @@
     "rules": "firestore.rules",
     "indexes": ","
   },
+  "storage": {
+    "rules": "storage.rules"
+  },
   "hosting": {
-    "public": "public",
+    "public": "build",
     "ignore": [
       "firebase.json",
       "**/.*",

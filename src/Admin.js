@@ -12,7 +12,7 @@ import {
   Snackbar,
   Avatar,
   CircularProgress,
-    FormControlLabel,
+  FormControlLabel,
   Switch,
 } from "@mui/material";
 import {
@@ -30,66 +30,71 @@ import {
   CloudSync,
   Add,
   Delete,
-    Code,
+  Code,
+  ExitToApp,
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
+import { signOut } from "firebase/auth";
+import { auth } from "./config/firebase";
 import { saveSiteContent, fetchSiteContent } from "./services/contentService";
-import { isFirebaseConfigured } from "./firebase/config";
+import { isFirebaseConfigured } from "./config/firebase";
+import { hueSaturationToHex, updateThemeFromHex } from "./styles/Theme";
+import { useSite } from "./context/SiteContext";
 
 // Admin özel styled components
-const AdminContainer = styled(Container)(({ theme }) => ({
+const AdminContainer = styled(Container)(() => ({
   paddingTop: "40px",
   paddingBottom: "40px",
   minHeight: "100vh",
-  background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+  background: "var(--gradient-surface)",
 }));
 
-const AdminCard = styled(Card)(({ theme }) => ({
+const AdminCard = styled(Card)(() => ({
   marginBottom: "24px",
   borderRadius: "16px",
-  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+  boxShadow: "0 8px 32px var(--shadow-color)",
   transition: "all 0.3s ease",
   "&:hover": {
     transform: "translateY(-4px)",
-    boxShadow: "0 12px 48px rgba(0,0,0,0.15)",
+    boxShadow: "0 12px 48px var(--shadow-strong)",
   },
 }));
 
-const AdminHeader = styled(Box)(({ theme }) => ({
-  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-  color: "#fff",
+const AdminHeader = styled(Box)(() => ({
+  background: "linear-gradient(135deg, var(--primary-400) 0%, var(--primary-700) 100%)",
+  color: "#var(--white)",
   padding: "32px",
   borderRadius: "16px 16px 0 0",
   textAlign: "center",
   marginBottom: 0,
 }));
 
-const FormSection = styled(CardContent)(({ theme }) => ({
+const FormSection = styled(CardContent)(() => ({
   padding: "32px",
 }));
 
-const SectionHeader = styled(Box)(({ theme }) => ({
+const SectionHeader = styled(Box)(() => ({
   display: "flex",
   alignItems: "center",
   marginBottom: "24px",
   gap: "12px",
 }));
 
-const SectionTitle = styled(Typography)(({ theme }) => ({
+const SectionTitle = styled(Typography)(() => ({
   fontSize: "1.3rem",
   fontWeight: "600",
-  color: "#2c3e50",
+  color: "var(--text-primary)",
   display: "flex",
   alignItems: "center",
   gap: "8px",
 }));
 
-const PreviewBox = styled(Box)(({ theme }) => ({
+const PreviewBox = styled(Box)(() => ({
   padding: "20px",
-  border: "2px dashed #e0e0e0",
+  border: "2px dashed var(--border)",
   borderRadius: "12px",
   textAlign: "center",
-  background: "#f8f9fa",
+  background: "var(--panel-bg)",
   minHeight: "120px",
   display: "flex",
   flexDirection: "column",
@@ -98,22 +103,24 @@ const PreviewBox = styled(Box)(({ theme }) => ({
   gap: "12px",
 }));
 
-const ColorPreview = styled(Box)(({ theme, color }) => ({
+const ColorPreview = styled(Box)(({ color }) => ({
   width: "100px",
   height: "40px",
   borderRadius: "8px",
-  background: color || "#1976d2",
-  border: "2px solid #fff",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+  background: color || "var(--primary-500)",
+  border: "2px solid var(--white)",
+  boxShadow: "0 4px 12px var(--shadow-strong)",
   margin: "0 auto",
 }));
 
+const DEFAULT_THEME = { hue: 8, saturation: 72 };
+
 const DEFAULT_SETTINGS = {
   title: "Sedat Demir Yapı",
-  color: "#1976d2",
+  color: hueSaturationToHex(DEFAULT_THEME),
   logoUrl: "",
   description: "Profesyonel yapı çözümleri",
-    codeReviewEnabled: true,
+  codeReviewEnabled: true,
 };
 
 const slugify = (value = "") =>
@@ -127,6 +134,11 @@ const slugify = (value = "") =>
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
 
+const normalizeColor = (value) =>
+  typeof value === "string" && value.trim().startsWith("#")
+    ? value.trim()
+    : DEFAULT_SETTINGS.color;
+
 function Admin({
   settings,
   setSettings,
@@ -134,11 +146,12 @@ function Admin({
   setSiteContent,
   refreshSiteContent,
 }) {
+  const { triggerSeed } = useSite();
   // Local state admin formu için
   const [title, setTitle] = useState(settings.title || "");
-  const [color, setColor] = useState(settings.color || "#1976d2");
+  const [color, setColor] = useState(normalizeColor(settings.color));
   const [logoUrl, setLogoUrl] = useState(settings.logoUrl || "");
-    const [codeReviewEnabled, setCodeReviewEnabled] = useState(
+  const [codeReviewEnabled, setCodeReviewEnabled] = useState(
     settings.codeReviewEnabled ?? DEFAULT_SETTINGS.codeReviewEnabled
   );
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -152,14 +165,18 @@ function Admin({
   const [isRefreshingContent, setIsRefreshingContent] = useState(false);
 
   // Ayarları kaydetme fonksiyonu
-    useEffect(() => {
+  useEffect(() => {
     setTitle(settings.title ?? DEFAULT_SETTINGS.title);
-    setColor(settings.color ?? DEFAULT_SETTINGS.color);
+    setColor(normalizeColor(settings.color));
     setLogoUrl(settings.logoUrl ?? DEFAULT_SETTINGS.logoUrl);
     setCodeReviewEnabled(
       settings.codeReviewEnabled ?? DEFAULT_SETTINGS.codeReviewEnabled
     );
   }, [settings]);
+
+  useEffect(() => {
+    updateThemeFromHex(color);
+  }, [color]);
 
   const saveSettings = () => {
     const newSettings = { title, color, logoUrl, codeReviewEnabled };
@@ -177,7 +194,7 @@ function Admin({
     setTitle(DEFAULT_SETTINGS.title);
     setColor(DEFAULT_SETTINGS.color);
     setLogoUrl(DEFAULT_SETTINGS.logoUrl);
-        setCodeReviewEnabled(DEFAULT_SETTINGS.codeReviewEnabled);
+    setCodeReviewEnabled(DEFAULT_SETTINGS.codeReviewEnabled);
     setSettings(newSettings);
     localStorage.setItem("siteSettings", JSON.stringify(newSettings));
     setSnackbarSeverity("success");
@@ -285,11 +302,11 @@ function Admin({
 
         return url
           ? {
-              id,
-              title,
-              url,
-              description,
-            }
+            id,
+            title,
+            url,
+            description,
+          }
           : null;
       })
       .filter(Boolean);
@@ -351,11 +368,22 @@ function Admin({
       setSnackbarSeverity("error");
       setSnackbarMessage(
         error.message ||
-          "İçerik kaydedilemedi. Lütfen daha sonra tekrar deneyin."
+        "İçerik kaydedilemedi. Lütfen daha sonra tekrar deneyin."
       );
     } finally {
       setSnackbarOpen(true);
       setIsSavingContent(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Çıkış yapılırken hata oluştu:", error);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Çıkış yapılamadı.");
+      setSnackbarOpen(true);
     }
   };
 
@@ -379,7 +407,7 @@ function Admin({
       setSnackbarSeverity("error");
       setSnackbarMessage(
         error.message ||
-          "İçerik yenilenemedi. Lütfen daha sonra tekrar deneyin."
+        "İçerik yenilenemedi. Lütfen daha sonra tekrar deneyin."
       );
     } finally {
       setSnackbarOpen(true);
@@ -391,7 +419,16 @@ function Admin({
     <AdminContainer maxWidth="lg">
       {/* Header */}
       <AdminCard>
-        <AdminHeader>
+        <AdminHeader sx={{ position: "relative" }}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleSignOut}
+            startIcon={<ExitToApp />}
+            sx={{ position: "absolute", top: 16, right: 16, boxShadow: 2 }}
+          >
+            Çıkış Yap
+          </Button>
           <Settings sx={{ fontSize: 40, mb: 2 }} />
           <Typography
             variant="h3"
@@ -403,6 +440,15 @@ function Admin({
           <Typography variant="h6" sx={{ opacity: 0.9 }}>
             Site ayarlarını buradan yönetebilirsiniz
           </Typography>
+          {/* Seed Button */}
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={triggerSeed}
+            sx={{ mt: 2 }}
+          >
+            Verileri Yükle (Seed)
+          </Button>
         </AdminHeader>
       </AdminCard>
 
@@ -413,7 +459,7 @@ function Admin({
           <AdminCard>
             <FormSection>
               <SectionHeader>
-                <Title sx={{ color: "#3498db", fontSize: 28 }} />
+                <Title sx={{ color: "var(--primary-500)", fontSize: 28 }} />
                 <SectionTitle variant="h5">Site Başlığı</SectionTitle>
               </SectionHeader>
 
@@ -437,7 +483,7 @@ function Admin({
           <AdminCard>
             <FormSection>
               <SectionHeader>
-                <Palette sx={{ color: "#e74c3c", fontSize: 28 }} />
+                <Palette sx={{ color: "var(--danger)", fontSize: 28 }} />
                 <SectionTitle variant="h5">Renk Ayarları</SectionTitle>
               </SectionHeader>
 
@@ -448,7 +494,7 @@ function Admin({
                     label="Temel Renk"
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
-                    placeholder="#1976d2"
+                    placeholder="{DEFAULT_SETTINGS.color}"
                     variant="outlined"
                     InputProps={{
                       startAdornment: (
@@ -458,7 +504,7 @@ function Admin({
                             height: 24,
                             borderRadius: "4px",
                             background: color,
-                            border: "1px solid #ccc",
+                            border: "1px solid var(--border)",
                             mr: 1,
                           }}
                         />
@@ -476,14 +522,7 @@ function Admin({
                     type="color"
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
-                    style={{
-                      width: "100%",
-                      height: "56px",
-                      border: "none",
-                      borderRadius: "12px",
-                      cursor: "pointer",
-                      background: color,
-                    }}
+                    className="admin-color-picker_input"
                   />
                 </Grid>
               </Grid>
@@ -494,7 +533,7 @@ function Admin({
           <AdminCard>
             <FormSection>
               <SectionHeader>
-                <Image sx={{ color: "#9b59b6", fontSize: 28 }} />
+                <Image sx={{ color: "var(--primry-600)", fontSize: 28 }} />
                 <SectionTitle variant="h5">Logo Ayarları</SectionTitle>
               </SectionHeader>
 
@@ -514,11 +553,11 @@ function Admin({
             </FormSection>
           </AdminCard>
 
-                    {/* Kod İncelemesi Ayarları */}
+          {/* Kod İncelemesi Ayarları */}
           <AdminCard>
             <FormSection>
               <SectionHeader>
-                <Code sx={{ color: "#16a085", fontSize: 28 }} />
+                <Code sx={{ color: "var(--priamry-500)", fontSize: 28 }} />
                 <SectionTitle variant="h5">Kod İncelemesi</SectionTitle>
               </SectionHeader>
 
@@ -551,7 +590,7 @@ function Admin({
           <AdminCard>
             <FormSection>
               <SectionHeader>
-                <VideoLibrary sx={{ color: "#8e44ad", fontSize: 28 }} />
+                <VideoLibrary sx={{ color: "var(--primary-700)", fontSize: 28 }} />
                 <SectionTitle variant="h5">Anasayfa Videoları</SectionTitle>
               </SectionHeader>
 
@@ -576,8 +615,8 @@ function Admin({
                       variant="outlined"
                       sx={{
                         borderRadius: "16px",
-                        borderColor: "rgba(142, 68, 173, 0.2)",
-                        background: "rgba(142, 68, 173, 0.04)",
+                        borderColor: "var(--primary-alpha-20)",
+                        background: "var(--primary-alpha-04)",
                       }}
                     >
                       <CardContent sx={{ p: 3 }}>

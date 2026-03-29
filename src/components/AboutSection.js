@@ -336,7 +336,7 @@ const AboutSection = ({ photos = [], about = {} }) => {
 
 
   return (
-    <MainContainer maxWidth="xl">
+    <MainContainer maxWidth="xl" component="section">
       <ContentWrapper>
         {/* Sol taraf - Resim */}
         <ImageSection>
@@ -346,6 +346,7 @@ const AboutSection = ({ photos = [], about = {} }) => {
                 component="img"
                 src={primaryPhoto.url}
                 alt={primaryPhoto.title || 'Şirket görseli'}
+                loading="lazy"
                 sx={{
                   width: '100%',
                   height: '100%',

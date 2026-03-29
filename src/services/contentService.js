@@ -1,12 +1,11 @@
-import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
-
-import { db, isFirebaseConfigured } from "../firebase/config";
+import { db, isFirebaseConfigured } from "../config/firebase";
 import {
   createDefaultSiteContent,
     DEFAULT_HOME_VIDEOS,
 } from "../constants/defaultSiteContent";
 import defaultActivities from "../data/activities";
 import defaultProjects from "../data/projects";
+import { doc, getDoc, getDocs, collection, setDoc } from "firebase/firestore";
 
 const COLLECTIONS = {
   config: "config",
@@ -197,18 +196,23 @@ const normalizeVideos = (videos) => {
 const buildContentFromSnapshots = async () => {
   const fallback = createDefaultSiteContent();
 
-  if (!isFirebaseConfigured || !db) {
+  if (!isFirebaseConfigured || !db || typeof db.collection !== "function") {
     return fallback;
   }
 
 
 
   try {
+    const configRef = doc(db, COLLECTIONS.config, CONFIG_DOCUMENT_ID);
+    const activitiesRef = collection(db, COLLECTIONS.activities);
+    const projectsRef = collection(db, COLLECTIONS.projects);
+    const mediaRef = collection(db, COLLECTIONS.media);
+
     const [configSnapshot, activitiesSnapshot, projectsSnapshot, mediaSnapshot] = await Promise.all([
-      getDoc(doc(db, COLLECTIONS.config, CONFIG_DOCUMENT_ID)),
-      getDocs(collection(db, COLLECTIONS.activities)),
-      getDocs(collection(db, COLLECTIONS.projects)),
-      getDocs(collection(db, COLLECTIONS.media)),
+      getDoc(configRef),
+      getDocs(activitiesRef),
+      getDocs(projectsRef),
+      getDocs(mediaRef),
     ]);
 
     const configData = configSnapshot.exists() ? configSnapshot.data() : {};

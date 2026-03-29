@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import ProjectsHeader from "../components/ProjectsHeader";
 import ProjectsGrid from "../components/ProjectsGrid";
 import StatsSection from "../components/StatsSection";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useSite } from "../context/SiteContext";
+import { Box, Typography } from "@mui/material";
 import { SectionContainer } from "../styles/StyledComponents";
 import defaultProjects from "../data/projects";
 
@@ -29,8 +32,9 @@ const normalizeProject = (project, index) => {
   };
 };
 
-const Projects = ({ siteContent }) => {
+const Projects = () => {
   const navigate = useNavigate();
+  const { siteContent, loading } = useSite();
 
   const availableSlugs = React.useMemo(
     () => new Set(defaultProjects.map((project) => project.slug)),
@@ -58,10 +62,22 @@ const Projects = ({ siteContent }) => {
     }
   };
 
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <SectionContainer maxWidth="lg">
       <ProjectsHeader />
-      <ProjectsGrid projeler={contentProjects} onSelect={handleSelectProject} />
+      {contentProjects && contentProjects.length > 0 ? (
+        <ProjectsGrid projeler={contentProjects} onSelect={handleSelectProject} />
+      ) : (
+        <Box sx={{ py: 10, textAlign: "center", minHeight: "40vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 500 }}>
+            Henüz proje eklenmedi.
+          </Typography>
+        </Box>
+      )}
       <StatsSection />
     </SectionContainer>
   );

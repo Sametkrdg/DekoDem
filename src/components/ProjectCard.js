@@ -10,7 +10,7 @@ const ProjectCard = ({ proje, onSelect }) => {
       case 'Tamamlandı': return '#27ae60';
       case 'Devam Ediyor': return '#f39c12';
       case 'Planlama': return '#9b59b6';
-      default: return '#3498db';
+      default: return 'primary.main';
     }
   };
 
@@ -20,7 +20,7 @@ const ProjectCard = ({ proje, onSelect }) => {
         height: '200px',
           background: imageUrl
           ? 'transparent'
-          : 'linear-gradient(135deg, #3498db, #2ecc71)',
+          : (theme) => theme.palette.gradients?.primary || 'primary.main',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -34,6 +34,7 @@ const ProjectCard = ({ proje, onSelect }) => {
           component="img"
           src={imageUrl}
           alt={title}
+          loading="lazy"
           sx={{
             width: '100%',
             height: '100%',
@@ -105,6 +106,7 @@ const ProjectCard = ({ proje, onSelect }) => {
 
   return (
     <StyledProjectCard
+      component="article"
       role={isSelectable ? 'button' : undefined}
       tabIndex={isSelectable ? 0 : -1}
       onClick={() => isSelectable && onSelect(proje)}
@@ -138,21 +140,21 @@ const ProjectCard = ({ proje, onSelect }) => {
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <ContactItem>
-            <LocationOn sx={{ color: '#3498db' }} />
+            <LocationOn color="primary" />
             <ContactText>
               <strong>Konum:</strong> {projectLocation}
             </ContactText>
           </ContactItem>
 
           <ContactItem>
-            <CalendarToday sx={{ color: '#3498db' }} />
+            <CalendarToday color="primary" />
             <ContactText>
               <strong>Yıl:</strong> {projectYear || 'Belirtilmedi'}
             </ContactText>
           </ContactItem>
 
           <ContactItem>
-            <Engineering sx={{ color: '#3498db' }} />
+            <Engineering color="primary" />
             <ContactText>
               <strong>Alan:</strong>
               <GradientText component="span" sx={{ marginLeft: '5px' }}>
