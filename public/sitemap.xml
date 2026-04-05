@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SITEMAP — DEKODEM
+  Production domain : https://dekodemyapi.com
+  Note             : Domain uses ASCII hostname (dekodemyapi.com), not the
+                     IDN variant (dekodemyapı.com), to avoid encoding issues
+                     in older crawlers.
+  Regenerate       : Update <lastmod> dates whenever page content changes.
+                     For dynamic routes (/haberler/:slug, /projeler/:slug)
+                     generate additional <url> entries or use a sitemap index.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       CORE PAGES
+       ══════════════════════════════════════════════════════════════ -->
+
+  <!-- Homepage — highest authority, updates with new projects/news -->
+  <url>
+    <loc>https://dekodemyapi.com/</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- About — stable content, refresh when company info changes -->
+  <url>
+    <loc>https://dekodemyapi.com/hakkimizda</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Contact — static, update if address/phone changes -->
+  <url>
+    <loc>https://dekodemyapi.com/iletisim</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       ACTIVITY FIELDS  (canonical path — /kategoriler redirects here)
+       ══════════════════════════════════════════════════════════════ -->
+
+  <!-- Activity fields index — important service-landing page -->
+  <url>
+    <loc>https://dekodemyapi.com/faaliyet-alanlari</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Individual activity field pages — generated from activityFields slugs -->
+  <url>
+    <loc>https://dekodemyapi.com/faaliyet-alanlari/ic-mimarlik-ve-tasarim</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dekodemyapi.com/faaliyet-alanlari/duvar-bolme-ve-siva</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dekodemyapi.com/faaliyet-alanlari/tavan-sistemleri</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dekodemyapi.com/faaliyet-alanlari/boya-badana-ve-yuzey</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dekodemyapi.com/faaliyet-alanlari/kapi-ve-gecis-sistemleri</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dekodemyapi.com/faaliyet-alanlari/mobilya-uretim-ve-donanim</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dekodemyapi.com/faaliyet-alanlari/peyzaj-bahce-ve-cevre</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dekodemyapi.com/faaliyet-alanlari/altyapi-ve-teknik</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dekodemyapi.com/faaliyet-alanlari/celik-konstruksiyon</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dekodemyapi.com/faaliyet-alanlari/mekanik-tesisat-ve-yangin</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dekodemyapi.com/faaliyet-alanlari/saha-betonlari-ve-cevre</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       PROJECTS
+       ══════════════════════════════════════════════════════════════ -->
+
+  <!-- Projects index — frequently updated -->
+  <url>
+    <loc>https://dekodemyapi.com/projeler</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- Individual project pages: add <url> entries as projects go live -->
+
+  <!-- ══════════════════════════════════════════════════════════════
+       BRANCHES
+       ══════════════════════════════════════════════════════════════ -->
+
+  <url>
+    <loc>https://dekodemyapi.com/subeler</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       BLOG / NEWS  (high crawl frequency — new posts expected)
+       ══════════════════════════════════════════════════════════════ -->
+
+  <url>
+    <loc>https://dekodemyapi.com/haberler</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <!-- Individual blog post URLs: add here or generate via sitemap-index -->
+
+  <!-- ══════════════════════════════════════════════════════════════
+       INFO PAGES
+       ══════════════════════════════════════════════════════════════ -->
+
+  <!-- FAQ / SSS — Google FAQ rich-result eligible -->
+  <url>
+    <loc>https://dekodemyapi.com/sss</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Careers -->
+  <url>
+    <loc>https://dekodemyapi.com/kariyer</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       LEGAL  (low SEO value — yearly updates only)
+       ══════════════════════════════════════════════════════════════ -->
+
+  <url>
+    <loc>https://dekodemyapi.com/gizlilik-politikasi</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+  <url>
+    <loc>https://dekodemyapi.com/kullanim-kosullari</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+</urlset>

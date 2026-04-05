@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { styled, keyframes } from '@mui/material/styles';
 import { Star, Engineering, Business, Group, Construction, Architecture } from '@mui/icons-material';
+import { brand, about } from '../constants/siteContent';
 
 const fadeInLeft = keyframes`
   from {
@@ -289,23 +290,15 @@ const HeroSection = () => {
         <TextSection>
           <TextContainer>
             <MainTitle>
-              Sedat Demir Yapı Hakkında
+              {brand.name} Hakkında
             </MainTitle>
-            
+
             <SubTitle>
-              Güvenilir İnşaat Çözümleri ve Kaliteli Hizmet Anlayışı
+              {brand.tagline}
             </SubTitle>
 
             <Description>
-              2009 yılında kurulan Sedat Demir Yapı, 15 yılı aşkın sektör deneyimi ile inşaat 
-              ve yapı sektöründe güvenilir bir marka haline gelmiştir. Modern teknoloji ve geleneksel 
-              ustalığı harmanlayarak, konut, ticari ve endüstriyel projelerde fark yaratan çözümler sunuyoruz.
-            </Description>
-
-            <Description>
-              Müşteri memnuniyeti odaklı yaklaşımımız, kaliteli malzeme kullanımı ve zamanında teslim 
-              ilkelerimizle, projelerinizi hayallerinizden daha güzel hale getiriyoruz. Uzman ekibimiz, 
-              her projede mükemmellik için çalışmakta ve sürekli gelişim göstermektedir.
+              {about.fullText}
             </Description>
 
             <StatsContainer>

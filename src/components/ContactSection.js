@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { ArrowForward, Phone, Email, LocationOn } from '@mui/icons-material';
+import { contact } from '../constants/siteContent';
 
 const Section = styled(Box)(({ theme }) => ({
   position: 'relative',
@@ -159,15 +160,15 @@ const ContactSection = () => {
         <ContactInfo>
           <ContactItem>
             <Phone />
-            <span>+90 555 123 4567</span>
+            <span>{contact.phone1}</span>
           </ContactItem>
           <ContactItem>
             <Email />
-            <span>info@sedatdemiryapi.com</span>
+            <span>{contact.email}</span>
           </ContactItem>
           <ContactItem>
             <LocationOn />
-            <span>İstanbul, Türkiye</span>
+            <span>İzmit / Kocaeli</span>
           </ContactItem>
         </ContactInfo>
 

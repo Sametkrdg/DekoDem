@@ -2,12 +2,75 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Public Read: Allows potential clients/visitors to view projects and data.
+
+    // ── Helper: authenticated admin ───────────────────────────────────────────
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // ── Settings (singleton: Settings/main) ───────────────────────────────────
+    match /Settings/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ── About (singleton: About/main) ─────────────────────────────────────────
+    match /About/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Activities ────────────────────────────────────────────────────────────
+    match /Activities/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Projects ──────────────────────────────────────────────────────────────
+    match /Projects/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Blogs ─────────────────────────────────────────────────────────────────
+    match /Blogs/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Testimonials ──────────────────────────────────────────────────────────
+    match /Testimonials/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ── References (brand partners / İş Ortakları) ────────────────────────────
+    match /References/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Career ────────────────────────────────────────────────────────────────
+    match /Career/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Branches ─────────────────────────────────────────────────────────────
+    match /branches/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ── FAQ ───────────────────────────────────────────────────────────────────
+    match /faq/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Deny everything else ──────────────────────────────────────────────────
     match /{document=**} {
-      allow read: if true;
-      
-      // Protected Write: Restricts create, update, and delete operations to authenticated admins only.
-      allow write: if request.auth != null; 
+      allow read, write: if false;
     }
   }
 }

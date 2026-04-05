@@ -1,132 +1,204 @@
-import { db } from "../config/firebase";
-import { collection, doc, getDoc, getDocs, query, where, orderBy, limit } from "firebase/firestore";
+/**
+ * firestore.js — Centralised Firestore read layer.
+ *
+ * Schema (exact casing used in Firestore):
+ *
+ * Singleton documents
+ *   Settings/main  → { Address, Email, Phone, InstaUrl, LogoUrl }
+ *   About/main     → { AboutShort, AboutLong }
+ *
+ * Collections
+ *   Activities     → { Id (int64), Name, Description, PhotoUrl }
+ *   Blogs          → { Name, Content, CoverImg, Date (timestamp) }
+ *   Career         → { Position, Department, IsActive (bool), Requirements (string[]) }
+ *   Projects       → { Id, Name, Description, category, PhotoUrl, IsCompleted (bool) }
+ *   References     → { BrandName, LogoUrl }
+ *   Testimonials   → { clientName, Company, Comment }
+ */
 
-// Collection References
-const SETTINGS_COLLECTION = "settings";
-const CATEGORIES_COLLECTION = "categories";
-const CAMPAIGNS_COLLECTION = "campaigns";
-const BRANCHES_COLLECTION = "branches";
+import { db, isFirebaseConfigured } from "../config/firebase";
+import {
+  collection, doc,
+  getDoc, getDocs,
+  query, orderBy,
+} from "firebase/firestore";
+
+// ── Collection / document name constants ─────────────────────────────────────
+const COL = {
+  activities:   "Activities",
+  blogs:        "Blogs",
+  career:       "Career",
+  projects:     "Projects",
+  references:   "References",
+  testimonials: "Testimonials",
+  // Legacy / non-schema collections kept for backward compat
+  branches:     "branches",
+  faq:          "faq",
+};
+
+const SINGLETON = {
+  settings: ["Settings", "main"],
+  about:    ["About",    "main"],
+};
+
+// ── Guard helper ──────────────────────────────────────────────────────────────
+const dbReady = () => isFirebaseConfigured && !!db;
+
+// ── Singleton document helpers ────────────────────────────────────────────────
 
 /**
- * Fetch global site settings.
- * @returns {Promise<Object>} Settings object or null
+ * Fetch the Settings singleton document.
+ * Fields: Address, Email, Phone, InstaUrl, LogoUrl
+ * @returns {Promise<Object|null>}
  */
 export const getSettings = async () => {
-    try {
-        const docRef = doc(db, SETTINGS_COLLECTION, "global");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            return docSnap.data();
-        } else {
-            console.warn("Global settings not found in Firestore.");
-            return null;
-        }
-    } catch (error) {
-        console.error("Error fetching settings:", error);
-        throw error;
-    }
+  if (!dbReady()) return null;
+  try {
+    const snap = await getDoc(doc(db, ...SINGLETON.settings));
+    return snap.exists() ? snap.data() : null;
+  } catch (err) {
+    console.error("getSettings:", err);
+    return null;
+  }
 };
 
 /**
- * Fetch all active categories.
- * @returns {Promise<Array>} List of categories
+ * Fetch the About singleton document.
+ * Fields: AboutShort, AboutLong
+ * @returns {Promise<Object|null>}
  */
-export const getCategories = async () => {
-    try {
-        const q = query(
-            collection(db, CATEGORIES_COLLECTION),
-            where("isActive", "==", true),
-            orderBy("priority", "asc")
-        );
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (error) {
-        console.error("Error fetching categories:", error);
-        return [];
-    }
+export const getAbout = async () => {
+  if (!dbReady()) return null;
+  try {
+    const snap = await getDoc(doc(db, ...SINGLETON.about));
+    return snap.exists() ? snap.data() : null;
+  } catch (err) {
+    console.error("getAbout:", err);
+    return null;
+  }
+};
+
+// ── Collection helpers ────────────────────────────────────────────────────────
+
+/**
+ * Fetch all Activities documents.
+ * Fields: Id, Name, Description, PhotoUrl
+ * @returns {Promise<Array>}
+ */
+export const getActivities = async () => {
+  if (!dbReady()) return [];
+  try {
+    const snap = await getDocs(collection(db, COL.activities));
+    return snap.docs
+      .map((d) => ({ _docId: d.id, ...d.data() }))
+      .sort((a, b) => (a.Id ?? 0) - (b.Id ?? 0));
+  } catch (err) {
+    console.error("getActivities:", err);
+    return [];
+  }
 };
 
 /**
- * Fetch a category by its slug.
- * @param {string} slug 
- * @returns {Promise<Object|null>} Category object or null
+ * Fetch all Blog documents ordered by Date descending.
+ * Fields: Name, Content, CoverImg, Date
+ * @returns {Promise<Array>}
  */
-export const getCategoryBySlug = async (slug) => {
-    try {
-        const q = query(
-            collection(db, CATEGORIES_COLLECTION),
-            where("slug", "==", slug),
-            limit(1)
-        );
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-            const doc = querySnapshot.docs[0];
-            return { id: doc.id, ...doc.data() };
-        }
-        return null;
-    } catch (error) {
-        console.error("Error fetching category by slug:", error);
-        return null;
-    }
+export const getBlogs = async () => {
+  if (!dbReady()) return [];
+  try {
+    const q = query(collection(db, COL.blogs), orderBy("Date", "desc"));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ _docId: d.id, ...d.data() }));
+  } catch (err) {
+    console.error("getBlogs:", err);
+    return [];
+  }
 };
 
 /**
- * Fetch active campaigns.
- * @returns {Promise<Array>} List of campaigns
+ * Fetch all Career (job listing) documents.
+ * Fields: Position, Department, IsActive, Requirements
+ * @returns {Promise<Array>}
  */
-export const getActiveCampaigns = async () => {
-    try {
-        // Complex queries might require indexes. For now, we fetch basic active ones.
-        const q = query(
-            collection(db, CAMPAIGNS_COLLECTION),
-            where("isActive", "==", true),
-            orderBy("priority", "asc")
-        );
-        const querySnapshot = await getDocs(q);
-
-        // Filter by date client-side if Firestore indexes are not set up for composite queries yet
-        const campaigns = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // TODO: Add date filtering here if needed
-        return campaigns;
-    } catch (error) {
-        console.error("Error fetching campaigns:", error);
-        return [];
-    }
+export const getCareers = async () => {
+  if (!dbReady()) return [];
+  try {
+    const snap = await getDocs(collection(db, COL.career));
+    return snap.docs.map((d) => ({ _docId: d.id, ...d.data() }));
+  } catch (err) {
+    console.error("getCareers:", err);
+    return [];
+  }
 };
 
 /**
- * Fetch all branches.
- * @returns {Promise<Array>} List of branches
+ * Fetch all Project documents.
+ * Fields: Id, Name, Description, category, PhotoUrl, IsCompleted
+ * @returns {Promise<Array>}
  */
+export const getProjects = async () => {
+  if (!dbReady()) return [];
+  try {
+    const snap = await getDocs(collection(db, COL.projects));
+    return snap.docs.map((d) => ({ _docId: d.id, ...d.data() }));
+  } catch (err) {
+    console.error("getProjects:", err);
+    return [];
+  }
+};
+
+/**
+ * Fetch all References (brand partners) documents.
+ * Fields: BrandName, LogoUrl
+ * @returns {Promise<Array>}
+ */
+export const getReferences = async () => {
+  if (!dbReady()) return [];
+  try {
+    const snap = await getDocs(collection(db, COL.references));
+    return snap.docs.map((d) => ({ _docId: d.id, ...d.data() }));
+  } catch (err) {
+    console.error("getReferences:", err);
+    return [];
+  }
+};
+
+/**
+ * Fetch all Testimonials documents.
+ * Fields: clientName, Company, Comment
+ * @returns {Promise<Array>}
+ */
+export const getTestimonials = async () => {
+  if (!dbReady()) return [];
+  try {
+    const snap = await getDocs(collection(db, COL.testimonials));
+    return snap.docs.map((d) => ({ _docId: d.id, ...d.data() }));
+  } catch (err) {
+    console.error("getTestimonials:", err);
+    return [];
+  }
+};
+
+// ── Legacy helpers kept for backward compat ───────────────────────────────────
+
 export const getBranches = async () => {
-    try {
-        const q = query(
-            collection(db, BRANCHES_COLLECTION),
-            where("isActive", "==", true)
-        );
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (error) {
-        console.error("Error fetching branches:", error);
-        return [];
-    }
+  if (!dbReady()) return [];
+  try {
+    const snap = await getDocs(collection(db, COL.branches));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.error("getBranches:", err);
+    return [];
+  }
 };
 
-/**
- * Fetch a branch by ID.
- * @param {string} id 
- * @returns {Promise<Object|null>} Branch object
- */
 export const getBranchById = async (id) => {
-    try {
-        const docRef = doc(db, BRANCHES_COLLECTION, id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            return { id: docSnap.id, ...docSnap.data() };
-        }
-        return null;
-    } catch (error) {
-        console.error("Error fetching branch:", error);
-        return null;
-    }
+  if (!dbReady()) return null;
+  try {
+    const snap = await getDoc(doc(db, COL.branches, id));
+    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  } catch (err) {
+    console.error("getBranchById:", err);
+    return null;
+  }
 };

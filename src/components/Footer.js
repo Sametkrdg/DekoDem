@@ -1,183 +1,187 @@
-// Footer.js
+// React
 import React from 'react';
-import { Typography, Container, Button, Grid, Box } from "@mui/material";
-import { Link } from "react-router-dom";
-import {
-  Facebook,
-  Instagram,
-  LinkedIn,
-  YouTube,
-  Phone,
-  Email,
-  LocationOn,
-  Construction,
-  Home,
-  Business,
-  Engineering
-} from "@mui/icons-material";
 
-// Ortak styled components'leri import et
+// MUI
+import { Typography, Container, Button, Grid, Box, Link as MuiLink } from '@mui/material';
+import { Link }      from 'react-router-dom';
+import { Phone, Email, LocationOn, Instagram } from '@mui/icons-material';
+
+// Styles
 import {
-  FooterContainer,
-  MainFooter,
-  FooterSection,
-  LogoContainer,
-  LogoText,
-  LogoSubtext,
-  SectionTitle,
-  SocialMediaContainer,
-  SocialButton,
-  ServiceItem,
-  ContactItem,
-  ContactText,
-  CopyrightSection,
-  CopyrightText
+  FooterContainer, MainFooter, FooterSection,
+  SectionTitle, SocialMediaContainer, SocialButton,
+  ServiceItem, ContactItem, ContactText,
+  CopyrightSection, CopyrightText,
 } from '../styles/StyledComponents';
 
-function Footer({ settings }) {
-  const siteTitle = settings?.title || 'Sedat Demir Yapı';
-  const description = settings?.description || 'Güvenilir inşaat çözümleri ve kaliteli hizmet anlayışı ile 15 yıldır sektörde lider konumundayız.';
+// Constants — single source of truth for all brand strings
+import { brand, about, activityFields } from '../constants/siteContent';
+import { FOOTER_QUICK_LINKS, activityPath, PATHS } from '../constants/navigation';
 
-  const services = [
-    { name: 'Konut İnşaatı', icon: <Home sx={{ fontSize: 18 }} /> },
-    { name: 'Ticari Yapılar', icon: <Business sx={{ fontSize: 18 }} /> },
-    { name: 'Tadilat & Renovasyon', icon: <Construction sx={{ fontSize: 18 }} /> },
-    { name: 'Proje Yönetimi', icon: <Engineering sx={{ fontSize: 18 }} /> },
-  ];
+// Context
+import { useSite } from '../context/SiteContext';
+
+// Show first 5 activity field entries in the footer services column
+const FOOTER_SERVICES = activityFields.slice(0, 5);
+
+function Footer() {
+  const { contactSettings } = useSite();
+
+  // Derive href values from Firestore fields
+  const phoneHref = contactSettings.Phone ? `tel:${contactSettings.Phone.replace(/\s/g, '')}` : '#';
+  const emailHref = contactSettings.Email ? `mailto:${contactSettings.Email}` : '#';
 
   return (
     <FooterContainer component="footer">
       <MainFooter>
         <Container maxWidth="lg">
           <Grid container spacing={4}>
-            {/* Sol Kısım - Logo ve Sosyal Medya */}
-            <Grid item xs={12} md={4}>
-              <FooterSection>
-                <LogoContainer>
-                  <LogoText>
-                    {siteTitle}
-                  </LogoText>
-                  <LogoSubtext>
-                    {description}
-                  </LogoSubtext>
-                </LogoContainer>
 
-                <Typography variant="h6" sx={{ fontSize: '1.1rem', mb: 2, color: '#ecf0f1' }}>
+            {/* ── Col 1: Brand + short summary + social ─────────────── */}
+            <Grid item xs={12} md={3}>
+              <FooterSection>
+                {/* Logo + brand name */}
+                <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box
+                    component="img"
+                    src={brand.logoSrc}
+                    alt={brand.logoAlt}
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    sx={{ height: 44, objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+                  />
+                  <Typography
+                    variant="h6"
+                    fontWeight={800}
+                    sx={{
+                      background:           'linear-gradient(135deg, #fff, rgba(255,255,255,0.7))',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor:  'transparent',
+                    }}
+                  >
+                    {brand.name}
+                  </Typography>
+                </Box>
+
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.65)', lineHeight: 1.75, mb: 3 }}>
+                  {about.shortSummary}
+                </Typography>
+
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', mb: 1.5 }}>
                   Bizi Takip Edin
                 </Typography>
 
                 <SocialMediaContainer>
-                  {settings?.facebookUrl && (
-                    <SocialButton 
-                      component="a" 
-                      href={settings.facebookUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      aria-label="Facebook"
-                    >
-                      <Facebook />
-                    </SocialButton>
-                  )}
-                  {settings?.instagramUrl && (
-                    <SocialButton 
-                      component="a" 
-                      href={settings.instagramUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      aria-label="Instagram"
-                    >
-                      <Instagram />
-                    </SocialButton>
-                  )}
-                  {settings?.linkedinUrl && (
-                    <SocialButton 
-                      component="a" 
-                      href={settings.linkedinUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      aria-label="LinkedIn"
-                    >
-                      <LinkedIn />
-                    </SocialButton>
-                  )}
-                  {settings?.youtubeUrl && (
-                    <SocialButton 
-                      component="a" 
-                      href={settings.youtubeUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      aria-label="YouTube"
-                    >
-                      <YouTube />
-                    </SocialButton>
-                  )}
+                  <SocialButton
+                    component="a"
+                    href={contactSettings.InstaUrl || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                  >
+                    <Instagram />
+                  </SocialButton>
                 </SocialMediaContainer>
               </FooterSection>
             </Grid>
 
-            {/* Orta Kısım - Faaliyetlerimiz */}
-            <Grid item xs={12} md={4}>
+            {/* ── Col 2: Activity fields (linked to detail pages) ────── */}
+            <Grid item xs={12} sm={6} md={3}>
               <FooterSection>
-                <SectionTitle>
-                  Faaliyetlerimiz
-                </SectionTitle>
+                <SectionTitle>Faaliyet Alanlarımız</SectionTitle>
 
-                {services.map((service, index) => (
-                  <ServiceItem key={index}>
-                    {service.icon}
-                    <Typography variant="body2">
-                      {service.name}
-                    </Typography>
+                {FOOTER_SERVICES.map((field) => (
+                  <ServiceItem
+                    key={field.id}
+                    component={Link}
+                    to={activityPath(field.slug)}
+                    sx={{ cursor: 'pointer', textDecoration: 'none' }}
+                  >
+                    <Typography variant="body2">{field.title}</Typography>
                   </ServiceItem>
                 ))}
 
                 <Button
                   component={Link}
-                  to="/kategoriler"
+                  to={PATHS.ACTIVITIES}
                   variant="outlined"
-                  sx={{ mt: 2 }}
+                  size="small"
+                  sx={{
+                    mt: 2, borderRadius: '50px', color: 'rgba(255,255,255,0.8)',
+                    borderColor: 'rgba(255,255,255,0.3)',
+                    '&:hover': { borderColor: '#fff', color: '#fff', bgcolor: 'rgba(255,255,255,0.08)' },
+                  }}
                 >
-                  Tümünü Gör
+                  Tümünü Gör →
                 </Button>
               </FooterSection>
             </Grid>
 
-            {/* Sağ Kısım - İletişim */}
-            <Grid item xs={12} md={4}>
+            {/* ── Col 3: Quick links (Kurumsal) ──────────────────────── */}
+            <Grid item xs={12} sm={6} md={3}>
               <FooterSection>
-                <SectionTitle>
-                  İletişim
-                </SectionTitle>
+                <SectionTitle>Kurumsal</SectionTitle>
 
-                <ContactItem>
-                  <Phone color="primary" />
+                <Box
+                  component="nav"
+                  aria-label="Kurumsal bağlantılar"
+                >
+                  <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0 }}>
+                    {FOOTER_QUICK_LINKS.map((link) => (
+                      <Box component="li" key={link.path}>
+                        <ServiceItem
+                          component={Link}
+                          to={link.path}
+                          sx={{ cursor: 'pointer', textDecoration: 'none' }}
+                        >
+                          <Typography variant="body2">{link.label}</Typography>
+                        </ServiceItem>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              </FooterSection>
+            </Grid>
+
+            {/* ── Col 4: Contact ─────────────────────────────────────── */}
+            <Grid item xs={12} sm={6} md={3}>
+              <FooterSection>
+                <SectionTitle>İletişim</SectionTitle>
+
+                <ContactItem
+                  component="a"
+                  href={phoneHref}
+                  sx={{ textDecoration: 'none', cursor: 'pointer' }}
+                >
+                  <Phone color="primary" sx={{ flexShrink: 0 }} />
                   <Box>
-                    <ContactText variant="body2">
-                      +90 (555) 123 45 67
-                    </ContactText>
+                    <ContactText variant="body2">{contactSettings.Phone}</ContactText>
                   </Box>
                 </ContactItem>
 
-                <ContactItem>
-                  <Email color="primary" />
-                  <ContactText variant="body2">
-                    info@sedatdemiryapi.com
-                  </ContactText>
+                <ContactItem
+                  component="a"
+                  href={emailHref}
+                  sx={{ textDecoration: 'none', cursor: 'pointer' }}
+                >
+                  <Email color="primary" sx={{ flexShrink: 0 }} />
+                  <ContactText variant="body2">{contactSettings.Email}</ContactText>
                 </ContactItem>
 
-                <ContactItem>
-                  <LocationOn color="primary" />
-                  <ContactText variant="body2">
-                    Çankaya Mahallesi, İnşaat Sokak No:15<br />
-                    Ankara / TÜRKİYE
-                  </ContactText>
+                <ContactItem
+                  component={MuiLink}
+                  href="#"
+                  sx={{ textDecoration: 'none', cursor: 'pointer' }}
+                >
+                  <LocationOn color="primary" sx={{ flexShrink: 0 }} />
+                  <ContactText variant="body2">{contactSettings.Address}</ContactText>
                 </ContactItem>
 
                 <Button
                   component={Link}
-                  to="/iletisim"
+                  to={PATHS.CONTACT}
                   variant="contained"
-                  sx={{ mt: 3 }}
+                  size="small"
+                  sx={{ mt: 2.5, borderRadius: '50px' }}
                 >
                   İletişime Geç
                 </Button>
@@ -187,13 +191,30 @@ function Footer({ settings }) {
         </Container>
       </MainFooter>
 
-      {/* Copyright Bölümü */}
+      {/* Copyright */}
       <CopyrightSection>
         <Container maxWidth="lg">
           <CopyrightText>
-            © {new Date().getFullYear()} {siteTitle}. Tüm hakları saklıdır. |
-            Tasarım & Geliştirme: Web Ajansı
+            © {new Date().getFullYear()} {brand.name}. Tüm hakları saklıdır.
           </CopyrightText>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mt: 1, flexWrap: 'wrap' }}>
+            <Typography
+              component={Link}
+              to={PATHS.PRIVACY}
+              variant="caption"
+              sx={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', '&:hover': { color: '#fff' } }}
+            >
+              Gizlilik Politikası
+            </Typography>
+            <Typography
+              component={Link}
+              to={PATHS.TERMS}
+              variant="caption"
+              sx={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', '&:hover': { color: '#fff' } }}
+            >
+              Kullanım Koşulları
+            </Typography>
+          </Box>
         </Container>
       </CopyrightSection>
     </FooterContainer>

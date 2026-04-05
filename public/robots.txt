@@ -1,3 +1,30 @@
-# https://www.robotstxt.org/robotstxt.html
+# robots.txt — DEKODEM (https://dekodemyapi.com)
+# Specification: https://www.robotstxt.org/robotstxt.html
+
+# ── Allow all major crawlers ─────────────────────────────────────────────────
 User-agent: *
-Disallow:
+Allow: /
+
+# ── Block private / admin routes ─────────────────────────────────────────────
+Disallow: /admin
+Disallow: /admin/
+Disallow: /login
+Disallow: /login/
+
+# ── Block build artefacts & static source-maps ───────────────────────────────
+Disallow: /static/js/*.map
+Disallow: /static/css/*.map
+
+# ── Block legacy redirect stubs (duplicate-content risk) ─────────────────────
+Disallow: /kategoriler
+Disallow: /kategoriler/
+Disallow: /faaliyet-alanlari$
+
+# ── Explicitly allow the canonical activity-fields path ──────────────────────
+Allow: /faaliyet-alanlari/
+
+# ── Crawl-delay hint for polite bots (optional; Googlebot ignores this) ──────
+# Crawl-delay: 1
+
+# ── Sitemap pointer ──────────────────────────────────────────────────────────
+Sitemap: https://dekodemyapi.com/sitemap.xml

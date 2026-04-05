@@ -1,418 +1,218 @@
+// React
 import React from 'react';
-import { Box, Container, Typography } from '@mui/material';
-import { styled, keyframes } from '@mui/material/styles';
-import { ArrowForward, CheckCircle, Engineering, Business, Star } from '@mui/icons-material';
+import { Link } from 'react-router-dom';
 
-// Ortak styled components'leri import et
-// Eğer import hatası alırsanız, aşağıdaki satırı yorum yapın ve manual tanımlamaları kullanın
-import {
-  StatsContainer,
-  StatItem,
-  StatNumber,
-  StatLabel,
-  FeaturesList,
-  FeatureItem,
-  CTAButton
-} from '../styles/StyledComponents';
+// MUI
+import { Box, Container, Typography, Grid, Button, Stack } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
+import { CheckCircleOutline, ArrowForward } from '@mui/icons-material';
 
-// About Section özel styled components
-const ImageSection = styled(Box)(({ theme }) => ({
-  width: '50%',
-  display: 'flex',
-  [theme.breakpoints.down('md')]: {
-    width: '100%',
-  },
-}));
+// Data — single source of truth; no hardcoded strings in this file
+import { brand, about } from '../constants/siteContent';
+import { PATHS } from '../constants/navigation';
 
-const TextSection = styled(Box)(({ theme }) => ({
-  width: '50%',
-  display: 'flex',
-  [theme.breakpoints.down('md')]: {
-    width: '100%',
-  },
-}));
+// Context
+import { useSite } from '../context/SiteContext';
 
-// Animasyonlar
-const fadeInLeft = keyframes`
-  from {
-    opacity: 0;
-    transform: translateX(-50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-`;
-
-const fadeInRight = keyframes`
-  from {
-    opacity: 0;
-    transform: translateX(50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-`;
-
-const floatAnimation = keyframes`
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-`;
-
-const MainContainer = styled(Container)(({ theme }) => ({
-  padding: '100px 20px',
-  background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
-  minHeight: '100vh',
-  position: 'relative',
-  overflow: 'hidden',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'radial-gradient(circle at 30% 20%, rgba(52, 152, 219, 0.1) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(46, 204, 113, 0.1) 0%, transparent 50%)',
-    zIndex: 0,
-  },
-}));
-
-const ContentWrapper = styled(Box)(({ theme }) => ({
-  position: 'relative',
-  zIndex: 1,
-  display: 'flex',
-  alignItems: 'stretch',
-  minHeight: '700px',
-  gap: '0',
-  [theme.breakpoints.down('md')]: {
-    flexDirection: 'column',
-    gap: '40px',
-  },
-}));
-
-const ImageContainer = styled(Box)(({ theme }) => ({
-  position: 'relative',
-  width: '100%',
-  height: '100%',
-  minHeight: '600px',
-  borderRadius: '24px',
-  overflow: 'hidden',
-  boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
-  animation: `${fadeInLeft} 1s ease-out, ${floatAnimation} 6s ease-in-out infinite`,
-  background: 'linear-gradient(135deg, #3498db 0%, #2ecc71 100%)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    transform: 'translateY(-8px)',
-    boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
-  },
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2))',
-    zIndex: 1,
-  },
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: '80px',
-    height: '80px',
-    background: 'rgba(255,255,255,0.15)',
-    borderRadius: '50%',
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255,255,255,0.2)',
-    zIndex: 2,
-  },
-  [theme.breakpoints.down('md')]: {
-    minHeight: '400px',
-  },
-}));
-
-const PlaceholderImage = styled(Box)(({ theme }) => ({
-  width: '100%',
-  height: '100%',
-  background: `
-    linear-gradient(135deg, #667eea 0%, #764ba2 100%),
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" text-anchor="middle" dy=".3em" font-family="Arial" font-size="14" fill="%23999">Fotoğraf</text></svg>')
-  `,
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: 'white',
-  fontSize: '18px',
-  fontWeight: 'bold',
-  position: 'relative',
-  zIndex: 3,
-}));
-
-const TextContainer = styled(Box)(({ theme }) => ({
-  animation: `${fadeInRight} 1s ease-out 0.3s both`,
-  paddingLeft: '60px',
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  [theme.breakpoints.down('md')]: {
-    paddingLeft: '0',
-    paddingTop: '20px',
-  },
-}));
-
-const MainTitle = styled(Typography)(({ theme }) => ({
-  fontSize: 'clamp(2rem, 4vw, 3.5rem)',
-  fontWeight: 800,
-  background: 'linear-gradient(135deg, #3498db, #2ecc71)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  marginBottom: '1rem',
-  lineHeight: 1.2,
-  position: 'relative',
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    bottom: '-10px',
-    left: 0,
-    width: '80px',
-    height: '4px',
-    background: 'linear-gradient(90deg, #3498db, #2ecc71)',
-    borderRadius: '2px',
-  },
-}));
-
-const SubTitle = styled(Typography)(({ theme }) => ({
-  fontSize: '1.3rem',
-  color: '#bdc3c7',
-  marginBottom: '2rem',
-  fontWeight: 300,
-  lineHeight: 1.6,
-}));
-
-const Description = styled(Typography)(({ theme }) => ({
-  fontSize: '1.1rem',
-  color: '#ecf0f1',
-  lineHeight: 1.8,
-  marginBottom: '2rem',
-  textAlign: 'justify',
-}));
-
-const FeatureText = styled(Typography)(({ theme }) => ({
-  fontSize: '1rem',
-  color: 'inherit',
-  fontWeight: 500,
-}));
-
-// Eğer import hatası alırsanız, bu component'leri yorum satırından çıkarın:
-/*
-const StatsContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: '30px',
-  marginBottom: '3rem',
-  flexWrap: 'wrap',
-  [theme.breakpoints.down('sm')]: {
-    gap: '20px',
-  },
-}));
-
-const StatItem = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '12px',
-  padding: '15px 20px',
-  background: 'rgba(52, 152, 219, 0.15)',
-  borderRadius: '50px',
-  border: '1px solid rgba(52, 152, 219, 0.3)',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    background: 'rgba(52, 152, 219, 0.25)',
-    transform: 'translateY(-8px)',
-    boxShadow: '0 12px 40px rgba(52, 152, 219, 0.15)',
-  },
-}));
-
-const StatNumber = styled(Typography)(({ theme }) => ({
-  fontSize: '1.5rem',
-  fontWeight: 'bold',
-  color: '#3498db',
-}));
-
-const StatLabel = styled(Typography)(({ theme }) => ({
-  fontSize: '0.9rem',
-  color: '#bdc3c7',
-  fontWeight: 500,
-}));
-
-const FeaturesList = styled(Box)(({ theme }) => ({
-  marginBottom: '3rem',
-}));
-
-const FeatureItem = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '15px',
-  marginBottom: '15px',
-  padding: '10px 0',
-  color: '#bdc3c7',
-  transition: 'all 0.3s ease',
-  cursor: 'pointer',
-  '&:hover': {
-    color: '#3498db',
-    transform: 'translateX(5px)',
-  },
-}));
-
-const CTAButton = styled(Button)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #3498db, #2ecc71)',
-  color: 'white',
-  padding: '15px 35px',
-  borderRadius: '50px',
-  fontSize: '1.1rem',
-  fontWeight: 600,
-  textTransform: 'none',
-  boxShadow: '0 8px 25px rgba(52, 152, 219, 0.3)',
-  transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-  position: 'relative',
-  overflow: 'hidden',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: '-100%',
-    width: '100%',
-    height: '100%',
-    background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)`,
-    transition: 'left 0.5s',
-  },
-  '&:hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
-    background: 'linear-gradient(135deg, #2980b9, #27ae60)',
-    '&::before': {
-      left: '100%',
-    },
-  },
-  '&:active': {
-    transform: 'translateY(-1px) scale(1.02)',
-  },
-}));
-*/
-
-const AboutSection = ({ photos = [], about = {} }) => {
-  const stats = [
-    { number: '15+', label: 'Yıl Deneyim', icon: <Star sx={{ color: '#3498db' }} /> },
-    { number: '100+', label: 'Tamamlanan Proje', icon: <Engineering sx={{ color: '#2ecc71' }} /> },
-    { number: '50+', label: 'Mutlu Müşteri', icon: <Business sx={{ color: '#3498db' }} /> }
-  ];
-
-  const features = [
-    'Kaliteli malzeme ve işçilik garantisi',
-    'Zamanında teslim ve güvenilir hizmet',
-    'Modern tasarım ve teknoloji kullanımı',
-    'Müşteri memnuniyeti odaklı yaklaşım',
-    'Profesyonel teknik destek'
-  ];
-
-    const primaryPhoto = photos.find((photo) => photo?.url) || null;
-      const aboutTitle = about?.aboutTitle || 'Sedat Demir Yapı';
-  const aboutDescription =
-    about?.aboutBody ||
-    '15 yılı aşkın sektör deneyimimizle, inşaat ve yapı sektöründe güvenilir bir isim olarak hizmet vermekteyiz. Modern teknoloji ve geleneksel ustalığı bir araya getirerek, müşterilerimizin hayallerini gerçeğe dönüştürüyoruz. Kalite, güvenilirlik ve müşteri memnuniyeti önceliklerimizin başında gelir.';
-  const subtitle = about?.subtitle || 'Güvenilir İnşaat Çözümleri ve Kaliteli Hizmet';
-
+// ── Stat card ─────────────────────────────────────────────────────────────────
+const StatCard = ({ number, label }) => {
+  const theme  = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   return (
-    <MainContainer maxWidth="xl" component="section">
-      <ContentWrapper>
-        {/* Sol taraf - Resim */}
-        <ImageSection>
-          <ImageContainer>
-            {primaryPhoto ? (
+    <Box
+      sx={{
+        p:                    2.5,
+        borderRadius:         '16px',
+        border:               '1px solid',
+        borderColor:          isDark ? theme.glass.border : alpha(theme.palette.primary.main, 0.15),
+        background:           isDark ? theme.glass.bgSubtle : alpha(theme.palette.primary.main, 0.04),
+        backdropFilter:       theme.glass.blur,
+        WebkitBackdropFilter: theme.glass.blur,
+        textAlign:            'center',
+        transition:           'transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease',
+        '&:hover': {
+          borderColor: alpha(theme.palette.primary.main, isDark ? 0.45 : 0.4),
+          transform:   'translateY(-4px)',
+          boxShadow:   isDark
+            ? `0 12px 32px rgba(0,0,0,0.5), 0 0 0 1px ${alpha(theme.palette.primary.main, 0.2)}`
+            : `0 10px 28px ${alpha(theme.palette.primary.main, 0.12)}`,
+        },
+      }}
+    >
+      <Typography
+        variant="h4"
+        fontWeight={800}
+        sx={{
+          background:           `linear-gradient(135deg, ${theme.palette.primary.main}, ${alpha(theme.palette.primary.light, 0.85)})`,
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor:  'transparent',
+          lineHeight:           1,
+          mb:                   0.5,
+        }}
+      >
+        {number}
+      </Typography>
+      <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ letterSpacing: '0.04em' }}>
+        {label}
+      </Typography>
+    </Box>
+  );
+};
+
+// ── Main component ────────────────────────────────────────────────────────────
+const AboutSection = ({ photos = [] }) => {
+  const theme  = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const { aboutContent } = useSite();
+
+  const primaryPhoto = photos.find((p) => p?.url) ?? null;
+
+  return (
+    <Box
+      component="section"
+      aria-label="Hakkımızda"
+      sx={{
+        py:       { xs: 9, md: 13 },
+        // Transparent in dark → shows fixed body gradient; off-white in light
+        ...theme.mixins.sectionSurface,
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content:    '""',
+          position:   'absolute',
+          top:        '10%',
+          right:      '-5%',
+          width:      '45%',
+          height:     '80%',
+          background: `radial-gradient(ellipse at center, ${alpha(theme.palette.primary.main, isDark ? 0.07 : 0.05)} 0%, transparent 70%)`,
+          pointerEvents: 'none',
+        },
+      }}
+    >
+      <Container maxWidth="lg">
+        <Grid container spacing={{ xs: 5, md: 8 }} alignItems="center">
+
+          {/* ── Left: Text content ──────────────────────────────────────── */}
+          <Grid item xs={12} md={6}>
+
+            {/* Overline */}
+            <Typography
+              variant="overline"
+              sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em', display: 'block', mb: 1.5 }}
+            >
+              HAKKIMIZDA
+            </Typography>
+
+            {/* Title */}
+            <Typography
+              variant="h3"
+              component="h2"
+              fontWeight={800}
+              sx={{
+                lineHeight:           1.15,
+                mb:                   2.5,
+                fontSize:             { xs: '2rem', md: '2.5rem' },
+                background:           isDark
+                  ? `linear-gradient(135deg, #fff 30%, ${alpha(theme.palette.primary.light, 0.85)} 100%)`
+                  : `linear-gradient(135deg, ${theme.palette.text.primary} 30%, ${theme.palette.primary.main} 100%)`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor:  'transparent',
+              }}
+            >
+              {brand.name}
+            </Typography>
+
+            {/* Tagline */}
+            <Typography
+              variant="h6"
+              color="text.secondary"
+              fontWeight={400}
+              sx={{ lineHeight: 1.5, mb: 3, fontSize: '1.05rem' }}
+            >
+              {brand.tagline}
+            </Typography>
+
+            {/* Short summary */}
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ lineHeight: 1.9, mb: 4, fontSize: '1rem' }}
+            >
+              {aboutContent.AboutShort || about.shortSummary}
+            </Typography>
+
+            {/* Highlights — pulled from siteContent.about.highlights */}
+            <Stack spacing={1.5} sx={{ mb: 5 }}>
+              {about.highlights.map((item) => (
+                <Box key={item} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <CheckCircleOutline
+                    sx={{ color: 'primary.main', fontSize: 22, flexShrink: 0 }}
+                  />
+                  <Typography variant="body2" fontWeight={500} sx={{ lineHeight: 1.5 }}>
+                    {item}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
+
+            {/* CTA */}
+            <Button
+              component={Link}
+              to={PATHS.ABOUT}
+              variant="contained"
+              size="large"
+              endIcon={<ArrowForward />}
+              sx={{ borderRadius: '50px', fontWeight: 700, px: 4 }}
+            >
+              Daha Fazla Bilgi
+            </Button>
+          </Grid>
+
+          {/* ── Right: Stats grid + optional photo ─────────────────────── */}
+          <Grid item xs={12} md={6}>
+            {/* If a real photo exists, show it above the stats */}
+            {primaryPhoto && (
               <Box
                 component="img"
                 src={primaryPhoto.url}
-                alt={primaryPhoto.title || 'Şirket görseli'}
+                alt={primaryPhoto.title || `${brand.name} — proje görseli`}
                 loading="lazy"
                 sx={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  position: 'relative',
-                  zIndex: 3,
+                  width:        '100%',
+                  height:       260,
+                  objectFit:    'cover',
+                  borderRadius: '20px',
+                  mb:           3,
+                  boxShadow:    `0 16px 40px ${alpha('#000', 0.18)}`,
                 }}
               />
-            ) : (
-              <PlaceholderImage>
-                {/* Buraya gerçek fotoğraf src ekleyebilirsiniz */}
-                <Engineering sx={{ fontSize: 60, opacity: 0.7 }} />
-              </PlaceholderImage>
             )}
-          </ImageContainer>
-        </ImageSection>
 
-        {/* Sağ taraf - Metin */}
-        <TextSection>
-          <TextContainer>
-            <MainTitle>
-              {aboutTitle}
-            </MainTitle>
-            
-            <SubTitle>
-              {subtitle}
-            </SubTitle>
-
-            <Description>
-              {aboutDescription}
-            </Description>
-
-            {/* İstatistikler */}
-            <StatsContainer>
-              {stats.map((stat, index) => (
-                <StatItem key={index}>
-                  {stat.icon}
-                  <Box>
-                    <StatNumber>{stat.number}</StatNumber>
-                    <StatLabel>{stat.label}</StatLabel>
-                  </Box>
-                </StatItem>
+            {/* Stats 2 × 2 grid — data from siteContent.about.stats */}
+            <Grid container spacing={2}>
+              {about.stats.map((stat) => (
+                <Grid item xs={6} key={stat.label}>
+                  <StatCard number={stat.number} label={stat.label} />
+                </Grid>
               ))}
-            </StatsContainer>
+            </Grid>
 
-            {/* Özellikler */}
-            <FeaturesList>
-              {features.map((feature, index) => (
-                <FeatureItem key={index}>
-                  <CheckCircle sx={{ color: '#2ecc71', fontSize: 24 }} />
-                  <FeatureText>{feature}</FeatureText>
-                </FeatureItem>
-              ))}
-            </FeaturesList>
-
-            {/* CTA Button */}
-            <CTAButton 
-              endIcon={<ArrowForward />}
-              onClick={() => window.location.href = '/hakkimizda'}
-            >
-              Daha Fazla Bilgi
-            </CTAButton>
-          </TextContainer>
-        </TextSection>
-      </ContentWrapper>
-    </MainContainer>
+            {/* Decorative separator line (only when no photo) */}
+            {!primaryPhoto && (
+              <Box
+                sx={{
+                  mt:           3,
+                  height:       4,
+                  borderRadius: 2,
+                  background:   `linear-gradient(90deg, ${theme.palette.primary.main}, ${alpha(theme.palette.primary.light, 0.3)}, transparent)`,
+                }}
+              />
+            )}
+          </Grid>
+        </Grid>
+      </Container>
+    </Box>
   );
 };
 

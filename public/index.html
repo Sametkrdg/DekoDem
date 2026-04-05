@@ -1,19 +1,101 @@
 <!DOCTYPE html>
 <html lang="tr">
   <head>
+    <!-- ── Google Analytics ────────────────────────────────────────── -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G53Q6T9W2G"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-G53Q6T9W2G');
+    </script>
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <title>DekoDem İnşaat</title>
-    <meta name="description" content="DekoDem İnşaat - Güvenilir inşaat çözümleri ve kaliteli hizmet anlayışı ile sektörde lider konumundayız." />
 
-    <!-- Google Fonts Preconnect (Performance) -->
+    <!-- ── Primary Meta ────────────────────────────────────────────── -->
+    <title>DEKODEM — Anahtar Teslim Dekorasyon ve Endüstriyel Yapı Çözümleri | İzmit / Kocaeli</title>
+    <meta name="description"
+          content="DEKODEM, Kocaeli / İzmit merkezli anahtar teslim dekorasyon, çelik konstrüksiyon, iç mimarlık ve endüstriyel yapı firması. Fabrika, ofis ve ticari alanlarda A'dan Z'ye uygulama." />
+    <meta name="keywords"
+          content="dekodem, anahtar teslim dekorasyon, iç mimarlık, çelik konstrüksiyon, fabrika dekorasyon, ofis tasarım, izmit yapı, kocaeli inşaat, endüstriyel yapı" />
+    <meta name="author"        content="DEKODEM" />
+    <meta name="robots"        content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="theme-color"   content="#1a365d" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color"   content="#0d1117" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme"  content="light dark" />
+
+    <!-- ── Canonical (production domain) ──────────────────────────── -->
+    <!-- PageTitleManager updates this dynamically per route at runtime -->
+    <link rel="canonical" href="https://dekodemyapi.com/" />
+
+    <!-- ── PWA Manifest ────────────────────────────────────────────── -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <!-- ── Favicons ────────────────────────────────────────────────── -->
+    <link rel="icon"             href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="icon"             href="%PUBLIC_URL%/favicon-32x32.png" sizes="32x32" type="image/png" />
+    <link rel="icon"             href="%PUBLIC_URL%/favicon-16x16.png" sizes="16x16" type="image/png" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+
+    <!-- ── Open Graph (Facebook / Instagram / WhatsApp / LinkedIn) ── -->
+    <meta property="og:type"         content="website" />
+    <meta property="og:site_name"    content="DEKODEM" />
+    <meta property="og:locale"       content="tr_TR" />
+    <meta property="og:url"          content="https://dekodemyapi.com/" />
+    <meta property="og:title"
+          content="DEKODEM — Anahtar Teslim Dekorasyon ve Endüstriyel Yapı Çözümleri" />
+    <meta property="og:description"
+          content="Kocaeli / İzmit merkezli DEKODEM; fabrika, ofis ve ticari alanlarda çelik konstrüksiyon, iç mimarlık ve anahtar teslim uygulama hizmetleri sunmaktadır." />
+    <!--
+      og:image — replace with absolute URL of a 1200×630 px brand image before go-live.
+      WhatsApp minimum: 300×200 px  |  LinkedIn recommended: 1200×627 px
+    -->
+    <meta property="og:image"        content="https://dekodemyapi.com/og-image.jpg" />
+    <meta property="og:image:secure_url" content="https://dekodemyapi.com/og-image.jpg" />
+    <meta property="og:image:width"  content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt"    content="DEKODEM — Anahtar Teslim Dekorasyon" />
+
+    <!-- ── Twitter / X Card ────────────────────────────────────────── -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:site"        content="@dekodem" />
+    <meta name="twitter:title"
+          content="DEKODEM — Anahtar Teslim Dekorasyon ve Endüstriyel Yapı" />
+    <meta name="twitter:description"
+          content="Kocaeli / İzmit'te fabrika, ofis ve ticari yapılarda çelik konstrüksiyon, iç mimarlık ve anahtar teslim dekorasyon hizmetleri." />
+    <meta name="twitter:image"       content="https://dekodemyapi.com/og-image.jpg" />
+    <meta name="twitter:image:alt"   content="DEKODEM — Anahtar Teslim Dekorasyon" />
+
+    <!-- ── Geo & Business meta ─────────────────────────────────────── -->
+    <meta name="geo.region"          content="TR-41" />
+    <meta name="geo.placename"       content="İzmit, Kocaeli" />
+    <meta name="geo.position"        content="40.76553;29.91987" />
+    <meta name="ICBM"                content="40.76553, 29.91987" />
+
+    <!-- ── Performance: Resource Hints ────────────────────────────── -->
+    <!-- Fonts — preconnect establishes the TLS tunnel before the CSS is parsed -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <!--
+      Inter is used by the MUI theme. Load only the weights actually needed.
+      display=swap prevents invisible text while the font loads (FOIT).
+    -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet" />
+
+    <!-- Firebase / Google services -->
+    <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+    <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com" />
+    <link rel="dns-prefetch" href="https://storage.googleapis.com" />
+    <!-- Third-party integrations -->
+    <link rel="dns-prefetch" href="https://api.emailjs.com" />
+    <link rel="dns-prefetch" href="https://www.recaptcha.net" />
+    <!-- Social CDNs — warm the connection early -->
+    <link rel="dns-prefetch" href="https://www.instagram.com" />
   </head>
   <body>
-        <noscript>Bu uygulamayı çalıştırmak için JavaScript etkin olmalıdır.</noscript>
+    <noscript>Bu uygulamayı kullanmak için tarayıcınızda JavaScript etkin olmalıdır.</noscript>
     <div id="root"></div>
   </body>
 </html>

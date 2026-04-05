@@ -66,10 +66,10 @@ const cloneProjects = () => projects.map((project) => ({ ...project }));
 const cloneActivities = () => activities.map((activity) => ({ ...activity }));
 
 const DEFAULT_SITE_CONFIG = {
-  title: "Sedat Demir Yapı",
-  aboutTitle: "Sedat Demir Yapı",
+  title: "DEKODEM",
+  aboutTitle: "DEKODEM",
   aboutBody:
-    "15 yılı aşkın sektör deneyimimizle, inşaat ve yapı sektöründe güvenilir bir isim olarak hizmet vermekteyiz.",
+    "DEKODEM, Kocaeli / İzmit merkezli olarak faaliyet gösteren, dekorasyon ve anahtar teslim projelerde uzmanlaşmış bir uygulama firmasıdır. Fabrika, ofis, depo ve tüm ticari alanlarda A'dan Z'ye tüm uygulama süreçlerini profesyonel bir yaklaşımla yönetmekteyiz.",
   logoUrl: "",
   socials: {},
   videos: DEFAULT_HOME_VIDEOS.map((video) => video.url),

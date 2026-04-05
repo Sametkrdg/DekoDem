@@ -1,92 +1,113 @@
-// pages/Contact.js
+// React
 import React from 'react';
-import { Grid, Box } from '@mui/material';
-import ContactHeader from '../components/ContactHeader';
-import ContactInfo from '../components/ContactInfo';
-import ContactForm from '../components/ContactForm';
-import LocationMap from '../components/LocationMap';
+
+// MUI
+import { Grid, Box, Typography, Link as MuiLink } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
+import { Phone } from '@mui/icons-material';
+
+// Styles
 import { SectionContainer } from '../styles/StyledComponents';
 
+// Components
+import ContactHeader from '../components/ContactHeader';
+import ContactInfo   from '../components/ContactInfo';
+import ContactForm   from '../components/ContactForm';
+import LocationMap   from '../components/LocationMap';
+
+// Context
+import { useSite } from '../context/SiteContext';
+
 const Contact = () => {
+  const theme  = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const { contactSettings } = useSite();
+
+  const phoneHref = contactSettings.Phone ? `tel:${contactSettings.Phone.replace(/\s/g, '')}` : '#';
+
   return (
     <SectionContainer maxWidth="lg">
-      {/* Header Section */}
+
+      {/* Header */}
       <ContactHeader />
 
-      {/* Main Content Grid */}
-      <Grid container spacing={6} sx={{ marginBottom: '80px' }}>
-        {/* Contact Info */}
-        <Grid item xs={12} lg={8}>
+      {/* Info + Form */}
+      <Grid container spacing={6} sx={{ mb: 10 }}>
+        <Grid item xs={12} lg={7}>
           <ContactInfo />
         </Grid>
-
-        {/* Contact Form */}
-        <Grid item xs={12} lg={4}>
+        <Grid item xs={12} lg={5}>
           <ContactForm />
         </Grid>
       </Grid>
 
-      {/* Location Map */}
-      <LocationMap />
+      {/* Map */}
+      <Box sx={{ mb: 10 }}>
+        <LocationMap />
+      </Box>
 
-      {/* Quick Contact Section */}
-      <Box 
-        sx={{ 
-          background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
-          borderRadius: '20px',
-          padding: '50px 30px',
-          marginTop: '80px',
+      {/* ── Quick-call CTA ────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          background: isDark
+            ? 'linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)'
+            : 'linear-gradient(135deg, #1a365d 0%, #2c5282 100%)',
+          borderRadius: 4,
+          p: { xs: '40px 24px', md: '56px 48px' },
           textAlign: 'center',
-          color: 'white'
+          color: '#fff',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            background: `radial-gradient(ellipse 50% 70% at 50% 100%, ${alpha(theme.palette.primary.main, 0.25)}, transparent)`,
+          },
         }}
       >
-        <Box sx={{ marginBottom: '30px' }}>
-          <Box 
-            sx={{ 
-              fontSize: '3rem',
-              marginBottom: '20px'
-            }}
-          >
-            📞
-          </Box>
-          
-          <Box 
-            sx={{ 
-              fontSize: '2rem',
-              fontWeight: 'bold',
-              background: 'linear-gradient(135deg, #3498db, #2ecc71)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              marginBottom: '10px'
-            }}
-          >
+        <Box sx={{ position: 'relative' }}>
+          <Typography variant="overline" sx={{ color: alpha('#fff', 0.6), letterSpacing: 3, display: 'block', mb: 1 }}>
             Hızlı İletişim
+          </Typography>
+          <Typography variant="h4" fontWeight={800} sx={{ mb: 1.5 }}>
+            Bizi Hemen Arayın
+          </Typography>
+          <Typography sx={{ color: alpha('#fff', 0.7), mb: 3.5, maxWidth: 420, mx: 'auto' }}>
+            Proje danışmanlığı ve fiyat teklifi için aşağıdaki numaraları arayabilirsiniz.
+          </Typography>
+
+          <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <MuiLink
+              href={phoneHref}
+              underline="none"
+              sx={{
+                display:     'inline-block',
+                px: 3.5, py: 1.5,
+                borderRadius: '50px',
+                border:      '1.5px solid rgba(255,255,255,0.35)',
+                bgcolor:     'rgba(255,255,255,0.08)',
+                color:       '#fff',
+                fontWeight:  700,
+                fontSize:    '1.05rem',
+                letterSpacing: '0.03em',
+                transition:  'all 0.2s ease',
+                backdropFilter: 'blur(8px)',
+                '&:hover': {
+                  bgcolor:     'rgba(255,255,255,0.16)',
+                  borderColor: '#fff',
+                  transform:   'translateY(-2px)',
+                  boxShadow:   '0 8px 24px rgba(0,0,0,0.3)',
+                },
+              }}
+            >
+              <Phone fontSize="small" aria-hidden="true" sx={{ mr: 0.5, verticalAlign: 'middle' }} />{contactSettings.Phone}
+            </MuiLink>
           </Box>
-          
-          <Box 
-            sx={{ 
-              color: '#bdc3c7',
-              fontSize: '1.2rem',
-              marginBottom: '30px'
-            }}
-          >
-            Acil durumlar için bizi arayabilirsiniz
-          </Box>
-          
-          <Box 
-            sx={{ 
-              fontSize: '1.8rem',
-              fontWeight: 'bold',
-              color: '#3498db',
-              marginBottom: '20px'
-            }}
-          >
-            +90 532 123 45 67
-          </Box>
-          
-          <Box sx={{ color: '#95a5a6' }}>
-            Pazartesi - Cuma: 09:00 - 18:00
-          </Box>
+
+          <Typography variant="caption" sx={{ color: alpha('#fff', 0.45), display: 'block', mt: 3 }}>
+            Pazartesi – Cumartesi: 08:00 – 18:00
+          </Typography>
         </Box>
       </Box>
     </SectionContainer>

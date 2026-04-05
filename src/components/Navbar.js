@@ -1,245 +1,259 @@
+// React
 import React, { useState } from 'react';
+
+// MUI
 import {
-  AppBar,
-  Toolbar,
-  Button,
-  Box,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  useTheme,
-  useMediaQuery,
-  Divider,
+  AppBar, Toolbar, Button, Box, IconButton,
+  Drawer, List, ListItem, ListItemText,
+  useTheme, useMediaQuery, Divider,
 } from '@mui/material';
 import {
-  Menu as MenuIcon,
-  Close as CloseIcon,
+  Menu      as MenuIcon,
+  Close     as CloseIcon,
   AdminPanelSettings as AdminIcon,
 } from '@mui/icons-material';
+import { styled, alpha } from '@mui/material/styles';
+
+// Router
 import { Link, useLocation } from 'react-router-dom';
-import { styled } from '@mui/material/styles';
 
-import {
-  LogoText as StyledLogoText,
-  GradientText,
-  CTAButton
-} from '../styles/StyledComponents';
+// Styles
+import { LogoText as StyledLogoText, GradientText, CTAButton } from '../styles/StyledComponents';
 
-// 🎨 Styled Components
-const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  background: 'rgba(255, 255, 255, 0.95)',
-  backdropFilter: 'blur(20px)',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-  borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-  position: 'fixed',
-  top: 0,
-  zIndex: theme.zIndex.appBar,
-}));
+// Components
+import DarkModeToggle from './DarkModeToggle';
 
+// Navigation data
+import { NAV_ITEMS, PATHS } from '../constants/navigation';
+
+// ── Styled Components ────────────────────────────────────────────────────────
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   justifyContent: 'space-between',
-  padding: '0 24px',
-  minHeight: '70px',
+  padding:        '0 24px',
+  minHeight:      '70px',
   [theme.breakpoints.down('md')]: {
-    padding: '0 16px',
+    padding:   '0 16px',
     minHeight: '60px',
   },
 }));
 
-const LogoContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '12px',
-  cursor: 'pointer',
+const LogoContainer = styled(Box)(() => ({
+  display:        'flex',
+  alignItems:     'center',
+  gap:            '12px',
+  cursor:         'pointer',
   textDecoration: 'none',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    transform: 'scale(1.05)',
-  },
+  transition:     'transform 0.25s ease',
+  '&:hover':      { transform: 'scale(1.04)' },
 }));
 
 const LogoText = styled(StyledLogoText)(({ theme }) => ({
   fontSize: '1.5rem',
-  display: 'none',
-  [theme.breakpoints.up('md')]: {
-    display: 'block',
-  },
+  display:  'none',
+  [theme.breakpoints.up('md')]: { display: 'block' },
 }));
 
 const LogoPlaceholder = styled(Box)(({ theme }) => ({
-  width: '50px',
-  height: '50px',
+  width:        '46px',
+  height:       '46px',
   borderRadius: '12px',
-  background: 'linear-gradient(135deg, #3498db, #2ecc71)',
-  display: 'flex',
-  alignItems: 'center',
+  background:   `linear-gradient(135deg, ${theme.palette.primary.main}, ${alpha(theme.palette.primary.main, 0.7)})`,
+  display:      'flex',
+  alignItems:   'center',
   justifyContent: 'center',
-  color: 'white',
-  fontWeight: 'bold',
-  fontSize: '1.2rem',
-  boxShadow: '0 4px 15px rgba(52, 152, 219, 0.3)',
+  color:        'white',
+  fontWeight:   'bold',
+  fontSize:     '1.1rem',
+  boxShadow:    `0 4px 14px ${alpha(theme.palette.primary.main, 0.35)}`,
+  flexShrink:   0,
   ...theme.mixins.hoverEffect,
 }));
 
 const NavMenu = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: '8px',
+  display:    'flex',
+  gap:        '4px',
   alignItems: 'center',
-  [theme.breakpoints.down('md')]: {
-    display: 'none',
-  },
+  [theme.breakpoints.down('md')]: { display: 'none' },
 }));
 
-const NavButton = styled(Button)(({ theme, active }) => ({
-  color: active ? theme.palette.primary.main : theme.palette.text.primary,
-  fontWeight: active ? 600 : 500,
-  fontSize: '0.95rem',
-  padding: '8px 16px',
-  borderRadius: '50px',
-  textTransform: 'none',
-  position: 'relative',
-  transition: 'all 0.3s ease',
-  backgroundColor: active ? 'rgba(52, 152, 219, 0.1)' : 'transparent',
+const NavButton = styled(Button, {
+  shouldForwardProp: (p) => p !== 'active',
+})(({ theme, active }) => ({
+  color:           active ? theme.palette.primary.main : theme.palette.text.primary,
+  fontWeight:      active ? 700 : 500,
+  fontSize:        '0.9rem',
+  padding:         '7px 14px',
+  borderRadius:    '50px',
+  textTransform:   'none',
+  position:        'relative',
+  transition:      theme.transitions.create(['background-color', 'color', 'transform'], { duration: 200 }),
+  backgroundColor: active ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
   '&:hover': {
-    backgroundColor: 'rgba(52, 152, 219, 0.1)',
-    transform: 'translateY(-2px)',
+    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+    transform:       'translateY(-1px)',
   },
   '&::after': active ? {
-    content: '""',
-    position: 'absolute',
-    bottom: '4px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: '20px',
-    height: '3px',
-    background: 'linear-gradient(135deg, #3498db, #2ecc71)',
-    borderRadius: '2px',
+    content:       '""',
+    position:      'absolute',
+    bottom:        '3px',
+    left:          '50%',
+    transform:     'translateX(-50%)',
+    width:         '18px',
+    height:        '2.5px',
+    background:    `linear-gradient(90deg, ${theme.palette.primary.main}, ${alpha(theme.palette.primary.main, 0.5)})`,
+    borderRadius:  '2px',
   } : {},
 }));
 
 const AdminButton = styled(CTAButton)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #e74c3c, #c0392b)',
+  background:   'linear-gradient(135deg, #e74c3c, #c0392b)',
   borderRadius: '50px',
-  padding: '6px 16px',
-  fontSize: '0.85rem',
-  minWidth: 'auto',
-  '&:hover': {
-    background: 'linear-gradient(135deg, #c0392b, #a93226)',
-  },
+  padding:      '6px 16px',
+  fontSize:     '0.82rem',
+  minWidth:     'auto',
+  '&:hover': { background: 'linear-gradient(135deg, #c0392b, #a93226)' },
 }));
 
 const MobileMenuButton = styled(IconButton)(({ theme }) => ({
   display: 'none',
-  color: theme.palette.text.primary,
-  [theme.breakpoints.down('md')]: {
-    display: 'flex',
-  },
+  color:   theme.palette.text.primary,
+  [theme.breakpoints.down('md')]: { display: 'flex' },
 }));
 
 const StyledDrawer = styled(Drawer)(({ theme }) => ({
   '& .MuiDrawer-paper': {
-    width: '280px',
-    ...theme.mixins.gradientBackground,
-    color: 'white',
+    width:   '280px',
     padding: '20px 0',
+    // Dark mode glass is handled by MuiDrawer theme override in Theme.js
+    // Light mode uses the gradient
+    ...(!theme.palette.mode || theme.palette.mode === 'light'
+      ? { ...theme.mixins.gradientBackground, color: 'white' }
+      : {}
+    ),
   },
 }));
 
-const DrawerHeader = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: '0 20px',
-  marginBottom: '20px',
-  marginTop: '10px',
-}));
-
-const DrawerNavItem = styled(ListItem)(({ theme, active }) => ({
-  margin: '4px 20px',
-  borderRadius: '12px',
-  backgroundColor: active ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-  transition: 'all 0.3s ease',
+const DrawerNavItem = styled(ListItem, {
+  shouldForwardProp: (p) => p !== 'active',
+})(({ theme, active }) => ({
+  margin:          '3px 16px',
+  borderRadius:    '12px',
+  backgroundColor: active ? alpha('#ffffff', 0.12) : 'transparent',
+  transition:      theme.transitions.create(['background-color', 'transform'], { duration: 200 }),
   '&:hover': {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    transform: 'translateX(8px)',
+    backgroundColor: alpha('#ffffff', 0.1),
+    transform:       'translateX(6px)',
   },
 }));
 
-// 📱 Navigation Items
-const navigationItems = [
-  { label: 'Anasayfa', path: '/' },
-  { label: 'Hakkımızda', path: '/hakkimizda' },
-  { label: 'Kategoriler', path: '/kategoriler' },
-  { label: 'Projeler', path: '/projeler' },
-  { label: 'İletişim', path: '/iletisim' },
-];
+// NAV_ITEMS is imported from navigation.js — do not duplicate here.
 
+// ── Component ────────────────────────────────────────────────────────────────
 function Navbar({ settings }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const location = useLocation();
+  const theme      = useTheme();
+  const isMobile   = useMediaQuery(theme.breakpoints.down('md'));
+  const location   = useLocation();
+  const isDark     = theme.palette.mode === 'dark';
 
-  const siteTitle = settings?.title || 'Sedat Demir Yapı';
-  const logoInitials = siteTitle.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'SD';
+  const siteTitle    = settings?.title || 'DEKODEM';
+  const logoInitials = siteTitle.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || 'SD';
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  const handleDrawerToggle = () => setMobileOpen((o) => !o);
 
+  /**
+   * Returns true when the given nav item should be styled as active.
+   * - exact items (home): strict equality only.
+   * - prefix items: match exact path OR any sub-route starting with path + '/'.
+   */
+  const isActive = (item) =>
+    item.exact
+      ? location.pathname === item.path
+      : location.pathname === item.path ||
+        location.pathname.startsWith(item.path + '/');
 
-  const isActiveRoute = (path) => {
-    return location.pathname === path;
-  };
-
+  // ── Mobile Drawer ────────────────────────────────────────────────────────
   const drawer = (
     <Box>
-      <DrawerHeader>
-        <Box display="flex" alignItems="center" gap={2}>
-          <LogoPlaceholder>
-            {logoInitials}
-          </LogoPlaceholder>
+      {/* Header */}
+      <Box
+        sx={{
+          display:       'flex',
+          alignItems:    'center',
+          justifyContent:'space-between',
+          px: 2.5,
+          mb: 2.5,
+          mt: 1,
+        }}
+      >
+        <Box display="flex" alignItems="center" gap={1.5}>
+          <LogoPlaceholder>{logoInitials}</LogoPlaceholder>
           <GradientText variant="h6" fontWeight="bold">
             {siteTitle}
           </GradientText>
         </Box>
-        <IconButton onClick={handleDrawerToggle} sx={{ color: 'white' }}>
+        <IconButton
+          onClick={handleDrawerToggle}
+          sx={{ color: isDark ? 'text.primary' : 'white' }}
+          aria-label="Menüyü kapat"
+        >
           <CloseIcon />
         </IconButton>
-      </DrawerHeader>
+      </Box>
 
-      <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)', margin: '0 20px' }} />
+      <Divider sx={{ bgcolor: 'rgba(255,255,255,0.15)', mx: 2 }} />
 
-      <List sx={{ mt: 2 }}>
-        {navigationItems.map((item) => (
+      {/* Nav items — List renders as <ul>, DrawerNavItem as <li> for semantic A11y */}
+      <List component="ul" sx={{ mt: 1.5, listStyle: 'none', p: 0, m: 0 }}>
+        {NAV_ITEMS.map((item) => (
           <DrawerNavItem
             key={item.path}
+            component="li"
             button
-            component={Link}
-            to={item.path}
-            onClick={handleDrawerToggle}
-            active={isActiveRoute(item.path)}
+            disableGutters={false}
+            ContainerComponent="div"
+            sx={{ display: 'block' }}
+            active={isActive(item)}
           >
-            <ListItemText
-              primary={item.label}
-              sx={{
-                '& .MuiListItemText-primary': {
-                  fontWeight: isActiveRoute(item.path) ? 600 : 400
-                }
-              }}
-            />
+            <Box
+              component={Link}
+              to={item.path}
+              onClick={handleDrawerToggle}
+              sx={{ display: 'block', textDecoration: 'none', px: 2, py: 0.5 }}
+            >
+              <ListItemText
+                primary={item.label}
+                sx={{
+                  '& .MuiListItemText-primary': {
+                    fontWeight: isActive(item) ? 700 : 400,
+                    color:      isDark ? 'text.primary' : 'white',
+                    fontSize:   '0.95rem',
+                  },
+                }}
+              />
+            </Box>
           </DrawerNavItem>
         ))}
       </List>
 
-      <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)', margin: '20px' }} />
+      <Divider sx={{ bgcolor: 'rgba(255,255,255,0.15)', mx: 2, my: 2 }} />
 
-      <Box sx={{ padding: '0 20px' }}>
+      {/* Bottom actions */}
+      <Box sx={{ px: 2.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        {/* Dark mode toggle in drawer */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box
+            component="span"
+            sx={{ fontSize: '0.85rem', color: isDark ? 'text.secondary' : 'rgba(255,255,255,0.75)', fontWeight: 500 }}
+          >
+            {isDark ? 'Karanlık mod açık' : 'Aydınlık mod açık'}
+          </Box>
+          <DarkModeToggle size="small" />
+        </Box>
+
         <AdminButton
           component={Link}
-          to="/admin"
+          to={PATHS.ADMIN}
           onClick={handleDrawerToggle}
           startIcon={<AdminIcon />}
           fullWidth
@@ -252,54 +266,64 @@ function Navbar({ settings }) {
 
   return (
     <>
-      <StyledAppBar>
+      <AppBar component="nav">
         <StyledToolbar>
-          {/* Logo Section */}
+          {/* Logo */}
           <LogoContainer component={Link} to="/">
-            <LogoPlaceholder>
-              {logoInitials}
-            </LogoPlaceholder>
-            <LogoText variant="h6">
-              {siteTitle}
-            </LogoText>
+            <LogoPlaceholder aria-hidden="true">{logoInitials}</LogoPlaceholder>
+            <LogoText variant="h6">{siteTitle}</LogoText>
           </LogoContainer>
 
-          {/* Desktop Navigation */}
+          {/* Desktop nav — semantic <nav><ul><li> for A11y & SEO */}
           <NavMenu component="nav" aria-label="Ana menü">
-            {navigationItems.map((item) => (
-              <NavButton
-                key={item.path}
-                component={Link}
-                to={item.path}
-                active={isActiveRoute(item.path)}
-              >
-                {item.label}
-              </NavButton>
-            ))}
+            <Box
+              component="ul"
+              sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', gap: '4px', alignItems: 'center' }}
+            >
+              {NAV_ITEMS.map((item) => (
+                <Box component="li" key={item.path}>
+                  <NavButton
+                    component={Link}
+                    to={item.path}
+                    active={isActive(item)}
+                  >
+                    {item.label}
+                  </NavButton>
+                </Box>
+              ))}
+            </Box>
           </NavMenu>
 
-          {/* Right Section */}
+          {/* Right-side actions */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {/* Dark mode toggle — always visible */}
+            <DarkModeToggle />
+
             {!isMobile && (
               <AdminButton
                 component={Link}
-                to="/admin"
+                to={PATHS.ADMIN}
                 startIcon={<AdminIcon fontSize="small" />}
               >
                 Admin
               </AdminButton>
             )}
 
-            {/* Mobile Menu Button */}
-            <MobileMenuButton onClick={handleDrawerToggle}>
+            <MobileMenuButton
+              onClick={handleDrawerToggle}
+              aria-label={mobileOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-drawer"
+            >
               <MenuIcon />
             </MobileMenuButton>
           </Box>
         </StyledToolbar>
-      </StyledAppBar>
+      </AppBar>
 
       {/* Mobile Drawer */}
       <StyledDrawer
+        id="mobile-drawer"
         variant="temporary"
         anchor="right"
         open={mobileOpen}
@@ -309,7 +333,7 @@ function Navbar({ settings }) {
         {drawer}
       </StyledDrawer>
 
-      {/* Spacer for fixed navbar */}
+      {/* Spacer for fixed AppBar */}
       <Box sx={{ height: { xs: '60px', md: '70px' } }} />
     </>
   );

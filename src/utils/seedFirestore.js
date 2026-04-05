@@ -2,6 +2,10 @@ import { db } from "../config/firebase";
 import { collection, doc, writeBatch, serverTimestamp } from "firebase/firestore";
 
 export const seedFirestore = async () => {
+    if (process.env.NODE_ENV === "production") {
+        throw new Error("seedFirestore is disabled in production builds.");
+    }
+
     const batch = writeBatch(db);
 
     // 1. Settings

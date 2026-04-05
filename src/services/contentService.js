@@ -196,7 +196,7 @@ const normalizeVideos = (videos) => {
 const buildContentFromSnapshots = async () => {
   const fallback = createDefaultSiteContent();
 
-  if (!isFirebaseConfigured || !db || typeof db.collection !== "function") {
+  if (!isFirebaseConfigured || !db) {
     return fallback;
   }
 
