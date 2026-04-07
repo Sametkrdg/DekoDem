@@ -1,17 +1,15 @@
 /**
- * ProjectsPanel
- *
- * Manages the Firestore `Projects` collection.
- * Schema: { Id, Name, Description, category, PhotoUrl, IsCompleted (bool) }
+ * ProjectsPanel — 5-field Firestore admin form.
+ * Schema: { Name, Summary, Description, Services (array), PhotoUrl }
+ * Photo upload: CloudinaryService via ImageUploadField (unsigned preset).
  */
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Box, Grid, TextField, Button, Typography,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  IconButton, CircularProgress, Alert, FormControlLabel,
-  Checkbox, Chip, Avatar,
+  IconButton, CircularProgress, Alert, Avatar,
 } from "@mui/material";
-import { Add, Edit, Delete, Business, CheckCircle, RadioButtonUnchecked } from "@mui/icons-material";
+import { Add, Edit, Delete, Business } from "@mui/icons-material";
 import { AdminCard, FormSection, SectionHeader, SectionTitle } from "../shared";
 import {
   getCollectionItems, addCollectionItem,
@@ -21,9 +19,12 @@ import ImageUploadField from "../../components/ImageUploadField";
 
 const COLLECTION = "Projects";
 
-const EMPTY = {
-  Id: "", Name: "", Description: "", category: "", PhotoUrl: "", IsCompleted: false,
-};
+const EMPTY = { Name: "", Summary: "", Description: "", Services: "", PhotoUrl: "" };
+
+// "Taşıyıcı Sistem, İzolasyon" ↔ ["Taşıyıcı Sistem","İzolasyon"]
+const arrayToInput = (arr) => (Array.isArray(arr) ? arr.join(", ") : arr ?? "");
+const inputToArray = (str) =>
+  str.split(",").map((s) => s.trim()).filter(Boolean);
 
 const fieldSx = { "& .MuiOutlinedInput-root": { borderRadius: "12px" } };
 
@@ -40,7 +41,7 @@ const ProjectsPanel = ({ showSnackbar }) => {
     setLoading(true);
     try {
       const data = await getCollectionItems(COLLECTION);
-      setItems(data.sort((a, b) => String(a.Id || "").localeCompare(String(b.Id || ""))));
+      setItems(data);
     } catch {
       showSnackbar("Projeler yüklenemedi.", "error");
     } finally {
@@ -54,12 +55,11 @@ const ProjectsPanel = ({ showSnackbar }) => {
   const openEdit = (item) => {
     setEditItem(item);
     setForm({
-      Id:          item.Id          || "",
       Name:        item.Name        || "",
+      Summary:     item.Summary     || "",
       Description: item.Description || "",
-      category:    item.category    || "",
+      Services:    arrayToInput(item.Services),
       PhotoUrl:    item.PhotoUrl    || "",
-      IsCompleted: item.IsCompleted ?? false,
     });
     setDialogOpen(true);
   };
@@ -71,12 +71,11 @@ const ProjectsPanel = ({ showSnackbar }) => {
     setSaving(true);
     try {
       const payload = {
-        Id:          form.Id.trim(),
         Name:        form.Name.trim(),
+        Summary:     form.Summary.trim(),
         Description: form.Description.trim(),
-        category:    form.category.trim(),
+        Services:    inputToArray(form.Services),
         PhotoUrl:    form.PhotoUrl.trim(),
-        IsCompleted: Boolean(form.IsCompleted),
       };
       if (editItem) {
         await updateCollectionItem(COLLECTION, editItem.id, payload);
@@ -110,6 +109,7 @@ const ProjectsPanel = ({ showSnackbar }) => {
     <Box>
       <AdminCard>
         <FormSection>
+          {/* ── Header ────────────────────────────────────────────────── */}
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
             <SectionHeader sx={{ mb: 0 }}>
               <Business sx={{ color: "#d35400", fontSize: 28 }} />
@@ -120,11 +120,14 @@ const ProjectsPanel = ({ showSnackbar }) => {
             </Button>
           </Box>
 
-          {loading && <Box sx={{ textAlign: "center", py: 4 }}><CircularProgress /></Box>}
+          {loading && (
+            <Box sx={{ textAlign: "center", py: 4 }}><CircularProgress /></Box>
+          )}
           {!loading && items.length === 0 && (
             <Alert severity="info" sx={{ borderRadius: 2 }}>Henüz proje eklenmedi.</Alert>
           )}
 
+          {/* ── List ──────────────────────────────────────────────────── */}
           <Grid container spacing={2}>
             {items.map((item) => (
               <Grid item xs={12} sm={6} key={item.id}>
@@ -138,32 +141,46 @@ const ProjectsPanel = ({ showSnackbar }) => {
                 >
                   <Box sx={{ display: "flex", gap: 1.5, flex: 1, minWidth: 0 }}>
                     {item.PhotoUrl ? (
-                      <Avatar src={item.PhotoUrl} variant="rounded" sx={{ width: 52, height: 52, flexShrink: 0 }} />
+                      <Avatar
+                        src={item.PhotoUrl}
+                        variant="rounded"
+                        sx={{ width: 52, height: 52, flexShrink: 0 }}
+                      />
                     ) : (
-                      <Avatar variant="rounded" sx={{ width: 52, height: 52, bgcolor: "#d35400", flexShrink: 0 }}>
+                      <Avatar
+                        variant="rounded"
+                        sx={{ width: 52, height: 52, bgcolor: "#d35400", flexShrink: 0 }}
+                      >
                         {item.Name?.[0]?.toUpperCase() || "P"}
                       </Avatar>
                     )}
                     <Box sx={{ minWidth: 0 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-                        <Typography variant="subtitle2" fontWeight={700} noWrap>{item.Name}</Typography>
-                        <Chip
-                          size="small"
-                          icon={item.IsCompleted ? <CheckCircle /> : <RadioButtonUnchecked />}
-                          label={item.IsCompleted ? "Tamamlandı" : "Devam Ediyor"}
-                          color={item.IsCompleted ? "success" : "warning"}
-                          variant="outlined"
-                          sx={{ height: 20, fontSize: "0.7rem" }}
-                        />
-                      </Box>
-                      <Typography variant="caption" color="text.secondary">
-                        {[item.category, item.Id ? `#${item.Id}` : null].filter(Boolean).join(" · ")}
+                      <Typography variant="subtitle2" fontWeight={700} noWrap>
+                        {item.Name}
                       </Typography>
+                      {item.Summary && (
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {item.Summary}
+                        </Typography>
+                      )}
                     </Box>
                   </Box>
                   <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
-                    <IconButton size="small" onClick={() => openEdit(item)} color="primary"><Edit fontSize="small" /></IconButton>
-                    <IconButton size="small" onClick={() => setDeleteTarget(item)} color="error"><Delete fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => openEdit(item)} color="primary">
+                      <Edit fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" onClick={() => setDeleteTarget(item)} color="error">
+                      <Delete fontSize="small" />
+                    </IconButton>
                   </Box>
                 </Box>
               </Grid>
@@ -172,36 +189,65 @@ const ProjectsPanel = ({ showSnackbar }) => {
         </FormSection>
       </AdminCard>
 
-      {/* Edit / New Dialog */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
-        <DialogTitle fontWeight={700}>{editItem ? "Projeyi Düzenle" : "Yeni Proje"}</DialogTitle>
+      {/* ── Create / Edit Dialog ──────────────────────────────────────────── */}
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
+        <DialogTitle fontWeight={700}>
+          {editItem ? "Projeyi Düzenle" : "Yeni Proje"}
+        </DialogTitle>
+
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ pt: 1 }}>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth label="Proje ID" value={form.Id}
-                onChange={(e) => handleChange("Id", e.target.value)}
-                placeholder="PRJ-001" sx={fieldSx}
-                helperText="Benzersiz tanımlayıcı"
-              />
-            </Grid>
-            <Grid item xs={12} sm={8}>
-              <TextField
-                fullWidth label="Proje Adı *" value={form.Name}
-                onChange={(e) => handleChange("Name", e.target.value)}
-                placeholder="Modern Fabrika Yapısı" sx={fieldSx}
-              />
-            </Grid>
+
+            {/* 1 — Project Name */}
             <Grid item xs={12}>
               <TextField
-                fullWidth label="Kategori (category)" value={form.category}
-                onChange={(e) => handleChange("category", e.target.value)}
-                placeholder="Endüstriyel, Ticari, Ofis..." sx={fieldSx}
+                fullWidth
+                label="Proje Adı *"
+                value={form.Name}
+                onChange={(e) => handleChange("Name", e.target.value)}
+                placeholder="Modern Fabrika Yapısı"
+                sx={fieldSx}
               />
             </Grid>
+
+            {/* 2 — Summary */}
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Kısa Özet"
+                value={form.Summary}
+                onChange={(e) => handleChange("Summary", e.target.value)}
+                multiline
+                minRows={2}
+                placeholder="Kart üzerinde görünecek kısa açıklama…"
+                sx={fieldSx}
+                helperText="Proje listesinde kartın altında gösterilir."
+              />
+            </Grid>
+
+            {/* 3 — Services */}
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Verilen Hizmetler"
+                value={form.Services}
+                onChange={(e) => handleChange("Services", e.target.value)}
+                placeholder="Taşıyıcı Sistem, İzolasyon, Elektrik Altyapısı"
+                sx={fieldSx}
+                helperText="Virgülle ayırın — kaydederken otomatik olarak diziye dönüştürülür."
+              />
+            </Grid>
+
+            {/* 4 — Photo via Cloudinary */}
             <Grid item xs={12}>
               <ImageUploadField
-                label="Fotoğraf (PhotoUrl)"
+                label="Proje Fotoğrafı"
                 value={form.PhotoUrl}
                 onChange={(url) => handleChange("PhotoUrl", url)}
                 folder="dekodem/projects"
@@ -209,48 +255,62 @@ const ProjectsPanel = ({ showSnackbar }) => {
                 aspectRatio="16/9"
               />
             </Grid>
+
+            {/* 5 — Detailed Info */}
             <Grid item xs={12}>
               <TextField
-                fullWidth label="Açıklama (Description)" value={form.Description}
+                fullWidth
+                label="Detaylı Bilgi"
+                value={form.Description}
                 onChange={(e) => handleChange("Description", e.target.value)}
-                multiline minRows={4} sx={fieldSx}
+                multiline
+                minRows={5}
+                placeholder="Proje hakkında ayrıntılı açıklama — detay sayfasında görüntülenir."
+                sx={fieldSx}
               />
             </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={form.IsCompleted}
-                    onChange={(e) => handleChange("IsCompleted", e.target.checked)}
-                    color="success"
-                  />
-                }
-                label="Tamamlandı (IsCompleted)"
-              />
-            </Grid>
+
           </Grid>
         </DialogContent>
+
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setDialogOpen(false)} disabled={saving}>İptal</Button>
+          <Button onClick={() => setDialogOpen(false)} disabled={saving}>
+            İptal
+          </Button>
           <Button
-            variant="contained" onClick={handleSave} disabled={saving}
+            variant="contained"
+            onClick={handleSave}
+            disabled={saving}
             startIcon={saving && <CircularProgress size={16} color="inherit" />}
             sx={{ borderRadius: 2 }}
           >
-            {saving ? "Kaydediliyor..." : "Kaydet"}
+            {saving ? "Kaydediliyor…" : "Kaydet"}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirm */}
-      <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)} PaperProps={{ sx: { borderRadius: 3 } }}>
+      {/* ── Delete Confirm ────────────────────────────────────────────────── */}
+      <Dialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
         <DialogTitle fontWeight={700}>Projeyi Sil</DialogTitle>
         <DialogContent>
-          <Typography><strong>{deleteTarget?.Name}</strong> projesi kalıcı olarak silinecek.</Typography>
+          <Typography>
+            <strong>{deleteTarget?.Name}</strong> projesi kalıcı olarak silinecek.
+          </Typography>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setDeleteTarget(null)}>Vazgeç</Button>
-          <Button variant="contained" color="error" onClick={handleDelete} sx={{ borderRadius: 2 }}>Sil</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDelete}
+            sx={{ borderRadius: 2 }}
+          >
+            Sil
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

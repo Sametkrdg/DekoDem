@@ -54,8 +54,10 @@ const ActivityCard = ({ field, index }) => {
   const IconComponent = ICON_MAP[field.id] ?? Build;
   const accent = ACCENT_GRADIENTS[index % ACCENT_GRADIENTS.length];
 
-  // Firestore items have no slug → link to activities list instead of detail page
-  const linkTo = field.slug ? activityPath(field.slug) : PATHS.ACTIVITIES;
+  // Firestore items use their doc ID as the URL segment
+  const linkTo = field.slug
+    ? activityPath(field.slug)
+    : field._docId ? activityPath(field._docId) : PATHS.ACTIVITIES;
 
   return (
     <Box
@@ -223,11 +225,12 @@ const ActivitiesSection = () => {
         if (data && data.length > 0) {
           // Normalize Firestore schema to the shape ActivityCard expects
           const normalized = data.map((item) => ({
-            id:          String(item.Id ?? ''),
-            title:       item.Name   ?? '',
+            id:          String(item.Id ?? item._docId ?? ''),
+            _docId:      item._docId ?? null,
+            title:       item.Name        ?? '',
             description: item.Description ?? '',
-            photoUrl:    item.PhotoUrl ?? '',
-            slug:        null,        // no slug in Firestore schema → card links to list page
+            photoUrl:    item.PhotoUrl    ?? '',
+            slug:        null,   // no slug in Firestore schema — link by _docId
             subServices: [],
           }));
           setFields(normalized);

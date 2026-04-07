@@ -37,20 +37,47 @@ export const about = {
 
   // Key differentiators shown as feature bullets on the homepage
   highlights: [
-    'Anahtar teslim proje yönetimi',
-    'Fabrika, ofis ve ticari alan uzmanlığı',
-    'Zamanında teslim ve şeffaf iletişim',
-    'Kaliteli malzeme ve işçilik garantisi',
-  ],
-
-  // Company metrics shown in the About hero stats row
-  stats: [
-    { number: '10+',  label: 'Yıl Deneyim'         },
-    { number: '200+', label: 'Tamamlanan Proje'     },
-    { number: '50+',  label: 'Mutlu Müşteri'        },
-    { number: '30+',  label: 'Uzman Ekip Üyesi'     },
+    'Fabrika, ofis ve ticari alan projelerinde A\'dan Z\'ye uygulama',
+    'Tasarım, planlama ve mühendislik süreçleri tek çatı altında',
+    'Anahtar teslim çözümler — zamanında teslim güvencesi',
+    'Kaliteli işçilik ve müşteri memnuniyeti odaklı çalışma',
   ],
 };
+
+// ── Founder Vision ────────────────────────────────────────────────────────
+export const founder = {
+  name:  'Sedat Demir',
+  title: 'Kurucu & Genel Müdür',
+  vision:
+    '"Bir projenin değeri sadece estetikle değil, zamanında teslim ve uzun ömürlü işçilikle ölçülür. ' +
+    'DEKODEM\'i kurarken hedefim tek bir şeydi: müşterilerimizin anahtarı teslim aldığında hiçbir eksiğin kalmadığından emin olmak."',
+  bio:
+    'Sedat Demir, inşaat ve dekorasyon sektöründeki köklü deneyimini Kocaeli\'nin endüstriyel yapısına taşımak amacıyla DEKODEM\'i kurdu. ' +
+    'Algida, Magna ve Hyundai gibi uluslararası markalarla yürütülen 200\'den fazla kurumsal proje, firmanın kalite ve güvenilirlik referanslarının temelini oluşturmaktadır.',
+};
+
+// ── Technical Standards ───────────────────────────────────────────────────
+// Applied across all DEKODEM projects — used in About and service pages.
+export const technicalStandards = [
+  { code: 'TS EN 520',    desc: 'Alçıpan ve alçı levha standartları'                },
+  { code: 'TS EN 13964', desc: 'Asma tavan sistemleri gereksinimleri'               },
+  { code: 'TS EN 1366',  desc: 'Yangına dayanıklı hava kanalı ve bölme sistemleri'  },
+  { code: 'TBDY 2018',   desc: 'Türkiye Bina Deprem Yönetmeliği'                    },
+  { code: 'TS EN ISO 12944', desc: 'Yapı çeliği koruyucu boya sistemleri'           },
+  { code: 'TS 4561',     desc: 'Epoksi zemin kaplama standartları'                  },
+];
+
+// ── Service Quality Claims ────────────────────────────────────────────────
+// Fact-sheet bullets used on About and CategoryDetail pages.
+export const qualityClaims = [
+  '200\'den fazla tamamlanmış kurumsal proje',
+  'Tüm projeler TS, TBDY 2018 ve ilgili EN normlarına uygun',
+  'A-sınıfı tedarikçilerden temin edilen malzeme ve ekipman',
+  '2 yıl işçilik + 5 yıl yapısal eleman garantisi',
+  'ISO 12944 kapsamında pasif yangın koruma uygulamaları',
+  'Proje bazlı şantiye sorumluluk sigortası',
+  'Hizmet sonrası bakım anlaşmaları (yıllık)',
+];
 
 // ── References ────────────────────────────────────────────────────────────
 // Each entry: { name, description } — description is the project scope from brochure
@@ -241,6 +268,36 @@ export const activityFields = [
       'Yağmur Suyu Drenaj Hattı Yapımı',
       'Çevre Düzenleme Ve Peyzaj Uygulamaları',
     ],
+  },
+];
+
+// ── Core Value Pillars ────────────────────────────────────────────────────
+// Shown as ValueCard grid on homepage + About page.
+// Each entry: { id, icon (MUI icon name string), title, description }
+export const coreValues = [
+  {
+    id:          'kesif',
+    icon:        'Search',
+    title:       'Ücretsiz Keşif & Analiz',
+    description: 'Projenizi yerinde inceliyor, ihtiyaç analizinizi yapıyor ve tamamen ücretsiz teknik keşif hizmeti sunuyoruz.',
+  },
+  {
+    id:          'teslimat',
+    icon:        'Schedule',
+    title:       'Zamanında Teslimat',
+    description: 'Belirlenen takvime bağlılık, işimizin temel prensibidir. Planladığımız tarihte, eksiksiz teslim ediyoruz.',
+  },
+  {
+    id:          'iscilik',
+    icon:        'Engineering',
+    title:       'Profesyonel İşçilik',
+    description: 'Alanında uzman ekibimiz ve kalite denetim süreçlerimizle her projede kurumsal standartları yakalıyoruz.',
+  },
+  {
+    id:          'memnuniyet',
+    icon:        'FavoriteBorder',
+    title:       'Müşteri Memnuniyeti Odaklı',
+    description: 'Müşteriyle şeffaf iletişim ve süreç boyunca düzenli raporlama — memnuniyetiniz teslimat sonrasında da devam eder.',
   },
 ];
 

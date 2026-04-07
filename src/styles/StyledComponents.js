@@ -1,4 +1,4 @@
-import { styled } from '@mui/material/styles';
+import { styled, alpha } from '@mui/material/styles';
 import { Box, Typography, IconButton, Container, Button, Card, Paper } from '@mui/material';
 
 // ===== LAYOUT COMPONENTS =====
@@ -160,7 +160,7 @@ export const ServiceItem = styled(Box)(({ theme }) => ({
     color: theme.palette.primary.light,
     transform: 'translateX(8px)',
     paddingLeft: theme.spacing(1),
-    background: 'rgba(52, 152, 219, 0.05)',
+    background: alpha(theme.palette.primary.main, 0.05),
   },
   '& .MuiSvgIcon-root': {
     transition: 'all 0.3s ease',
@@ -223,7 +223,7 @@ export const DescriptionText = styled(Typography)(({ theme }) => ({
 // ===== CARD COMPONENTS =====
 export const ProjectCard = styled(Card)(({ theme }) => ({
   ...theme.mixins.hoverEffect,
-  borderRadius: '16px',
+  borderRadius: '10px',
   overflow: 'hidden',
   background: theme.palette.background.paper,
   position: 'relative',
@@ -276,7 +276,7 @@ export const ServiceCard = styled(Card)(({ theme }) => ({
 
 export const FeatureCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
-  borderRadius: '16px',
+  borderRadius: '10px',
   textAlign: 'center',
   background: theme.palette.background.paper,
   border: `1px solid ${theme.palette.primary.main}20`,
@@ -317,11 +317,10 @@ export const HeroTitle = styled(Typography)(({ theme }) => ({
   fontSize: 'clamp(2.5rem, 5vw, 4rem)',
   fontWeight: 'bold',
   marginBottom: theme.spacing(3),
-  background: 'linear-gradient(135deg, #fff, #f0f0f0)',
+  background: `linear-gradient(135deg, ${theme.palette.common.white}, ${alpha(theme.palette.common.white, 0.82)})`,
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
   lineHeight: 1.2,
-  textShadow: '0 2px 4px rgba(0,0,0,0.1)',
 }));
 
 export const HeroSubtitle = styled(Typography)(({ theme }) => ({
@@ -531,7 +530,7 @@ export const HeroImage = styled('img')(({ theme }) => ({
 export const FormContainer = styled(Box)(({ theme }) => ({
   background: theme.palette.background.paper,
   padding: theme.spacing(4),
-  borderRadius: '16px',
+  borderRadius: '10px',
   boxShadow: theme.shadows[3],
   '& .MuiTextField-root': {
     marginBottom: theme.spacing(2),
@@ -543,7 +542,7 @@ export const FormContainer = styled(Box)(({ theme }) => ({
 
 export const ContactFormWrapper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
-  borderRadius: '20px',
+  borderRadius: '10px',
   background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
   boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
   border: `1px solid ${theme.palette.primary.main}20`,
@@ -656,7 +655,7 @@ export const Modal = styled(Box)(({ theme }) => ({
   left: '50%',
   transform: 'translate(-50%, -50%)',
   background: theme.palette.background.paper,
-  borderRadius: '16px',
+  borderRadius: '10px',
   padding: theme.spacing(4),
   boxShadow: theme.shadows[6],
   maxWidth: '90vw',
@@ -669,9 +668,9 @@ export const Modal = styled(Box)(({ theme }) => ({
 export const StatusBadge = styled(Box)(({ theme, status = 'default' }) => {
   const statusColors = {
     success: theme.palette.secondary.main,
-    warning: '#f39c12',
-    error: '#e74c3c',
-    info: theme.palette.primary.main,
+    warning: theme.palette.warning?.main ?? '#f59e0b',
+    error:   theme.palette.error?.main   ?? '#ef4444',
+    info:    theme.palette.primary.main,
     default: theme.palette.neutral.gray,
   };
 

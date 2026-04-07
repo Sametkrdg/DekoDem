@@ -1,11 +1,11 @@
 // React
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
 
 // MUI
 import {
   Box, Container, Typography, Grid, Button,
-  Breadcrumbs, Chip, Divider,
+  Breadcrumbs, Chip, Divider, Paper, CircularProgress,
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 import {
@@ -13,11 +13,35 @@ import {
   Architecture, Construction, ViewComfy, Brush,
   MeetingRoom, Weekend, Park, ElectricBolt,
   Build, Whatshot, Terrain, ArrowForward,
+  Shield, VerifiedUser, Phone,
 } from '@mui/icons-material';
 
 // Data
-import { activityFields, brand } from '../constants/siteContent';
+import { activityFields, brand, qualityClaims, contact } from '../constants/siteContent';
 import { PATHS } from '../constants/navigation';
+
+// Firebase
+import { getDoc, doc } from 'firebase/firestore';
+import { db, isFirebaseConfigured } from '../config/firebase';
+
+// Firestore activity detail layout (split-column)
+import ActivityDetail from '../components/activity/ActivityDetail';
+
+// ── Per-service technical notes ───────────────────────────────────────────────
+// Fact-sheet text shown in the right sidebar for each service category.
+const SERVICE_TECH_NOTES = {
+  'ic-mimarlik':         'A-sınıfı malzeme ve ürünler kullanılır. 3D mimari görselleştirme, uygulama öncesinde müşteriyle paylaşılır.',
+  'duvar-bolme':         'TS EN 520 normuna uygun alçıpan levhalar; yangına dayanıklı sistemlerde BS EN 1366 sertifikalı ürünler tercih edilir.',
+  'tavan':               'TS EN 13964 normunda asma tavan sistemleri. Akustik tavanlar NRC ≥ 0.70 performans garantisi ile uygulanır.',
+  'boya-badana':         'ISO 12944 kapsamında pasif yangın koruması dahil endüstriyel boya sistemleri. Epoksi zeminde TS 4561 uyumlu ürünler.',
+  'kapi-gecis':          'Yangın kapıları TS EN 1634-1 sertifikalı; otomatik kapı sistemleri TS EN 16005 normuna uygun kurulur.',
+  'mobilya-uretim':      'Mezzanine kat ve çelik platformlar TBDY 2018 yük hesaplamalarına göre projelendirilir.',
+  'peyzaj':              'Yağmur suyu drenaj hatları TS 5281 normuna uygun; çimlendirme ve bitki seçimi yerel iklim koşullarına göre belirlenir.',
+  'altyapi':             'Elektrik tesisatı TS EN 60364; zayıf akım altyapısı TS EN 50174 normlarına göre projelendirilir ve uygulanır.',
+  'celik-konstruksiyon': 'Çelik konstrüksiyon imalatı TS EN 1090-2 sınıf EXC2 uyumlu; tüm kaynaklar sertifikalı kaynakçılar tarafından yapılır.',
+  'mekanik-yangin':      'Sprinkler sistemleri NFPA 13 ve TS EN 12845 standartlarına uygun projelendirilir; yangın dolabı sistemleri TS EN 671 sertifikalı.',
+  'saha-betonlari':      'Endüstriyel beton zeminde C30/37 beton sınıfı ve çelik fiber takviye uygulanır; forklift trafiğine uygun minimum 15 cm kalınlık.',
+};
 
 // ── Icon map (id → MUI icon component) ───────────────────────────────────────
 const ICON_MAP = {
@@ -100,6 +124,23 @@ const CategoryDetail = () => {
   // Find the matching activity field from static data
   const field = activityFields.find((f) => f.slug === slug);
 
+  // Firestore fallback — when slug doesn't match any static entry it may be a Firestore doc ID
+  const [fsLoading,  setFsLoading]  = useState(false);
+  const [fsActivity, setFsActivity] = useState(null);
+
+  useEffect(() => {
+    if (field || !slug) return;           // static match found — no Firestore call needed
+    if (!isFirebaseConfigured || !db) return;
+
+    setFsLoading(true);
+    getDoc(doc(db, 'Activities', slug))
+      .then((snap) => {
+        if (snap.exists()) setFsActivity({ id: snap.id, ...snap.data() });
+      })
+      .catch((err) => console.error('[CategoryDetail] Firestore fallback:', err))
+      .finally(() => setFsLoading(false));
+  }, [slug, field]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── BreadcrumbList JSON-LD ───────────────────────────────────────────────
   useEffect(() => {
     if (!field) return;
@@ -125,8 +166,17 @@ const CategoryDetail = () => {
     return () => { document.getElementById('ld-category-breadcrumb')?.remove(); };
   }, [field]);
 
+  // ── Loading (Firestore fallback in progress) ─────────────────────────────
+  if (!field && fsLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   // ── 404 state ────────────────────────────────────────────────────────────
-  if (!field) {
+  if (!field && !fsActivity) {
     return (
       <Container maxWidth="sm" sx={{ py: 14, textAlign: 'center' }}>
         <Typography variant="h4" fontWeight={800} gutterBottom>
@@ -145,6 +195,11 @@ const CategoryDetail = () => {
         </Button>
       </Container>
     );
+  }
+
+  // ── Firestore activity — delegate to split-layout component ─────────────
+  if (fsActivity) {
+    return <ActivityDetail activity={fsActivity} />;
   }
 
   const icon = ICON_MAP[field.id] ?? <Build sx={{ fontSize: 48 }} />;
@@ -297,58 +352,116 @@ const CategoryDetail = () => {
 
           {/* ── Right: CTA sidebar ──────────────────────────────────────── */}
           <Grid item xs={12} lg={4}>
-            <Box
-              sx={{
-                position:       { lg: 'sticky' },
-                top:            { lg: '90px' },
-                p:              3.5,
-                borderRadius:   '20px',
-                border:         '1px solid',
-                borderColor:    isDark ? 'rgba(255,255,255,0.08)' : alpha(theme.palette.primary.main, 0.15),
-                bgcolor:        isDark
-                  ? 'rgba(255,255,255,0.03)'
-                  : alpha(theme.palette.primary.main, 0.03),
-                backdropFilter: 'blur(12px)',
-              }}
-            >
-              <Typography variant="h6" fontWeight={700} gutterBottom>
-                Bu hizmet hakkında bilgi alın
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.75, mb: 3 }}>
-                {field.title} konusunda profesyonel destek almak için uzman ekibimizle iletişime geçin.
-                Ücretsiz keşif ve teklif için bizi arayın.
-              </Typography>
+            <Box sx={{ position: { lg: 'sticky' }, top: { lg: '90px' }, display: 'flex', flexDirection: 'column', gap: 3 }}>
 
-              <Button
-                variant="contained"
-                fullWidth
-                size="large"
-                component={RouterLink}
-                to={PATHS.CONTACT}
-                endIcon={<ArrowForward />}
-                sx={{ borderRadius: '50px', fontWeight: 700, mb: 1.5 }}
+              {/* Primary CTA card */}
+              <Paper
+                elevation={0}
+                sx={{
+                  p:              3.5,
+                  borderRadius:   '20px',
+                  border:         '1px solid',
+                  borderColor:    isDark ? 'rgba(255,255,255,0.08)' : alpha(theme.palette.primary.main, 0.15),
+                  bgcolor:        isDark
+                    ? 'rgba(255,255,255,0.03)'
+                    : alpha(theme.palette.primary.main, 0.03),
+                  backdropFilter: 'blur(12px)',
+                }}
               >
-                Teklif Al
-              </Button>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
+                  Ücretsiz Teklif Alın
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.75, mb: 3 }}>
+                  <strong>{field.title}</strong> konusunda yerinde keşif ve ücretsiz teklif için uzman
+                  ekibimizle iletişime geçin.
+                </Typography>
 
-              <Button
-                variant="outlined"
-                fullWidth
-                component={RouterLink}
-                to={PATHS.ACTIVITIES}
-                sx={{ borderRadius: '50px' }}
+                <Button
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  component={RouterLink}
+                  to={PATHS.CONTACT}
+                  endIcon={<ArrowForward />}
+                  sx={{ borderRadius: '50px', fontWeight: 700, mb: 1.5 }}
+                >
+                  Teklif Al
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  component="a"
+                  href={`tel:${contact.phone1.replace(/\s/g, '')}`}
+                  startIcon={<Phone />}
+                  sx={{ borderRadius: '50px', fontWeight: 600 }}
+                >
+                  {contact.phone1}
+                </Button>
+
+                <Divider sx={{ my: 3 }} />
+
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                    Alt hizmet sayısı
+                  </Typography>
+                  <Typography variant="h4" fontWeight={800} color="primary.main">
+                    {field.subServices.length}
+                  </Typography>
+                </Box>
+              </Paper>
+
+              {/* Technical spec note */}
+              {SERVICE_TECH_NOTES[field.id] && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p:           2.5,
+                    borderRadius:'16px',
+                    border:      '1px solid',
+                    borderColor: isDark ? 'rgba(255,255,255,0.06)' : alpha(theme.palette.primary.main, 0.12),
+                    bgcolor:     isDark ? 'rgba(255,255,255,0.03)' : alpha(theme.palette.primary.main, 0.03),
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                    <Shield sx={{ fontSize: 18, color: 'primary.main' }} aria-hidden="true" />
+                    <Typography variant="caption" fontWeight={700} color="primary.main" sx={{ letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                      Teknik Standart
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                    {SERVICE_TECH_NOTES[field.id]}
+                  </Typography>
+                </Paper>
+              )}
+
+              {/* Quality guarantee mini-card */}
+              <Paper
+                elevation={0}
+                sx={{
+                  p:           2.5,
+                  borderRadius:'16px',
+                  border:      '1px solid',
+                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : alpha(theme.palette.primary.main, 0.12),
+                  bgcolor:     isDark ? 'rgba(255,255,255,0.03)' : alpha(theme.palette.primary.main, 0.03),
+                }}
               >
-                Diğer Hizmetler
-              </Button>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                  <VerifiedUser sx={{ fontSize: 18, color: 'primary.main' }} aria-hidden="true" />
+                  <Typography variant="caption" fontWeight={700} color="primary.main" sx={{ letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                    Garanti
+                  </Typography>
+                </Box>
+                <Box component="ul" sx={{ p: 0, m: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {['2 yıl işçilik garantisi', '5 yıl yapısal eleman garantisi', 'A-sınıfı malzeme kullanımı'].map((g) => (
+                    <Box key={g} component="li" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <CheckCircleOutline sx={{ fontSize: 15, color: 'primary.main', flexShrink: 0 }} aria-hidden="true" />
+                      <Typography variant="caption" color="text.secondary" fontWeight={500}>{g}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Paper>
 
-              <Divider sx={{ my: 3 }} />
-
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                Toplam alt hizmet sayısı
-              </Typography>
-              <Typography variant="h3" fontWeight={800} color="primary.main">
-                {field.subServices.length}
-              </Typography>
             </Box>
           </Grid>
         </Grid>

@@ -1,53 +1,93 @@
-// React
+/**
+ * About.js — "Hakkımızda" page
+ *
+ * Structure (semantic HTML):
+ *   <article>
+ *     <section> Hero banner
+ *     <section> Full about text + references card
+ *     <section> Work process steps  (tinted bg — contrasts with About section)
+ *     <section> Founder vision (Sedat Demir)
+ *     <section> Technical standards / fact sheet
+ *     <section> Quality claims strip
+ *     <section> ValuesSection (core pillars)
+ *     <section> ContactSection CTA
+ *   </article>
+ *
+ * All corporate strings come from siteContent.js (single source of truth).
+ */
+
 import React from 'react';
 
-// MUI
 import {
   Box, Container, Typography, Grid, Paper,
-  Chip, Divider,
+  Chip, Divider, Button,
 } from '@mui/material';
 import {
-  CheckCircleOutline, WorkspacePremium, Star,
-  Groups, Engineering, Bolt,
+  CheckCircleOutline, Bolt, FormatQuote, ArrowForward,
+  VerifiedUser, Shield,
 } from '@mui/icons-material';
 import { alpha, useTheme } from '@mui/material/styles';
+import { Link as RouterLink } from 'react-router-dom';
 
-// Components
 import ValuesSection  from '../components/ValueSection';
 import ContactSection from '../components/ContactSection';
 
-// Constants
-import { brand, about, references } from '../constants/siteContent';
-
-// Context
+import {
+  brand, about, references, workProcess,
+  founder, technicalStandards, qualityClaims,
+} from '../constants/siteContent';
+import { PATHS } from '../constants/navigation';
 import { useSite } from '../context/SiteContext';
 
-// ── Stats ─────────────────────────────────────────────────────────────────
-const STATS = [
-  { value: '10+',  label: 'Yıl Deneyim',         icon: <Star /> },
-  { value: '200+', label: 'Tamamlanan Proje',     icon: <WorkspacePremium /> },
-  { value: '50+',  label: 'Kurumsal Müşteri',     icon: <Groups /> },
-  { value: '30+',  label: 'Uzman Kadro',          icon: <Engineering /> },
-];
+// ── Work process step card ────────────────────────────────────────────────────
+const ProcessCard = ({ step, label }) => {
+  const theme  = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const color  = theme.palette.primary.main;
 
-// ── Values bullet list ────────────────────────────────────────────────────
-const HIGHLIGHTS = [
-  'Fabrika, ofis ve depo projelerinde A\'dan Z\'ye uygulama',
-  'Tasarım, planlama ve mühendislik süreçleri tek çatı altında',
-  'Anahtar teslim çözümler — zamanında teslim garantisi',
-  'Kaliteli işçilik ve müşteri memnuniyeti odaklı çalışma',
-];
+  return (
+    <Box sx={{ textAlign: 'center', py: 1.5 }}>
+      <Box
+        aria-hidden="true"
+        sx={{
+          display:        'inline-flex',
+          alignItems:     'center',
+          justifyContent: 'center',
+          width:  48,
+          height: 48,
+          borderRadius:   '50%',
+          border:         '2px solid',
+          borderColor:    alpha(color, isDark ? 0.5 : 0.4),
+          bgcolor:        alpha(color, isDark ? 0.12 : 0.07),
+          color,
+          fontWeight:     800,
+          fontSize:       '1.1rem',
+          mb:             1.25,
+        }}
+      >
+        {step}
+      </Box>
+      <Typography variant="body2" fontWeight={600} color="text.primary" sx={{ lineHeight: 1.4 }}>
+        {label}
+      </Typography>
+    </Box>
+  );
+};
 
+// ── Page ──────────────────────────────────────────────────────────────────────
 const About = () => {
   const theme  = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const { aboutContent } = useSite();
+  const color  = theme.palette.primary.main;
 
   return (
-    <Box component="article">
+    <Box component="article" sx={{ bgcolor: 'background.default' }}>
 
-      {/* ── Hero Banner ─────────────────────────────────────────────────── */}
+      {/* ── Hero Banner ──────────────────────────────────────────────────────── */}
       <Box
+        component="section"
+        aria-label="Sayfa başlığı"
         sx={{
           background: isDark
             ? 'linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)'
@@ -60,12 +100,17 @@ const About = () => {
             content: '""',
             position: 'absolute',
             inset: 0,
-            background: `radial-gradient(ellipse 60% 60% at 80% 50%, ${alpha(theme.palette.primary.main, 0.25)}, transparent)`,
+            background: `radial-gradient(ellipse 60% 60% at 80% 50%, ${alpha(color, 0.25)}, transparent)`,
+            pointerEvents: 'none',
           },
         }}
       >
         <Container maxWidth="lg" sx={{ position: 'relative' }}>
-          <Typography variant="overline" sx={{ color: alpha('#fff', 0.65), letterSpacing: 3 }}>
+          <Typography
+            variant="overline"
+            component="p"
+            sx={{ color: alpha('#fff', 0.65), letterSpacing: 3 }}
+          >
             Hakkımızda
           </Typography>
           <Typography
@@ -76,73 +121,32 @@ const About = () => {
           >
             {brand.name}
           </Typography>
-          <Typography variant="h6" sx={{ color: alpha('#fff', 0.75), fontWeight: 400, maxWidth: 560, lineHeight: 1.7 }}>
+          <Typography
+            variant="h6"
+            sx={{ color: alpha('#fff', 0.75), fontWeight: 400, maxWidth: 560, lineHeight: 1.7, mb: 3 }}
+          >
             {brand.tagline}
           </Typography>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Chip label="Kocaeli / İzmit" size="small" sx={{ bgcolor: alpha('#fff', 0.15), color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontWeight: 600 }} />
+            <Chip label="200+ Kurumsal Proje" size="small" sx={{ bgcolor: alpha('#fff', 0.15), color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontWeight: 600 }} />
+            <Chip label="Anahtar Teslim" size="small" sx={{ bgcolor: alpha('#fff', 0.15), color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontWeight: 600 }} />
+          </Box>
         </Container>
       </Box>
 
-      {/* ── Stats Row ───────────────────────────────────────────────────── */}
-      <Box
-        sx={{
-          bgcolor:    'background.paper',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          py: { xs: 4, md: 5 },
-        }}
-      >
-        <Container maxWidth="lg">
-          <Grid container spacing={2} justifyContent="center">
-            {STATS.map((stat) => (
-              <Grid item xs={6} sm={3} key={stat.label}>
-                <Box sx={{ textAlign: 'center', py: 1 }}>
-                  <Box
-                    sx={{
-                      display:        'inline-flex',
-                      alignItems:     'center',
-                      justifyContent: 'center',
-                      width:  48,
-                      height: 48,
-                      borderRadius: 2,
-                      bgcolor: alpha(theme.palette.primary.main, 0.1),
-                      color:   'primary.main',
-                      mb: 1,
-                      '& svg': { fontSize: 24 },
-                    }}
-                  >
-                    {stat.icon}
-                  </Box>
-                  <Typography variant="h4" fontWeight={800} color="primary.main">
-                    {stat.value}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                    {stat.label}
-                  </Typography>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* ── Main Content ────────────────────────────────────────────────── */}
-      <Container maxWidth="lg" sx={{ py: { xs: 7, md: 10 } }}>
+      {/* ── Main Content: About text + References ────────────────────────────── */}
+      <Container maxWidth="lg" sx={{ py: { xs: 7, md: 10 } }} component="section" aria-label="Firma hakkında">
         <Grid container spacing={6} alignItems="flex-start">
 
-          {/* Left — logo + about text */}
+          {/* Left — full about text */}
           <Grid item xs={12} md={6}>
-            {/* Logo */}
             <Box
               sx={{
-                mb: 4,
-                p: 3,
-                borderRadius: 3,
-                border: '1px solid',
-                borderColor: 'divider',
+                mb: 4, p: 3,
+                borderRadius: 3, border: '1px solid', borderColor: 'divider',
                 bgcolor: 'background.paper',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 2,
+                display: 'inline-flex', alignItems: 'center', gap: 2,
               }}
             >
               <Box
@@ -157,17 +161,25 @@ const About = () => {
               </Typography>
             </Box>
 
-            <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.9, mb: 3 }}>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ lineHeight: 1.9, mb: 3 }}
+            >
               {aboutContent.AboutLong || about.fullText}
             </Typography>
 
-            {/* Highlights */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              {HIGHLIGHTS.map((h) => (
-                <Box key={h} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+            <Box
+              component="ul"
+              aria-label="Öne çıkan özellikler"
+              sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 0, listStyle: 'none', mb: 4 }}
+            >
+              {about.highlights.map((h) => (
+                <Box key={h} component="li" sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
                   <CheckCircleOutline
                     sx={{ color: 'primary.main', mt: 0.25, flexShrink: 0 }}
                     fontSize="small"
+                    aria-hidden="true"
                   />
                   <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
                     {h}
@@ -175,34 +187,39 @@ const About = () => {
                 </Box>
               ))}
             </Box>
+
+            {/* CTA — drives to contact */}
+            <Button
+              variant="contained"
+              component={RouterLink}
+              to={PATHS.CONTACT}
+              endIcon={<ArrowForward />}
+              sx={{ borderRadius: '50px', fontWeight: 700, px: 3.5 }}
+            >
+              Ücretsiz Keşif Talep Et
+            </Button>
           </Grid>
 
           {/* Right — references card */}
           <Grid item xs={12} md={6}>
             <Paper
               elevation={0}
+              component="aside"
+              aria-label="Referans markalarımız"
               sx={{
                 p: { xs: 3, md: 4 },
-                border: '1px solid',
-                borderColor: 'divider',
-                borderRadius: 3,
+                border: '1px solid', borderColor: 'divider', borderRadius: 3,
                 ...(isDark && {
-                  background:   theme.glass?.bgSubtle,
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
+                  background:          theme.glass?.bgSubtle,
+                  backdropFilter:      'blur(16px)',
+                  WebkitBackdropFilter:'blur(16px)',
                 }),
               }}
             >
-              {/* Section header */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
                 <Box
-                  sx={{
-                    p: 1,
-                    borderRadius: 2,
-                    bgcolor: alpha(theme.palette.primary.main, 0.1),
-                    color:   'primary.main',
-                    display: 'flex',
-                  }}
+                  sx={{ p: 1, borderRadius: 2, bgcolor: alpha(color, 0.1), color: 'primary.main', display: 'flex' }}
+                  aria-hidden="true"
                 >
                   <Bolt />
                 </Box>
@@ -218,41 +235,33 @@ const About = () => {
 
               <Divider sx={{ mb: 3 }} />
 
-              {/* Reference chips */}
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+              <Box
+                component="ul"
+                sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, p: 0, listStyle: 'none', mb: 3 }}
+              >
                 {references.map((ref) => (
-                  <Chip
-                    key={ref.name}
-                    label={ref.name}
-                    variant="outlined"
-                    sx={{
-                      fontWeight:  700,
-                      fontSize:    '0.9rem',
-                      px:          1,
-                      py:          2.5,
-                      borderRadius: '10px',
-                      borderColor: alpha(theme.palette.primary.main, 0.4),
-                      color:       'primary.main',
-                      bgcolor:     alpha(theme.palette.primary.main, isDark ? 0.1 : 0.04),
-                      '&:hover': {
-                        bgcolor: alpha(theme.palette.primary.main, isDark ? 0.18 : 0.08),
-                        borderColor: 'primary.main',
-                      },
-                    }}
-                  />
+                  <Box component="li" key={ref.name}>
+                    <Chip
+                      label={ref.name}
+                      title={ref.description}
+                      variant="outlined"
+                      sx={{
+                        fontWeight: 700, fontSize: '0.9rem',
+                        px: 1, py: 2.5, borderRadius: '10px',
+                        borderColor: alpha(color, 0.4), color: 'primary.main',
+                        bgcolor: alpha(color, isDark ? 0.1 : 0.04),
+                        '&:hover': { bgcolor: alpha(color, isDark ? 0.18 : 0.08), borderColor: 'primary.main' },
+                      }}
+                    />
+                  </Box>
                 ))}
               </Box>
 
-              <Divider sx={{ my: 3 }} />
-
-              {/* Quality promise */}
               <Box
                 sx={{
-                  p: 2.5,
-                  borderRadius: 2,
-                  bgcolor: alpha(theme.palette.primary.main, isDark ? 0.12 : 0.05),
-                  border: '1px solid',
-                  borderColor: alpha(theme.palette.primary.main, 0.2),
+                  p: 2.5, borderRadius: 2,
+                  bgcolor: alpha(color, isDark ? 0.12 : 0.05),
+                  border: '1px solid', borderColor: alpha(color, 0.2),
                 }}
               >
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
@@ -263,16 +272,286 @@ const About = () => {
                   en somut göstergesidir. Her projede kurumsal standartta sonuçlar teslim etmeyi taahhüt ediyoruz.
                 </Typography>
               </Box>
+
+              <Divider sx={{ my: 3 }} />
+
+              {/* CTA — drives to projects */}
+              <Button
+                variant="outlined"
+                component={RouterLink}
+                to={PATHS.PROJECTS}
+                endIcon={<ArrowForward />}
+                fullWidth
+                sx={{ borderRadius: '50px', fontWeight: 600 }}
+              >
+                Projelerimizi İnceleyin
+              </Button>
             </Paper>
           </Grid>
         </Grid>
       </Container>
 
-      {/* ── Values Section ──────────────────────────────────────────────── */}
+      {/* ── Work Process strip ───────────────────────────────────────────────── */}
+      {/* Sits on a tinted surface to visually separate it from the plain About section above */}
+      <Box
+        component="section"
+        aria-label="Çalışma sürecimiz"
+        sx={{
+          bgcolor:    isDark ? alpha(color, 0.05) : alpha(color, 0.04),
+          borderTop:  '1px solid',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          py: { xs: 7, md: 9 },
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box sx={{ textAlign: 'center', mb: { xs: 5, md: 6 } }}>
+            <Typography
+              variant="overline"
+              sx={{
+                display:       'block',
+                color:         'primary.main',
+                fontWeight:    700,
+                letterSpacing: '0.1em',
+                mb:            1,
+              }}
+            >
+              ÇALIŞMA SÜRECİMİZ
+            </Typography>
+            <Typography variant="h5" fontWeight={700}>
+              Projeden Teslimata
+            </Typography>
+          </Box>
+          <Grid container spacing={{ xs: 3, md: 2 }} justifyContent="center" component="ol" sx={{ listStyle: 'none', p: 0, m: 0 }}>
+            {workProcess.map((proc) => (
+              <Grid item xs={6} sm={4} md={2} key={proc.step} component="li">
+                <ProcessCard step={proc.step} label={proc.label} />
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* ── Founder Vision ───────────────────────────────────────────────────── */}
+      <Box
+        component="section"
+        aria-label="Kurucu vizyonu"
+        sx={{
+          bgcolor: isDark ? alpha(color, 0.05) : alpha(color, 0.03),
+          borderTop: '1px solid', borderBottom: '1px solid', borderColor: 'divider',
+          py: { xs: 7, md: 10 },
+        }}
+      >
+        <Container maxWidth="md">
+          <Box sx={{ textAlign: 'center', mb: 5 }}>
+            <Typography variant="overline" color="primary.main" fontWeight={700} letterSpacing={3}>
+              Kurucu Vizyonu
+            </Typography>
+            <Typography variant="h4" fontWeight={800} sx={{ mt: 0.5 }}>
+              {founder.name}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" fontWeight={600} sx={{ mt: 0.5 }}>
+              {founder.title}
+            </Typography>
+          </Box>
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 3.5, md: '48px 56px' },
+              borderRadius: 4,
+              border: '1px solid', borderColor: alpha(color, isDark ? 0.2 : 0.15),
+              position: 'relative',
+              ...(isDark && {
+                background:          theme.glass?.bgSubtle,
+                backdropFilter:      'blur(16px)',
+                WebkitBackdropFilter:'blur(16px)',
+              }),
+            }}
+          >
+            <FormatQuote
+              aria-hidden="true"
+              sx={{
+                fontSize: 64,
+                color: alpha(color, 0.2),
+                position: 'absolute',
+                top: 16, left: { xs: 16, md: 24 },
+                transform: 'scaleX(-1)',
+              }}
+            />
+            <Typography
+              variant="h6"
+              color="text.primary"
+              sx={{
+                fontStyle: 'italic',
+                lineHeight: 1.85,
+                fontWeight: 500,
+                textAlign: 'center',
+                pt: { xs: 3, md: 1 },
+                px: { xs: 0, md: 4 },
+              }}
+            >
+              {founder.vision}
+            </Typography>
+
+            <Divider sx={{ my: 3 }} />
+
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ lineHeight: 1.85, textAlign: 'center' }}
+            >
+              {founder.bio}
+            </Typography>
+          </Paper>
+        </Container>
+      </Box>
+
+      {/* ── Technical Standards Fact Sheet ───────────────────────────────────── */}
+      <Container maxWidth="lg" component="section" aria-label="Teknik standartlar" sx={{ py: { xs: 7, md: 10 } }}>
+        <Grid container spacing={6} alignItems="flex-start">
+
+          {/* Left: Quality claims */}
+          <Grid item xs={12} md={6}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+              <Box
+                aria-hidden="true"
+                sx={{ p: 1.25, borderRadius: 2, bgcolor: alpha(color, 0.1), color: 'primary.main', display: 'flex' }}
+              >
+                <VerifiedUser />
+              </Box>
+              <Box>
+                <Typography variant="overline" color="primary.main" fontWeight={700} sx={{ lineHeight: 1 }}>
+                  Kalite Güvencesi
+                </Typography>
+                <Typography variant="h5" fontWeight={700}>
+                  Neden DEKODEM?
+                </Typography>
+              </Box>
+            </Box>
+
+            <Box
+              component="ul"
+              sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 0, listStyle: 'none', mb: 4 }}
+            >
+              {qualityClaims.map((claim) => (
+                <Box
+                  key={claim}
+                  component="li"
+                  sx={{
+                    display: 'flex', alignItems: 'flex-start', gap: 1.5,
+                    p: 2, borderRadius: '12px',
+                    border: '1px solid', borderColor: alpha(color, isDark ? 0.15 : 0.1),
+                    bgcolor: alpha(color, isDark ? 0.05 : 0.03),
+                  }}
+                >
+                  <CheckCircleOutline
+                    sx={{ color: 'primary.main', mt: '2px', flexShrink: 0, fontSize: 20 }}
+                    aria-hidden="true"
+                  />
+                  <Typography variant="body2" fontWeight={500} sx={{ lineHeight: 1.6 }}>
+                    {claim}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+
+            {/* CTA */}
+            <Button
+              variant="contained"
+              component={RouterLink}
+              to={PATHS.ACTIVITIES}
+              endIcon={<ArrowForward />}
+              sx={{ borderRadius: '50px', fontWeight: 700, px: 3.5 }}
+            >
+              Faaliyet Alanlarımız
+            </Button>
+          </Grid>
+
+          {/* Right: Technical standards */}
+          <Grid item xs={12} md={6}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 3, md: 4 },
+                border: '1px solid', borderColor: 'divider', borderRadius: 3,
+                ...(isDark && {
+                  background:          theme.glass?.bgSubtle,
+                  backdropFilter:      'blur(16px)',
+                  WebkitBackdropFilter:'blur(16px)',
+                }),
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                <Box
+                  aria-hidden="true"
+                  sx={{ p: 1.25, borderRadius: 2, bgcolor: alpha(color, 0.1), color: 'primary.main', display: 'flex' }}
+                >
+                  <Shield />
+                </Box>
+                <Box>
+                  <Typography variant="overline" color="primary.main" fontWeight={700} sx={{ lineHeight: 1 }}>
+                    Standartlar
+                  </Typography>
+                  <Typography variant="h5" fontWeight={700}>
+                    Uygulanan Teknik Normlar
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Divider sx={{ mb: 3 }} />
+
+              <Box component="dl" sx={{ m: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {technicalStandards.map((std) => (
+                  <Box
+                    key={std.code}
+                    sx={{
+                      display: 'flex', alignItems: 'flex-start', gap: 2,
+                      p: 2, borderRadius: '12px',
+                      bgcolor: isDark ? 'rgba(255,255,255,0.04)' : alpha(color, 0.03),
+                      border: '1px solid', borderColor: isDark ? 'rgba(255,255,255,0.06)' : alpha(color, 0.08),
+                    }}
+                  >
+                    <Box sx={{ flexShrink: 0 }}>
+                      <Chip
+                        component="dt"
+                        label={std.code}
+                        size="small"
+                        sx={{
+                          fontFamily: 'monospace', fontWeight: 700, fontSize: '0.72rem',
+                          bgcolor: alpha(color, 0.12), color: 'primary.main',
+                          border: '1px solid', borderColor: alpha(color, 0.25),
+                        }}
+                      />
+                    </Box>
+                    <Typography
+                      component="dd"
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ m: 0, lineHeight: 1.6, pt: '2px' }}
+                    >
+                      {std.desc}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+
+              <Divider sx={{ my: 3 }} />
+              <Typography variant="caption" color="text.disabled" sx={{ display: 'block', lineHeight: 1.6 }}>
+                Tüm projelerimiz ilgili Türk Standartları (TS) ve Avrupa Normları (EN) çerçevesinde
+                projelendirilir ve uygulanır. Standart belgelerine talep halinde ulaşabilirsiniz.
+              </Typography>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Container>
+
+      {/* ── Values Section (core pillars + full process) ─────────────────────── */}
       <ValuesSection />
 
-      {/* ── Contact CTA ─────────────────────────────────────────────────── */}
+      {/* ── Contact CTA ────────────────────────────────────────────────────── */}
       <ContactSection />
+
     </Box>
   );
 };

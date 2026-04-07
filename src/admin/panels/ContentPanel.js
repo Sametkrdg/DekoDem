@@ -1,297 +1,461 @@
-import React, { useEffect, useState } from "react";
+/**
+ * ContentPanel.js — Gallery management (image-only, Cloudinary upload).
+ *
+ * Architecture
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Firestore collection: Gallery
+ * Document schema:      { url: string, createdAt: Timestamp }
+ *
+ * Flow
+ *   1. User picks a file → local preview via URL.createObjectURL
+ *   2. User clicks "Yükle" → upload to Cloudinary (unsigned preset)
+ *   3. On success → addDoc to Gallery collection with { url, createdAt }
+ *   4. onSnapshot listener keeps the grid in sync in real time
+ *   5. Delete → deleteDoc removes the Firestore record
+ *      (Cloudinary asset is abandoned — Direct URL Overwrite model)
+ *
+ * Image delivery: every URL in the grid passes through buildCloudinaryUrl
+ * to get q_auto, f_auto, w_800 transformations applied automatically.
+ */
+
+import { useEffect, useRef, useState } from "react";
 import {
-  Box,
-  Grid,
-  TextField,
-  Button,
-  Typography,
-  Card,
-  CardContent,
-  Alert,
-  CircularProgress,
+  Box, Grid, Button, Typography, IconButton,
+  Tooltip, CircularProgress, Alert, LinearProgress,
 } from "@mui/material";
 import {
-  VideoLibrary,
-  Collections,
-  CloudUpload,
-  CloudSync,
-  Add,
-  Delete,
+  Collections, CloudUpload, Delete, AddPhotoAlternate,
 } from "@mui/icons-material";
-import { AdminCard, FormSection, SectionHeader, SectionTitle, slugify } from "../shared";
-import { saveSiteContent, fetchSiteContent } from "../../services/contentService";
-import { isFirebaseConfigured } from "../../config/firebase";
+import { alpha, useTheme } from "@mui/material/styles";
+import {
+  collection, addDoc, deleteDoc, doc,
+  onSnapshot, query, orderBy, serverTimestamp,
+} from "firebase/firestore";
+import { db, isFirebaseConfigured } from "../../config/firebase";
+import { AdminCard, FormSection, SectionHeader, SectionTitle } from "../shared";
+import {
+  uploadImageToCloudinary,
+  buildCloudinaryUrl,
+  ALLOWED_IMAGE_TYPES,
+  MAX_UPLOAD_SIZE_MB,
+} from "../../services/CloudinaryService";
 
-const fieldSx = { "& .MuiOutlinedInput-root": { borderRadius: "12px" } };
+const GALLERY_COL = "Gallery";
 
-const ContentPanel = ({ siteContent, setSiteContent, refreshSiteContent, showSnackbar }) => {
-  const [videos, setVideos] = useState(siteContent?.homepageVideos || []);
-  const [photos, setPhotos] = useState(siteContent?.galleryPhotos || []);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-  useEffect(() => {
-    setVideos(siteContent?.homepageVideos || []);
-    setPhotos(siteContent?.galleryPhotos || []);
-  }, [siteContent]);
+const formatBytes = (bytes) => {
+  if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / 1024 ** 2).toFixed(1)} MB`;
+};
 
-  // ── Video handlers ──────────────────────────────────────────────────
-  const handleVideoChange = (i, field, val) =>
-    setVideos((prev) => prev.map((v, idx) => (idx === i ? { ...v, [field]: val } : v)));
+// ── Sub-component: upload zone ────────────────────────────────────────────────
 
-  const handleAddVideo = () => setVideos((p) => [...p, { title: "", url: "" }]);
+const UploadZone = ({ onUploaded, showSnackbar }) => {
+  const theme    = useTheme();
+  const isDark   = theme.palette.mode === "dark";
+  const inputRef = useRef(null);
 
-  const handleRemoveVideo = (i) => setVideos((p) => p.filter((_, idx) => idx !== i));
+  const [file,       setFile]       = useState(null);   // selected File object
+  const [preview,    setPreview]    = useState(null);   // object URL for thumbnail
+  const [uploading,  setUploading]  = useState(false);
+  const [progress,   setProgress]   = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
-  // ── Photo handlers ──────────────────────────────────────────────────
-  const handlePhotoChange = (i, field, val) =>
-    setPhotos((prev) => prev.map((p, idx) => (idx === i ? { ...p, [field]: val } : p)));
+  // Revoke the object URL when the component unmounts or the file changes
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
 
-  const handleAddPhoto = () =>
-    setPhotos((p) => [...p, { id: `photo-${p.length + 1}`, title: "", url: "", description: "" }]);
+  const pickFile = (picked) => {
+    if (!picked) return;
+    if (!ALLOWED_IMAGE_TYPES.includes(picked.type)) {
+      showSnackbar?.("Yalnızca JPG, PNG veya WebP dosyaları yüklenebilir.", "error");
+      return;
+    }
+    if (picked.size > MAX_UPLOAD_SIZE_MB * 1024 * 1024) {
+      showSnackbar?.(`Dosya boyutu ${MAX_UPLOAD_SIZE_MB} MB limitini aşıyor.`, "error");
+      return;
+    }
+    if (preview) URL.revokeObjectURL(preview);
+    setFile(picked);
+    // Instant local preview — no network call yet
+    setPreview(URL.createObjectURL(picked));
+  };
 
-  const handleRemovePhoto = (i) => setPhotos((p) => p.filter((_, idx) => idx !== i));
+  const handleInputChange = (e) => pickFile(e.target.files?.[0]);
 
-  // ── Sanitize ────────────────────────────────────────────────────────
-  const sanitizeVideos = () =>
-    videos
-      .map((v, i) => ({ title: v?.title?.trim() || `Video ${i + 1}`, url: (v?.url || "").trim() }))
-      .filter((v) => v.url);
+  const handleDragEnter = (e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragLeave = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!e.currentTarget.contains(e.relatedTarget)) setIsDragging(false);
+  };
+  const handleDragOver  = (e) => { e.preventDefault(); e.stopPropagation(); };
+  const handleDrop      = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    setIsDragging(false);
+    pickFile(e.dataTransfer.files?.[0]);
+  };
 
-  const sanitizePhotos = () =>
-    photos
-      .map((p, i) => {
-        const title = p?.title?.trim() || `Fotoğraf ${i + 1}`;
-        const url = (p?.url || "").trim();
-        return url
-          ? { id: p?.id?.trim() || slugify(title) || `photo-${i + 1}`, title, url, description: p?.description?.trim() || "" }
-          : null;
-      })
-      .filter(Boolean);
-
-  // ── Save / Refresh ──────────────────────────────────────────────────
-  const handleSave = async () => {
-    setIsSaving(true);
+  const handleUpload = async () => {
+    if (!file) return;
+    setUploading(true);
+    setProgress(0);
     try {
-      const payload = { homepageVideos: sanitizeVideos(), galleryPhotos: sanitizePhotos() };
-      await saveSiteContent(payload);
-      setSiteContent?.((prev) => ({ ...prev, ...payload }));
-      showSnackbar("İçerik başarıyla kaydedildi!");
+      // Step 1 — upload to Cloudinary, receive secure_url string
+      const url = await uploadImageToCloudinary(file, {
+        folder:     "dekodem/gallery",
+        onProgress: setProgress,
+      });
+
+      // Step 2 — persist to Firestore Gallery collection
+      await addDoc(collection(db, GALLERY_COL), {
+        url,
+        createdAt: serverTimestamp(),
+      });
+
+      showSnackbar?.("Fotoğraf galeriye eklendi.", "success");
+      onUploaded?.();
+      // Reset upload zone
+      setFile(null);
+      setPreview(null);
+      if (inputRef.current) inputRef.current.value = "";
     } catch (err) {
-      showSnackbar(err.message || "İçerik kaydedilemedi.", "error");
+      showSnackbar?.(err.message || "Yükleme başarısız.", "error");
     } finally {
-      setIsSaving(false);
+      setUploading(false);
+      setProgress(0);
     }
   };
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      if (refreshSiteContent) {
-        await refreshSiteContent();
-      } else {
-        const latest = await fetchSiteContent();
-        setSiteContent?.(latest);
-      }
-      showSnackbar("İçerik Firebase'den güncellendi.");
-    } catch (err) {
-      showSnackbar(err.message || "İçerik yenilenemedi.", "error");
-    } finally {
-      setIsRefreshing(false);
-    }
+  const handleClear = () => {
+    setFile(null);
+    if (preview) { URL.revokeObjectURL(preview); setPreview(null); }
+    if (inputRef.current) inputRef.current.value = "";
   };
+
+  const borderColor = isDragging
+    ? theme.palette.primary.main
+    : isDark ? "rgba(255,255,255,0.18)" : alpha(theme.palette.primary.main, 0.3);
 
   return (
     <Box>
-      {/* ── Videos ───────────────────────────────────────────────── */}
-      <AdminCard>
-        <FormSection>
-          <SectionHeader>
-            <VideoLibrary sx={{ color: "primary.dark", fontSize: 28 }} />
-            <SectionTitle variant="h5">Anasayfa Videoları</SectionTitle>
-          </SectionHeader>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            YouTube bağlantısını veya yalnızca video ID'sini girebilirsiniz.
+      {/* Drop zone / preview */}
+      <Box
+        role="button"
+        tabIndex={uploading ? -1 : 0}
+        aria-label="Fotoğraf seç veya sürükle"
+        onClick={() => !uploading && inputRef.current?.click()}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") inputRef.current?.click(); }}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        sx={{
+          position:    "relative",
+          width:       "100%",
+          aspectRatio: "16/7",
+          borderRadius: "12px",
+          border:      "2px dashed",
+          borderColor,
+          bgcolor:     preview ? "transparent"
+            : isDragging ? alpha(theme.palette.primary.main, isDark ? 0.15 : 0.06)
+            : isDark ? "rgba(255,255,255,0.03)" : alpha(theme.palette.primary.main, 0.02),
+          overflow:    "hidden",
+          cursor:      uploading ? "default" : "pointer",
+          outline:     "none",
+          transition:  "all 0.2s",
+          boxShadow:   isDragging ? `0 0 0 3px ${alpha(theme.palette.primary.main, 0.2)}` : "none",
+          "&:focus-visible": { boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.35)}` },
+        }}
+      >
+        {/* Pre-upload thumbnail */}
+        {preview && !uploading && (
+          <Box
+            component="img"
+            src={preview}
+            alt="önizleme"
+            sx={{ width: "100%", height: "100%", objectFit: "contain", display: "block", p: 1 }}
+          />
+        )}
+
+        {/* Empty hint */}
+        {!preview && !uploading && (
+          <Box
+            sx={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center", gap: 1,
+            }}
+          >
+            <AddPhotoAlternate
+              sx={{
+                fontSize: 48, color: "primary.main",
+                opacity:   isDragging ? 1 : 0.5,
+                transform: isDragging ? "translateY(-4px)" : "none",
+                transition: "all 0.2s",
+              }}
+            />
+            <Typography variant="body2" color="text.secondary" fontWeight={500}>
+              {isDragging ? "Bırakın — önizleme hazırlanıyor" : "Tıkla veya sürükle bırak"}
+            </Typography>
+            <Typography variant="caption" color="text.disabled">
+              JPG, PNG, WebP — maks. {MAX_UPLOAD_SIZE_MB} MB
+            </Typography>
+          </Box>
+        )}
+
+        {/* Upload progress overlay */}
+        {uploading && (
+          <Box
+            sx={{
+              position: "absolute", inset: 0,
+              display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center", gap: 2,
+              bgcolor: isDark ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.9)",
+              backdropFilter: "blur(4px)", p: 3,
+            }}
+          >
+            <Typography variant="body2" fontWeight={700}>
+              Cloudinary'ye yükleniyor… {progress}%
+            </Typography>
+            <LinearProgress
+              variant="determinate" value={progress}
+              sx={{ width: "80%", borderRadius: 4, height: 6 }}
+            />
+          </Box>
+        )}
+      </Box>
+
+      {/* Hidden file input */}
+      <input
+        ref={inputRef}
+        type="file"
+        accept={ALLOWED_IMAGE_TYPES.join(",")}
+        style={{ display: "none" }}
+        onChange={handleInputChange}
+        aria-hidden="true"
+      />
+
+      {/* File info + action buttons */}
+      {file && !uploading && (
+        <Box sx={{ mt: 1.5, display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+          <Typography variant="caption" color="text.secondary" sx={{ flexGrow: 1 }}>
+            {file.name} · {formatBytes(file.size)}
           </Typography>
+          <Button
+            size="small"
+            variant="outlined"
+            color="inherit"
+            onClick={handleClear}
+            sx={{ borderRadius: "8px", textTransform: "none" }}
+          >
+            İptal
+          </Button>
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<CloudUpload sx={{ fontSize: 16 }} />}
+            onClick={handleUpload}
+            sx={{ borderRadius: "8px", textTransform: "none" }}
+          >
+            Galeriye Yükle
+          </Button>
+        </Box>
+      )}
 
-          <Grid container spacing={2}>
-            {videos.length === 0 && (
-              <Grid item xs={12}>
-                <Alert severity="info" sx={{ borderRadius: 2 }}>
-                  Henüz video eklenmedi.
-                </Alert>
-              </Grid>
-            )}
+      {!file && !uploading && (
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<AddPhotoAlternate />}
+          onClick={() => inputRef.current?.click()}
+          fullWidth
+          sx={{ mt: 1.5, borderRadius: "8px", textTransform: "none" }}
+        >
+          Fotoğraf Seç
+        </Button>
+      )}
+    </Box>
+  );
+};
 
-            {videos.map((video, i) => (
-              <Grid item xs={12} key={i}>
-                <Card variant="outlined" sx={{ borderRadius: 3, borderColor: "primary.light", bgcolor: "primary.50" }}>
-                  <CardContent sx={{ p: 2.5 }}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={5}>
-                        <TextField
-                          fullWidth
-                          label="Video Başlığı"
-                          value={video?.title || ""}
-                          onChange={(e) => handleVideoChange(i, "title", e.target.value)}
-                          placeholder="Örn: Proje Tanıtımı"
-                          sx={fieldSx}
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={7}>
-                        <TextField
-                          fullWidth
-                          label="YouTube URL veya Video ID"
-                          value={video?.url || video?.id || ""}
-                          onChange={(e) => handleVideoChange(i, "url", e.target.value)}
-                          placeholder="https://www.youtube.com/watch?v=..."
-                          sx={fieldSx}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Button color="error" startIcon={<Delete />} onClick={() => handleRemoveVideo(i)}>
-                          Videoyu Kaldır
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+// ── Main panel ────────────────────────────────────────────────────────────────
 
-            <Grid item xs={12}>
-              <Button variant="outlined" startIcon={<Add />} onClick={handleAddVideo} sx={{ borderRadius: 2 }}>
-                Video Ekle
-              </Button>
-            </Grid>
-          </Grid>
-        </FormSection>
-      </AdminCard>
+const ContentPanel = ({ showSnackbar }) => {
+  const theme  = useTheme();
+  const isDark = theme.palette.mode === "dark";
 
-      {/* ── Photos ───────────────────────────────────────────────── */}
+  const [photos,   setPhotos]   = useState([]);   // { id, url, createdAt }
+  const [loading,  setLoading]  = useState(true);
+  const [deleting, setDeleting] = useState(null); // doc id being deleted
+
+  // ── Real-time listener ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!isFirebaseConfigured || !db) {
+      setLoading(false);
+      return;
+    }
+
+    const q = query(
+      collection(db, GALLERY_COL),
+      orderBy("createdAt", "desc")
+    );
+
+    // onSnapshot fires immediately with cached data, then on every write.
+    // The gallery grid stays in sync without a page refresh.
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        setPhotos(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        setLoading(false);
+      },
+      (err) => {
+        console.error("[ContentPanel] Gallery listener error:", err);
+        setLoading(false);
+      }
+    );
+
+    return unsubscribe; // cleanup on unmount
+  }, []);
+
+  // ── Delete ─────────────────────────────────────────────────────────────────
+
+  const handleDelete = async (photoId) => {
+    setDeleting(photoId);
+    try {
+      await deleteDoc(doc(db, GALLERY_COL, photoId));
+      showSnackbar?.("Fotoğraf silindi.");
+    } catch (err) {
+      showSnackbar?.(err.message || "Silinemedi.", "error");
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+
+  return (
+    <Box>
+      {/* ── Upload zone ─────────────────────────────────────────────── */}
       <AdminCard>
         <FormSection>
           <SectionHeader>
-            <Collections sx={{ color: "#16a085", fontSize: 28 }} />
-            <SectionTitle variant="h5">Galeri Fotoğrafları</SectionTitle>
-          </SectionHeader>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Sitede kullanılan görselleri buradan güncelleyebilirsiniz.
-          </Typography>
-
-          <Grid container spacing={2}>
-            {photos.length === 0 && (
-              <Grid item xs={12}>
-                <Alert severity="info" sx={{ borderRadius: 2 }}>
-                  Henüz fotoğraf eklenmedi.
-                </Alert>
-              </Grid>
-            )}
-
-            {photos.map((photo, i) => (
-              <Grid item xs={12} key={i}>
-                <Card variant="outlined" sx={{ borderRadius: 3, borderColor: "rgba(22,160,133,0.25)", bgcolor: "rgba(22,160,133,0.04)" }}>
-                  <CardContent sx={{ p: 2.5 }}>
-                    <Grid container spacing={2} alignItems="stretch">
-                      {/* Preview thumbnail */}
-                      <Grid item xs={12} md={3}>
-                        <Box
-                          sx={{
-                            width: "100%",
-                            paddingTop: "65%",
-                            borderRadius: 2,
-                            background: photo?.url
-                              ? `url(${photo.url}) center/cover no-repeat`
-                              : "linear-gradient(135deg,#16a085,#1abc9c)",
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={9}>
-                        <Grid container spacing={1.5}>
-                          <Grid item xs={12} sm={6}>
-                            <TextField fullWidth label="Başlık" value={photo?.title || ""} onChange={(e) => handlePhotoChange(i, "title", e.target.value)} sx={fieldSx} />
-                          </Grid>
-                          <Grid item xs={12} sm={6}>
-                            <TextField fullWidth label="ID" value={photo?.id || ""} onChange={(e) => handlePhotoChange(i, "id", e.target.value)} placeholder="modern-konutlar" sx={fieldSx} />
-                          </Grid>
-                          <Grid item xs={12}>
-                            <TextField fullWidth label="URL" value={photo?.url || ""} onChange={(e) => handlePhotoChange(i, "url", e.target.value)} placeholder="https://..." sx={fieldSx} />
-                          </Grid>
-                          <Grid item xs={12}>
-                            <TextField
-                              fullWidth
-                              label="Açıklama"
-                              value={photo?.description || ""}
-                              onChange={(e) => handlePhotoChange(i, "description", e.target.value)}
-                              multiline
-                              minRows={2}
-                              sx={fieldSx}
-                            />
-                          </Grid>
-                          <Grid item xs={12}>
-                            <Button color="error" startIcon={<Delete />} onClick={() => handleRemovePhoto(i)}>
-                              Fotoğrafı Kaldır
-                            </Button>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-
-            <Grid item xs={12}>
-              <Button variant="outlined" startIcon={<Add />} onClick={handleAddPhoto} sx={{ borderRadius: 2, borderColor: "#16a085", color: "#16a085" }}>
-                Fotoğraf Ekle
-              </Button>
-            </Grid>
-          </Grid>
-        </FormSection>
-      </AdminCard>
-
-      {/* ── Save / Refresh ────────────────────────────────────────── */}
-      <AdminCard>
-        <FormSection>
-          <SectionHeader>
-            <CloudUpload sx={{ color: "#2980b9", fontSize: 28 }} />
-            <SectionTitle variant="h5">İçerik İşlemleri</SectionTitle>
+            <AddPhotoAlternate sx={{ color: "primary.main", fontSize: 28 }} />
+            <SectionTitle variant="h5">Galeriye Fotoğraf Ekle</SectionTitle>
           </SectionHeader>
 
           {!isFirebaseConfigured && (
-            <Alert severity="warning" sx={{ mb: 3, borderRadius: 2 }}>
-              Firebase yapılandırması eksik — içerik kayıt işlemleri devre dışı.
+            <Alert severity="warning" sx={{ mb: 2, borderRadius: 2 }}>
+              Firebase yapılandırması eksik — yükleme devre dışı.
             </Alert>
           )}
 
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <Button
-                fullWidth
-                variant="contained"
-                size="large"
-                startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <CloudUpload />}
-                onClick={handleSave}
-                disabled={isSaving || !isFirebaseConfigured}
-                sx={{ borderRadius: 2, py: 1.8 }}
-              >
-                İçeriği Kaydet
-              </Button>
+          <UploadZone showSnackbar={showSnackbar} />
+        </FormSection>
+      </AdminCard>
+
+      {/* ── Gallery grid ────────────────────────────────────────────── */}
+      <AdminCard>
+        <FormSection>
+          <SectionHeader>
+            <Collections sx={{ color: "primary.main", fontSize: 28 }} />
+            <SectionTitle variant="h5">
+              Galeri Fotoğrafları
+              {!loading && (
+                <Typography
+                  component="span"
+                  variant="caption"
+                  sx={{ ml: 1, color: "text.disabled", fontWeight: 400 }}
+                >
+                  ({photos.length} fotoğraf)
+                </Typography>
+              )}
+            </SectionTitle>
+          </SectionHeader>
+
+          {loading && (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+              <CircularProgress />
+            </Box>
+          )}
+
+          {!loading && photos.length === 0 && (
+            <Alert severity="info" sx={{ borderRadius: 2 }}>
+              Galeride henüz fotoğraf yok. Yukarıdan ilk fotoğrafı ekleyin.
+            </Alert>
+          )}
+
+          {!loading && photos.length > 0 && (
+            <Grid container spacing={1.5}>
+              {photos.map((photo) => {
+                // Pass through Cloudinary transformations for optimised delivery
+                const displayUrl = buildCloudinaryUrl(photo.url, {
+                  width: 400,
+                  height: 300,
+                  crop: "fill",
+                });
+
+                return (
+                  <Grid item xs={6} sm={4} md={3} key={photo.id}>
+                    <Box
+                      sx={{
+                        position:     "relative",
+                        aspectRatio:  "4/3",
+                        borderRadius: "10px",
+                        overflow:     "hidden",
+                        border:       "1px solid",
+                        borderColor:  isDark ? "rgba(255,255,255,0.1)" : alpha(theme.palette.primary.main, 0.1),
+                        bgcolor:      isDark ? "rgba(255,255,255,0.04)" : alpha(theme.palette.primary.main, 0.02),
+                        // Hover — reveal delete button
+                        "&:hover .delete-btn":  { opacity: 1 },
+                        "&:hover img":          { transform: "scale(1.05)", filter: "brightness(0.75)" },
+                        "& img": { transition: "transform 0.3s ease, filter 0.3s ease" },
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={displayUrl}
+                        alt={`Galeri fotoğrafı`}
+                        loading="lazy"
+                        sx={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      />
+
+                      {/* Delete overlay */}
+                      <Box
+                        sx={{
+                          position:       "absolute",
+                          inset:          0,
+                          display:        "flex",
+                          alignItems:     "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {deleting === photo.id ? (
+                          <CircularProgress size={28} sx={{ color: "#fff" }} />
+                        ) : (
+                          <Tooltip title="Fotoğrafı Sil">
+                            <IconButton
+                              className="delete-btn"
+                              size="small"
+                              onClick={() => handleDelete(photo.id)}
+                              sx={{
+                                opacity:  0,
+                                bgcolor:  "rgba(0,0,0,0.6)",
+                                color:    "#fff",
+                                transition: "opacity 0.2s",
+                                "&:hover": { bgcolor: "error.main" },
+                              }}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Box>
+                    </Box>
+                  </Grid>
+                );
+              })}
             </Grid>
-            <Grid item xs={12} md={6}>
-              <Button
-                fullWidth
-                variant="outlined"
-                size="large"
-                startIcon={isRefreshing ? <CircularProgress size={20} /> : <CloudSync />}
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                sx={{ borderRadius: 2, py: 1.8 }}
-              >
-                Firebase'den Yenile
-              </Button>
-            </Grid>
-          </Grid>
+          )}
         </FormSection>
       </AdminCard>
     </Box>

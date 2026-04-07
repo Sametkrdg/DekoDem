@@ -1,51 +1,79 @@
-// components/StatsSection.js
+/**
+ * StatsSection.js — Working Principles strip (used in Projects page).
+ *
+ * Previously showed fabricated vanity metrics ("50+", "15 Yıl", "100K+ m²", "98%").
+ * Now displays DEKODEM's actual working principles from whyUs in siteContent.js.
+ */
+
 import React from 'react';
-import { Grid, Box } from '@mui/material';
-import { SectionTitle, StatLabel, GradientText } from '../styles/StyledComponents';
+import { Box, Container, Grid, Typography } from '@mui/material';
+import { CheckCircle } from '@mui/icons-material';
+import { alpha, useTheme } from '@mui/material/styles';
+
+import { whyUs } from '../constants/siteContent';
 
 const StatsSection = () => {
-  const statsData = [
-    { number: '50+', label: 'Tamamlanan Proje' },
-    { number: '15', label: 'Yıl Deneyim' },
-    { number: '100K+', label: 'm² İnşaat Alanı' },
-    { number: '98%', label: 'Müşteri Memnuniyeti' },
-  ];
+  const theme  = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const color  = theme.palette.primary.main;
 
   return (
-    <Box sx={{ textAlign: 'center', marginTop: '80px' }}>
-      <SectionTitle 
-        variant="h4" 
-        sx={{ 
-          textAlign: 'center', 
-          fontSize: '2rem', 
-          marginBottom: '40px',
-          color: '#2c3e50'
-        }}
-      >
-        Başarılarımız
-      </SectionTitle>
-      
-      <Grid container spacing={4} justifyContent="center">
-        {statsData.map((stat, index) => (
-          <Grid item xs={6} md={3} key={index}>
-            <Box sx={{ textAlign: 'center' }}>
-              <GradientText 
-                variant="h3" 
-                sx={{ 
-                  fontSize: '2.5rem', 
-                  marginBottom: '10px',
-                  display: 'block'
+    <Box
+      component="section"
+      aria-label="Çalışma prensipleri"
+      sx={{
+        py:       { xs: 6, md: 8 },
+        bgcolor:  isDark ? alpha(color, 0.05) : alpha(color, 0.03),
+        border:   '1px solid',
+        borderColor: alpha(color, 0.1),
+        borderRadius: 3,
+        my:       { xs: 5, md: 7 },
+      }}
+    >
+      <Container maxWidth="lg">
+        <Typography
+          variant="overline"
+          sx={{
+            display:       'block',
+            textAlign:     'center',
+            color:         'primary.main',
+            fontWeight:    700,
+            letterSpacing: '0.1em',
+            mb:            4,
+          }}
+        >
+          NEDEN DEKODEM?
+        </Typography>
+
+        <Grid
+          container
+          spacing={2}
+          component="ul"
+          sx={{ listStyle: 'none', p: 0, m: 0 }}
+          justifyContent="center"
+        >
+          {whyUs.map((principle) => (
+            <Grid item xs={12} sm={6} md={4} key={principle} component="li">
+              <Box
+                sx={{
+                  display:    'flex',
+                  alignItems: 'center',
+                  gap:        1.25,
+                  py:         1,
                 }}
               >
-                {stat.number}
-              </GradientText>
-              <StatLabel sx={{ fontSize: '1.1rem' }}>
-                {stat.label}
-              </StatLabel>
-            </Box>
-          </Grid>
-        ))}
-      </Grid>
+                <CheckCircle
+                  aria-hidden="true"
+                  sx={{ color, fontSize: 20, flexShrink: 0 }}
+                />
+                <Typography variant="body2" fontWeight={600} sx={{ lineHeight: 1.5 }}>
+                  {principle}
+                </Typography>
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
     </Box>
   );
 };

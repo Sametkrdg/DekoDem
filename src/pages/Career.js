@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Container, Typography, Box, Grid, Card, CardContent,
   Chip, Button, Breadcrumbs, Divider,
 } from "@mui/material";
-import { CardGridSkeleton } from "../components/Skeletons";
+import { alpha, useTheme } from "@mui/material/styles";
 import EmptyState from "../components/EmptyState";
 import {
   Work, Home, NavigateNext, LocationOn, Schedule,
   Send, WorkOutline,
 } from "@mui/icons-material";
 import { Link } from "react-router-dom";
-import { db } from "../config/firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
 
 const VALUES = [
   { emoji: "🤝", title: "Güven", desc: "Şeffaf iletişim ve dürüstlük her ilişkimizin temelidir." },
@@ -30,33 +28,33 @@ const BENEFITS = [
   "Yılda 2 kez performans değerlendirmesi",
 ];
 
-const Career = () => {
-  const [positions, setPositions] = useState([]);
-  const [loading, setLoading] = useState(true);
+// ── Static open positions (add entries here when new roles open) ─────────────
+const POSITIONS = [];
 
-  useEffect(() => {
-    const fetchPositions = async () => {
-      try {
-        const q = query(collection(db, "careers"), where("status", "==", "open"));
-        const snapshot = await getDocs(q);
-        setPositions(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
-      } catch {
-        setPositions([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPositions();
-  }, []);
+const Career = () => {
+  const theme     = useTheme();
+  const isDark    = theme.palette.mode === "dark";
+  const positions = POSITIONS;
 
   return (
-    <Box sx={{ bgcolor: "#f8fafc", minHeight: "80vh" }}>
+    <Box sx={{ bgcolor: "background.default", minHeight: "80vh" }}>
       {/* ─── Hero ─────────────────────────────────────────── */}
       <Box
         sx={{
-          background: "linear-gradient(135deg, #1a365d 0%, #2c5282 100%)",
+          background: isDark
+            ? "linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)"
+            : "linear-gradient(135deg, #1a365d 0%, #2c5282 100%)",
           color: "#fff",
           py: { xs: 8, md: 11 },
+          position: "relative",
+          overflow: "hidden",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            background: `radial-gradient(ellipse 55% 55% at 90% 50%, ${alpha(theme.palette.primary.main, 0.22)}, transparent)`,
+            pointerEvents: "none",
+          },
         }}
       >
         <Container maxWidth="lg">
@@ -137,9 +135,7 @@ const Career = () => {
         </Typography>
         <Divider sx={{ mb: 4 }} />
 
-        {loading ? (
-          <CardGridSkeleton count={4} columns={{ xs: 12, md: 6 }} />
-        ) : positions.length === 0 ? (
+        {positions.length === 0 ? (
           <EmptyState
             icon={<WorkOutline />}
             title="Şu an aktif bir ilan yok"
@@ -202,7 +198,7 @@ const Career = () => {
         )}
 
         {/* ─── Spontaneous application CTA ──────────────────── */}
-        {!loading && positions.length > 0 && (
+        {positions.length > 0 && (
           <Box sx={{ mt: 6, p: 4, border: "1px solid", borderColor: "divider", borderRadius: 3, textAlign: "center" }}>
             <Typography variant="h6" fontWeight={700} gutterBottom>
               Aradığınız pozisyonu bulamadınız mı?

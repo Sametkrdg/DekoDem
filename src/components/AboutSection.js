@@ -1,63 +1,34 @@
-// React
+/**
+ * AboutSection.js — Homepage "Hakkımızda" section.
+ *
+ * Left column  : company intro text + highlights + CTA
+ * Right column : CoreValue 2×2 grid (replaces vanity stats)
+ *
+ * All strings sourced from siteContent.js — no hardcoding.
+ */
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-// MUI
 import { Box, Container, Typography, Grid, Button, Stack } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
-import { CheckCircleOutline, ArrowForward } from '@mui/icons-material';
+import {
+  CheckCircleOutline, ArrowForward,
+  Search, Schedule, Engineering, FavoriteBorder,
+} from '@mui/icons-material';
 
-// Data — single source of truth; no hardcoded strings in this file
-import { brand, about } from '../constants/siteContent';
+import ValueCard from './ValueCard.jsx';
+
+import { brand, about, coreValues } from '../constants/siteContent';
 import { PATHS } from '../constants/navigation';
-
-// Context
 import { useSite } from '../context/SiteContext';
 
-// ── Stat card ─────────────────────────────────────────────────────────────────
-const StatCard = ({ number, label }) => {
-  const theme  = useTheme();
-  const isDark = theme.palette.mode === 'dark';
-
-  return (
-    <Box
-      sx={{
-        p:                    2.5,
-        borderRadius:         '16px',
-        border:               '1px solid',
-        borderColor:          isDark ? theme.glass.border : alpha(theme.palette.primary.main, 0.15),
-        background:           isDark ? theme.glass.bgSubtle : alpha(theme.palette.primary.main, 0.04),
-        backdropFilter:       theme.glass.blur,
-        WebkitBackdropFilter: theme.glass.blur,
-        textAlign:            'center',
-        transition:           'transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease',
-        '&:hover': {
-          borderColor: alpha(theme.palette.primary.main, isDark ? 0.45 : 0.4),
-          transform:   'translateY(-4px)',
-          boxShadow:   isDark
-            ? `0 12px 32px rgba(0,0,0,0.5), 0 0 0 1px ${alpha(theme.palette.primary.main, 0.2)}`
-            : `0 10px 28px ${alpha(theme.palette.primary.main, 0.12)}`,
-        },
-      }}
-    >
-      <Typography
-        variant="h4"
-        fontWeight={800}
-        sx={{
-          background:           `linear-gradient(135deg, ${theme.palette.primary.main}, ${alpha(theme.palette.primary.light, 0.85)})`,
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor:  'transparent',
-          lineHeight:           1,
-          mb:                   0.5,
-        }}
-      >
-        {number}
-      </Typography>
-      <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ letterSpacing: '0.04em' }}>
-        {label}
-      </Typography>
-    </Box>
-  );
+// ── Icon registry (same as ValueSection) ─────────────────────────────────────
+const ICON_MAP = {
+  Search:         <Search />,
+  Schedule:       <Schedule />,
+  Engineering:    <Engineering />,
+  FavoriteBorder: <FavoriteBorder />,
 };
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -74,7 +45,6 @@ const AboutSection = ({ photos = [] }) => {
       aria-label="Hakkımızda"
       sx={{
         py:       { xs: 9, md: 13 },
-        // Transparent in dark → shows fixed body gradient; off-white in light
         ...theme.mixins.sectionSurface,
         position: 'relative',
         overflow: 'hidden',
@@ -93,10 +63,9 @@ const AboutSection = ({ photos = [] }) => {
       <Container maxWidth="lg">
         <Grid container spacing={{ xs: 5, md: 8 }} alignItems="center">
 
-          {/* ── Left: Text content ──────────────────────────────────────── */}
+          {/* ── Left: Text content ────────────────────────────────────────── */}
           <Grid item xs={12} md={6}>
 
-            {/* Overline */}
             <Typography
               variant="overline"
               sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em', display: 'block', mb: 1.5 }}
@@ -104,7 +73,6 @@ const AboutSection = ({ photos = [] }) => {
               HAKKIMIZDA
             </Typography>
 
-            {/* Title */}
             <Typography
               variant="h3"
               component="h2"
@@ -123,7 +91,6 @@ const AboutSection = ({ photos = [] }) => {
               {brand.name}
             </Typography>
 
-            {/* Tagline */}
             <Typography
               variant="h6"
               color="text.secondary"
@@ -133,7 +100,6 @@ const AboutSection = ({ photos = [] }) => {
               {brand.tagline}
             </Typography>
 
-            {/* Short summary */}
             <Typography
               variant="body1"
               color="text.secondary"
@@ -142,13 +108,11 @@ const AboutSection = ({ photos = [] }) => {
               {aboutContent.AboutShort || about.shortSummary}
             </Typography>
 
-            {/* Highlights — pulled from siteContent.about.highlights */}
+            {/* Highlights */}
             <Stack spacing={1.5} sx={{ mb: 5 }}>
               {about.highlights.map((item) => (
                 <Box key={item} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <CheckCircleOutline
-                    sx={{ color: 'primary.main', fontSize: 22, flexShrink: 0 }}
-                  />
+                  <CheckCircleOutline sx={{ color: 'primary.main', fontSize: 22, flexShrink: 0 }} />
                   <Typography variant="body2" fontWeight={500} sx={{ lineHeight: 1.5 }}>
                     {item}
                   </Typography>
@@ -156,7 +120,6 @@ const AboutSection = ({ photos = [] }) => {
               ))}
             </Stack>
 
-            {/* CTA */}
             <Button
               component={Link}
               to={PATHS.ABOUT}
@@ -169,9 +132,8 @@ const AboutSection = ({ photos = [] }) => {
             </Button>
           </Grid>
 
-          {/* ── Right: Stats grid + optional photo ─────────────────────── */}
+          {/* ── Right: optional photo + CoreValue 2×2 grid ───────────────── */}
           <Grid item xs={12} md={6}>
-            {/* If a real photo exists, show it above the stats */}
             {primaryPhoto && (
               <Box
                 component="img"
@@ -180,7 +142,7 @@ const AboutSection = ({ photos = [] }) => {
                 loading="lazy"
                 sx={{
                   width:        '100%',
-                  height:       260,
+                  height:       240,
                   objectFit:    'cover',
                   borderRadius: '20px',
                   mb:           3,
@@ -189,16 +151,27 @@ const AboutSection = ({ photos = [] }) => {
               />
             )}
 
-            {/* Stats 2 × 2 grid — data from siteContent.about.stats */}
-            <Grid container spacing={2}>
-              {about.stats.map((stat) => (
-                <Grid item xs={6} key={stat.label}>
-                  <StatCard number={stat.number} label={stat.label} />
+            {/* Core value pillars — 2 × 2 */}
+            <Grid
+              container
+              spacing={2}
+              component="ul"
+              aria-label="Temel değerlerimiz"
+              sx={{ listStyle: 'none', p: 0, m: 0 }}
+            >
+              {coreValues.map((val) => (
+                <Grid item xs={6} key={val.id} component="li">
+                  <ValueCard
+                    icon={ICON_MAP[val.icon] ?? <Engineering />}
+                    title={val.title}
+                    description=""
+                    compact
+                  />
                 </Grid>
               ))}
             </Grid>
 
-            {/* Decorative separator line (only when no photo) */}
+            {/* Decorative separator (only when no photo present) */}
             {!primaryPhoto && (
               <Box
                 sx={{

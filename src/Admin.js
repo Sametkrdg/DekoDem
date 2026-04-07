@@ -15,12 +15,9 @@ import {
 import {
   Dashboard,
   Settings,
-  VideoLibrary,
+  Collections,
   Business,
   Article,
-  LocationOn,
-  QuestionAnswer,
-  Work,
   FormatQuote,
   Handshake,
   ExitToApp,
@@ -37,9 +34,6 @@ import ContentPanel          from "./admin/panels/ContentPanel";
 import ActivitiesPanel       from "./admin/panels/ActivitiesPanel";
 import ProjectsPanel         from "./admin/panels/ProjectsPanel";
 import BlogPanel             from "./admin/panels/BlogPanel";
-import BranchesPanel         from "./admin/panels/BranchesPanel";
-import FaqPanel              from "./admin/panels/FaqPanel";
-import CareerPanel           from "./admin/panels/CareerPanel";
 import TestimonialsPanel     from "./admin/panels/TestimonialsPanel";
 import PartnersPanel         from "./admin/panels/PartnersPanel";
 
@@ -72,17 +66,14 @@ const StyledTabs = styled(Tabs)(({ theme }) => ({
 
 // ── Tab definitions ─────────────────────────────────────────────────────────
 const TABS = [
-  { label: "Özet",          icon: <Dashboard      fontSize="small" /> },
-  { label: "Ayarlar",       icon: <Settings       fontSize="small" /> },
-  { label: "Medya",         icon: <VideoLibrary   fontSize="small" /> },
-  { label: "Faaliyetler",   icon: <Bolt           fontSize="small" /> },
-  { label: "Projeler",      icon: <Business       fontSize="small" /> },
-  { label: "Blog",          icon: <Article        fontSize="small" /> },
-  { label: "Şubeler",       icon: <LocationOn     fontSize="small" /> },
-  { label: "SSS",           icon: <QuestionAnswer fontSize="small" /> },
-  { label: "Kariyer",       icon: <Work           fontSize="small" /> },
-  { label: "Referanslar",   icon: <FormatQuote    fontSize="small" /> },
-  { label: "İş Ortakları",  icon: <Handshake      fontSize="small" /> },
+  { label: "Özet",          icon: <Dashboard   fontSize="small" /> },
+  { label: "Ayarlar",       icon: <Settings    fontSize="small" /> },
+  { label: "Galeri",        icon: <Collections fontSize="small" /> },
+  { label: "Faaliyetler",   icon: <Bolt        fontSize="small" /> },
+  { label: "Projeler",      icon: <Business    fontSize="small" /> },
+  { label: "Blog",          icon: <Article     fontSize="small" /> },
+  { label: "Referanslar",   icon: <FormatQuote fontSize="small" /> },
+  { label: "İş Ortakları",  icon: <Handshake   fontSize="small" /> },
 ];
 
 // ── Component ───────────────────────────────────────────────────────────────
@@ -116,17 +107,14 @@ function Admin({ settings, setSettings, siteContent, setSiteContent, refreshSite
     const contentProps = { siteContent, setSiteContent, refreshSiteContent, ...common };
 
     switch (tab) {
-      case 0:  return <DashboardPanel settings={settings} {...common} />;
-      case 1:  return <GeneralSettingsPanel settings={settings} setSettings={setSettings} {...common} />;
-      case 2:  return <ContentPanel {...contentProps} />;
-      case 3:  return <ActivitiesPanel {...common} />;
-      case 4:  return <ProjectsPanel {...common} />;
-      case 5:  return <BlogPanel {...common} />;
-      case 6:  return <BranchesPanel {...common} />;
-      case 7:  return <FaqPanel {...common} />;
-      case 8:  return <CareerPanel {...common} />;
-      case 9:  return <TestimonialsPanel {...common} />;
-      case 10: return <PartnersPanel {...common} />;
+      case 0: return <DashboardPanel settings={settings} {...common} />;
+      case 1: return <GeneralSettingsPanel settings={settings} setSettings={setSettings} {...common} />;
+      case 2: return <ContentPanel {...common} />;
+      case 3: return <ActivitiesPanel {...common} />;
+      case 4: return <ProjectsPanel {...common} />;
+      case 5: return <BlogPanel {...common} />;
+      case 6: return <TestimonialsPanel {...common} />;
+      case 7: return <PartnersPanel {...common} />;
       default: return null;
     }
   };

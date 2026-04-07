@@ -1,8 +1,8 @@
 // React
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 // MUI
-import { Typography, Container, Button, Grid, Box, Link as MuiLink } from '@mui/material';
+import { Typography, Container, Button, Grid, Box, Link as MuiLink, Skeleton } from '@mui/material';
 import { Link }      from 'react-router-dom';
 import { Phone, Email, LocationOn, Instagram } from '@mui/icons-material';
 
@@ -18,18 +18,65 @@ import {
 import { brand, about, activityFields } from '../constants/siteContent';
 import { FOOTER_QUICK_LINKS, activityPath, PATHS } from '../constants/navigation';
 
+// Firebase
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db, isFirebaseConfigured } from '../config/firebase';
+
 // Context
 import { useSite } from '../context/SiteContext';
 
-// Show first 5 activity field entries in the footer services column
-const FOOTER_SERVICES = activityFields.slice(0, 5);
+// Max items shown in the footer column
+const FOOTER_MAX = 5;
 
 function Footer() {
   const { contactSettings } = useSite();
 
+  // Real-time activities from Firestore; falls back to static data if Firebase is not configured
+  // null = loading, array = ready (may be static fallback)
+  const [activities, setActivities] = useState(null);
+
+  useEffect(() => {
+    if (!isFirebaseConfigured || !db) {
+      // Firebase not available — use static data immediately
+      setActivities(
+        activityFields.slice(0, FOOTER_MAX).map((f) => ({ id: f.slug, title: f.title }))
+      );
+      return;
+    }
+
+    const q = query(collection(db, 'Activities'), orderBy('Name'));
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        const docs = snap.docs
+          .map((d) => ({ id: d.id, title: d.data().Name ?? '' }))
+          .filter((a) => a.title)
+          .slice(0, FOOTER_MAX);
+
+        // If Firestore returned no documents fall back to static data
+        setActivities(
+          docs.length > 0
+            ? docs
+            : activityFields.slice(0, FOOTER_MAX).map((f) => ({ id: f.slug, title: f.title }))
+        );
+      },
+      (err) => {
+        console.error('[Footer] Activities listener error:', err);
+        setActivities(
+          activityFields.slice(0, FOOTER_MAX).map((f) => ({ id: f.slug, title: f.title }))
+        );
+      }
+    );
+
+    return unsubscribe;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Derive href values from Firestore fields
   const phoneHref = contactSettings.Phone ? `tel:${contactSettings.Phone.replace(/\s/g, '')}` : '#';
   const emailHref = contactSettings.Email ? `mailto:${contactSettings.Email}` : '#';
+  const mapsHref  = contactSettings.Address
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contactSettings.Address)}`
+    : null;
 
   return (
     <FooterContainer component="footer">
@@ -89,16 +136,35 @@ function Footer() {
               <FooterSection>
                 <SectionTitle>Faaliyet Alanlarımız</SectionTitle>
 
-                {FOOTER_SERVICES.map((field) => (
-                  <ServiceItem
-                    key={field.id}
-                    component={Link}
-                    to={activityPath(field.slug)}
-                    sx={{ cursor: 'pointer', textDecoration: 'none' }}
-                  >
-                    <Typography variant="body2">{field.title}</Typography>
-                  </ServiceItem>
-                ))}
+                {activities === null ? (
+                  // Loading skeleton — preserves column height to prevent layout shift
+                  Array.from({ length: FOOTER_MAX }).map((_, i) => (
+                    <Box key={i} sx={{ py: '6px' }}>
+                      <Skeleton
+                        variant="text"
+                        width={`${65 + (i % 3) * 12}%`}
+                        sx={{ bgcolor: 'rgba(255,255,255,0.08)', borderRadius: 1 }}
+                      />
+                    </Box>
+                  ))
+                ) : (
+                  activities.map((activity) => (
+                    <ServiceItem
+                      key={activity.id}
+                      component={Link}
+                      to={activityPath(activity.id)}
+                      sx={{ cursor: 'pointer', textDecoration: 'none' }}
+                    >
+                      <Typography
+                        variant="body2"
+                        noWrap
+                        sx={{ overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}
+                      >
+                        {activity.title}
+                      </Typography>
+                    </ServiceItem>
+                  ))
+                )}
 
                 <Button
                   component={Link}
@@ -167,14 +233,18 @@ function Footer() {
                   <ContactText variant="body2">{contactSettings.Email}</ContactText>
                 </ContactItem>
 
-                <ContactItem
-                  component={MuiLink}
-                  href="#"
-                  sx={{ textDecoration: 'none', cursor: 'pointer' }}
-                >
-                  <LocationOn color="primary" sx={{ flexShrink: 0 }} />
-                  <ContactText variant="body2">{contactSettings.Address}</ContactText>
-                </ContactItem>
+                {contactSettings.Address && mapsHref && (
+                  <ContactItem
+                    component={MuiLink}
+                    href={mapsHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{ textDecoration: 'none', cursor: 'pointer' }}
+                  >
+                    <LocationOn color="primary" sx={{ flexShrink: 0 }} />
+                    <ContactText variant="body2">{contactSettings.Address}</ContactText>
+                  </ContactItem>
+                )}
 
                 <Button
                   component={Link}

@@ -15,8 +15,15 @@ const ContactInfo = () => {
   const { contactSettings } = useSite();
 
   // Derive href values from Firestore fields
-  const phoneHref = contactSettings.Phone ? `tel:${contactSettings.Phone.replace(/\s/g, '')}` : '#';
-  const emailHref = contactSettings.Email ? `mailto:${contactSettings.Email}` : '#';
+  const phoneHref = contactSettings.Phone
+    ? `tel:${contactSettings.Phone.replace(/\s/g, '')}`
+    : '#';
+  const emailHref = contactSettings.Email
+    ? `mailto:${contactSettings.Email}`
+    : '#';
+  const mapsHref = contactSettings.Address
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contactSettings.Address)}`
+    : null;
 
   // ── Contact card definitions ─────────────────────────────────────────────
   const CARDS = [
@@ -34,13 +41,13 @@ const ContactInfo = () => {
       sub:    '24 saat içinde yanıt veriyoruz',
       accent: '#276749',
     },
-    {
-      icon:   <LocationOn />,
-      title:  'Adres',
-      lines:  [{ text: contactSettings.Address, href: '#' }],
-      sub:    'İzmit / Kocaeli',
-      accent: '#c05621',
-    },
+    ...(contactSettings.Address && mapsHref ? [{
+      icon:     <LocationOn />,
+      title:    'Adres',
+      lines:    [{ text: contactSettings.Address, href: mapsHref, external: true }],
+      sub:      'İzmit / Kocaeli',
+      accent:   '#c05621',
+    }] : []),
     {
       icon:   <Instagram />,
       title:  'Instagram',

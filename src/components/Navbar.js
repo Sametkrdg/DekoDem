@@ -1,21 +1,29 @@
 // React
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // MUI
 import {
   AppBar, Toolbar, Button, Box, IconButton,
   Drawer, List, ListItem, ListItemText,
-  useTheme, useMediaQuery, Divider,
+  useTheme, useMediaQuery, Divider, Tooltip,
 } from '@mui/material';
 import {
-  Menu      as MenuIcon,
-  Close     as CloseIcon,
-  AdminPanelSettings as AdminIcon,
+  Menu                as MenuIcon,
+  Close               as CloseIcon,
+  AdminPanelSettings  as AdminIcon,
+  ArrowForward,
 } from '@mui/icons-material';
 import { styled, alpha } from '@mui/material/styles';
 
 // Router
 import { Link, useLocation } from 'react-router-dom';
+
+// Firebase — real-time logo sync
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db, isFirebaseConfigured } from '../config/firebase';
+
+// Cloudinary — optimised logo delivery
+import { buildCloudinaryUrl } from '../services/cloudinary';
 
 // Styles
 import { LogoText as StyledLogoText, GradientText, CTAButton } from '../styles/StyledComponents';
@@ -54,19 +62,22 @@ const LogoText = styled(StyledLogoText)(({ theme }) => ({
 }));
 
 const LogoPlaceholder = styled(Box)(({ theme }) => ({
-  width:        '46px',
-  height:       '46px',
-  borderRadius: '12px',
-  background:   `linear-gradient(135deg, ${theme.palette.primary.main}, ${alpha(theme.palette.primary.main, 0.7)})`,
+  width:        '40px',
+  height:       '40px',
+  borderRadius: '8px',    // Architectural: tighter radius
+  // Primary navy + secondary orange corner accent
+  background:   `linear-gradient(135deg, ${theme.palette.primary.main} 60%, ${theme.palette.secondary.main} 100%)`,
   display:      'flex',
   alignItems:   'center',
   justifyContent: 'center',
   color:        'white',
-  fontWeight:   'bold',
-  fontSize:     '1.1rem',
-  boxShadow:    `0 4px 14px ${alpha(theme.palette.primary.main, 0.35)}`,
+  fontWeight:   800,
+  fontSize:     '1rem',
+  letterSpacing: '-0.03em',
+  boxShadow:    `0 4px 14px ${alpha(theme.palette.primary.main, 0.4)}`,
   flexShrink:   0,
-  ...theme.mixins.hoverEffect,
+  transition:   'transform 0.2s ease',
+  '&:hover':    { transform: 'scale(1.06)' },
 }));
 
 const NavMenu = styled(Box)(({ theme }) => ({
@@ -105,13 +116,39 @@ const NavButton = styled(Button, {
   } : {},
 }));
 
-const AdminButton = styled(CTAButton)(({ theme }) => ({
-  background:   'linear-gradient(135deg, #e74c3c, #c0392b)',
-  borderRadius: '50px',
-  padding:      '6px 16px',
-  fontSize:     '0.82rem',
+// Primary CTA — "Teklif Al" using safety-orange secondary palette
+const QuoteButton = styled(Button)(({ theme }) => ({
+  background:   `linear-gradient(135deg, ${theme.palette.secondary.main}, ${theme.palette.secondary.dark})`,
+  color:        '#fff',
+  borderRadius: '8px',          // Architectural: slightly squared
+  padding:      '7px 18px',
+  fontSize:     '0.85rem',
+  fontWeight:   700,
   minWidth:     'auto',
-  '&:hover': { background: 'linear-gradient(135deg, #c0392b, #a93226)' },
+  textTransform: 'none',
+  boxShadow:    `0 4px 14px ${alpha(theme.palette.secondary.main, 0.35)}`,
+  letterSpacing: '0.02em',
+  transition:   'transform 0.2s ease, box-shadow 0.2s ease',
+  '&:hover': {
+    background:  `linear-gradient(135deg, ${theme.palette.secondary.dark}, ${theme.palette.secondary.main})`,
+    boxShadow:   `0 6px 20px ${alpha(theme.palette.secondary.main, 0.5)}`,
+    transform:   'translateY(-2px)',
+  },
+}));
+
+// Admin — small icon-button for the admin panel link
+const AdminIconButton = styled(IconButton)(({ theme }) => ({
+  width:        34,
+  height:       34,
+  borderRadius: '8px',
+  color:        theme.palette.text.secondary,
+  border:       `1px solid ${theme.palette.divider}`,
+  transition:   'all 0.2s ease',
+  '&:hover': {
+    color:       theme.palette.primary.main,
+    borderColor: theme.palette.primary.main,
+    background:  alpha(theme.palette.primary.main, 0.06),
+  },
 }));
 
 const MobileMenuButton = styled(IconButton)(({ theme }) => ({
@@ -159,6 +196,45 @@ function Navbar({ settings }) {
   const siteTitle    = settings?.title || 'DEKODEM';
   const logoInitials = siteTitle.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || 'SD';
 
+  // ── Real-time logo — onSnapshot listener on Settings/main ────────────────
+  // logo state holds the Cloudinary-optimised URL, or null when no logo is set.
+  const [logo, setLogo] = useState(null);
+
+  useEffect(() => {
+    // When Firebase is unavailable, fall back to the prop value immediately
+    if (!isFirebaseConfigured || !db) {
+      const fallback = settings?.logoUrl || null;
+      setLogo(fallback ? buildCloudinaryUrl(fallback, { width: 200, crop: 'limit' }) : null);
+      return;
+    }
+
+    // onSnapshot fires immediately with cached data, then re-fires on every
+    // Firestore write — logo changes in the Admin Panel reflect site-wide
+    // without a page refresh.
+    const unsubscribe = onSnapshot(
+      doc(db, 'Settings', 'main'),
+      (snap) => {
+        const rawUrl = snap.exists() ? (snap.data()?.LogoUrl ?? null) : null;
+        setLogo(rawUrl
+          ? buildCloudinaryUrl(rawUrl, { width: 200, crop: 'limit' })
+          : null
+        );
+      },
+      (err) => {
+        console.error('[Navbar] Firestore logo listener error:', err);
+        // Degrade to prop value so the Navbar stays functional
+        const fallback = settings?.logoUrl || null;
+        setLogo(fallback ? buildCloudinaryUrl(fallback, { width: 200, crop: 'limit' }) : null);
+      }
+    );
+
+    // Cleanup: unsubscribe the Firestore listener on component unmount to
+    // prevent memory leaks and ghost listeners on hot-reloads.
+    return unsubscribe;
+    // Intentionally empty deps — the listener self-manages updates via Firestore.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleDrawerToggle = () => setMobileOpen((o) => !o);
 
   /**
@@ -187,10 +263,21 @@ function Navbar({ settings }) {
         }}
       >
         <Box display="flex" alignItems="center" gap={1.5}>
-          <LogoPlaceholder>{logoInitials}</LogoPlaceholder>
-          <GradientText variant="h6" fontWeight="bold">
-            {siteTitle}
-          </GradientText>
+          {logo ? (
+            <Box
+              component="img"
+              src={logo}
+              alt={siteTitle}
+              sx={{ maxHeight: '40px', width: 'auto', display: 'block', objectFit: 'contain' }}
+            />
+          ) : (
+            <>
+              <LogoPlaceholder>{logoInitials}</LogoPlaceholder>
+              <GradientText variant="h6" fontWeight="bold">
+                {siteTitle}
+              </GradientText>
+            </>
+          )}
         </Box>
         <IconButton
           onClick={handleDrawerToggle}
@@ -251,15 +338,38 @@ function Navbar({ settings }) {
           <DarkModeToggle size="small" />
         </Box>
 
-        <AdminButton
+        {/* Primary CTA in mobile drawer */}
+        <QuoteButton
+          component={Link}
+          to={PATHS.CONTACT}
+          onClick={handleDrawerToggle}
+          endIcon={<ArrowForward />}
+          fullWidth
+          sx={{ py: 1.25 }}
+        >
+          Teklif Al
+        </QuoteButton>
+
+        {/* Admin — secondary link */}
+        <Button
           component={Link}
           to={PATHS.ADMIN}
           onClick={handleDrawerToggle}
-          startIcon={<AdminIcon />}
+          startIcon={<AdminIcon sx={{ fontSize: 16 }} />}
+          variant="outlined"
+          size="small"
           fullWidth
+          sx={{
+            color:       isDark ? 'text.secondary' : 'rgba(255,255,255,0.6)',
+            borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.25)',
+            borderRadius: '8px',
+            fontWeight:  500,
+            fontSize:    '0.8rem',
+            textTransform: 'none',
+          }}
         >
           Admin Panel
-        </AdminButton>
+        </Button>
       </Box>
     </Box>
   );
@@ -268,10 +378,28 @@ function Navbar({ settings }) {
     <>
       <AppBar component="nav">
         <StyledToolbar>
-          {/* Logo */}
+          {/* Logo — renders Cloudinary-optimised image when set, text fallback otherwise */}
           <LogoContainer component={Link} to="/">
-            <LogoPlaceholder aria-hidden="true">{logoInitials}</LogoPlaceholder>
-            <LogoText variant="h6">{siteTitle}</LogoText>
+            {logo ? (
+              <Box
+                component="img"
+                src={logo}
+                alt={siteTitle}
+                sx={{
+                  maxHeight:  '50px',
+                  width:      'auto',
+                  display:    'block',
+                  objectFit:  'contain',
+                  // Crisp rendering on retina displays
+                  imageRendering: '-webkit-optimize-contrast',
+                }}
+              />
+            ) : (
+              <>
+                <LogoPlaceholder aria-hidden="true">{logoInitials}</LogoPlaceholder>
+                <LogoText variant="h6">{siteTitle}</LogoText>
+              </>
+            )}
           </LogoContainer>
 
           {/* Desktop nav — semantic <nav><ul><li> for A11y & SEO */}
@@ -295,18 +423,32 @@ function Navbar({ settings }) {
           </NavMenu>
 
           {/* Right-side actions */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, md: 1.25 } }}>
             {/* Dark mode toggle — always visible */}
             <DarkModeToggle />
 
             {!isMobile && (
-              <AdminButton
-                component={Link}
-                to={PATHS.ADMIN}
-                startIcon={<AdminIcon fontSize="small" />}
-              >
-                Admin
-              </AdminButton>
+              <>
+                {/* Admin — small icon-only button to avoid visual clutter */}
+                <Tooltip title="Admin Panel" placement="bottom">
+                  <AdminIconButton
+                    component={Link}
+                    to={PATHS.ADMIN}
+                    aria-label="Admin Panel"
+                  >
+                    <AdminIcon sx={{ fontSize: 17 }} />
+                  </AdminIconButton>
+                </Tooltip>
+
+                {/* Primary CTA — drives to contact/quote flow */}
+                <QuoteButton
+                  component={Link}
+                  to={PATHS.CONTACT}
+                  endIcon={<ArrowForward sx={{ fontSize: 16 }} />}
+                >
+                  Teklif Al
+                </QuoteButton>
+              </>
             )}
 
             <MobileMenuButton

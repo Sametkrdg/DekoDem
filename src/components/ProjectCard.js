@@ -1,170 +1,158 @@
-// components/ProjectCard.js
-import React from 'react';
-import { Box, Typography, Chip } from '@mui/material';
-import { LocationOn, CalendarToday, Engineering } from '@mui/icons-material';
-import { ProjectCard as StyledProjectCard, ContactItem, GradientText, ContactText } from '../styles/StyledComponents';
+/**
+ * ProjectCard.js — Clean listing card for the Projects page.
+ *
+ * Props:
+ *   project   { id, name, summary }
+ *   imageUrl  pre-transformed Cloudinary URL (or null for placeholder)
+ *   onSelect  () => void — navigate to detail page
+ */
+import React from "react";
+import { Box, Typography, Button } from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
+import { ArrowForward, Apartment } from "@mui/icons-material";
 
-const ProjectCard = ({ proje, onSelect }) => {
-  const getStatusColor = (durum) => {
-    switch(durum) {
-      case 'Tamamlandı': return '#27ae60';
-      case 'Devam Ediyor': return '#f39c12';
-      case 'Planlama': return '#9b59b6';
-      default: return 'primary.main';
-    }
-  };
+const ProjectCard = ({ project, imageUrl, onSelect }) => {
+  const theme  = useTheme();
+  const isDark = theme.palette.mode === "dark";
+  const orange = theme.palette.secondary?.main ?? theme.palette.primary.main;
+  const navy   = theme.palette.primary.main;
 
-  const ProjectImage = ({ children, imageUrl, title }) => (
-    <Box
-      sx={{
-        height: '200px',
-          background: imageUrl
-          ? 'transparent'
-          : (theme) => theme.palette.gradients?.primary || 'primary.main',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'white',
-        fontSize: '4rem',
-                overflow: 'hidden',
-      }}
-    >
-      {imageUrl ? (
-        <Box
-          component="img"
-          src={imageUrl}
-          alt={title}
-          loading="lazy"
-          sx={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-          }}
-        />
-      ) : (
-        children
-      )}
-    </Box>
-  );
-
-  const ProjectContent = ({ children }) => (
-    <Box sx={{ padding: '25px' }}>
-      {children}
-    </Box>
-  );
-
-  const ProjectHeader = ({ children }) => (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: '15px',
-      }}
-    >
-      {children}
-    </Box>
-  );
-
-  const ProjectTitle = ({ children }) => (
-    <Typography
-      variant="h5"
-      sx={{
-        fontSize: '1.4rem',
-        fontWeight: '600',
-        color: '#2c3e50',
-        margin: 0,
-      }}
-    >
-      {children}
-    </Typography>
-  );
-
-  const StatusChip = ({ durum }) => (
-    <Chip
-      label={durum}
-      sx={{
-        background: getStatusColor(durum),
-        color: 'white',
-        fontWeight: '600',
-      }}
-    />
-  );
-
-    const projectTitle = proje.ad || proje.title || 'Proje';
-  const projectStatus = proje.durum || proje.status || 'Devam Ediyor';
-  const projectDescription =
-    proje.aciklama || proje.description || 'Proje açıklaması yakında eklenecektir.';
-  const projectLocation = proje.yer || proje.location || 'Belirtilmedi';
-  const projectYear = proje.yıl || proje.year || '';
-  const projectArea = proje.alan || proje.area || '';
-  const projectIcon = proje.icon || proje.emoji || '🏗️';
-  const projectImage = proje.imageUrl || proje.coverImage || '';
-
-  const isSelectable = Boolean(onSelect && proje?.canNavigate);
-
+  const name    = project?.name    || "Proje";
+  const summary = project?.summary || "";
 
   return (
-    <StyledProjectCard
+    <Box
       component="article"
-      role={isSelectable ? 'button' : undefined}
-      tabIndex={isSelectable ? 0 : -1}
-      onClick={() => isSelectable && onSelect(proje)}
-      onKeyDown={(event) => {
-        if (!isSelectable) {
-          return;
-        }
-
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          onSelect(proje);
-        }
+      sx={{
+        height:        "100%",
+        display:       "flex",
+        flexDirection: "column",
+        borderRadius:  "16px",
+        overflow:      "hidden",
+        border:        "1px solid",
+        borderColor:   isDark ? "rgba(255,255,255,0.08)" : alpha(navy, 0.12),
+        bgcolor:       isDark ? "rgba(255,255,255,0.03)" : "#fff",
+        transition:    "transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease",
+        // Orange accent strip at top
+        "&::before": {
+          content:  "\"\"",
+          display:  "block",
+          height:   "3px",
+          background: `linear-gradient(90deg, ${navy}, ${orange})`,
+        },
+        "&:hover": {
+          transform:   "translateY(-5px)",
+          borderColor: alpha(orange, isDark ? 0.4 : 0.3),
+          boxShadow:   isDark
+            ? `0 18px 44px rgba(0,0,0,0.55)`
+            : `0 14px 38px ${alpha(navy, 0.13)}`,
+        },
       }}
-      sx={{ cursor: isSelectable ? 'pointer' : 'default' }}
     >
-      <ProjectImage imageUrl={projectImage} title={projectTitle}>
-        {projectIcon}
-      </ProjectImage>
-      
-      <ProjectContent>
-        <ProjectHeader>
-          <ProjectTitle>
-            {projectTitle}
-          </ProjectTitle>
-          <StatusChip durum={projectStatus} />
-        </ProjectHeader>
+      {/* ── Cover image ──────────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          height:   "200px",
+          flexShrink: 0,
+          overflow: "hidden",
+          position: "relative",
+          bgcolor:  isDark ? alpha(navy, 0.2) : alpha(navy, 0.06),
+        }}
+      >
+        {imageUrl ? (
+          <Box
+            component="img"
+            src={imageUrl}
+            alt={name}
+            loading="lazy"
+            sx={{
+              width:      "100%",
+              height:     "100%",
+              objectFit:  "cover",
+              display:    "block",
+              transition: "transform 0.45s ease",
+              "article:hover &": { transform: "scale(1.06)" },
+            }}
+          />
+        ) : (
+          <Box
+            sx={{
+              width:          "100%",
+              height:         "100%",
+              display:        "flex",
+              alignItems:     "center",
+              justifyContent: "center",
+              background:     `linear-gradient(135deg, ${alpha(navy, 0.55)}, ${alpha(orange, 0.35)})`,
+            }}
+          >
+            <Apartment sx={{ fontSize: 52, color: "rgba(255,255,255,0.5)" }} />
+          </Box>
+        )}
+      </Box>
 
-        <ContactText sx={{ marginBottom: '20px', color: '#7f8c8d' }}>
-          {projectDescription}
-        </ContactText>
+      {/* ── Body ─────────────────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          p:             "22px 24px",
+          flexGrow:      1,
+          display:       "flex",
+          flexDirection: "column",
+          gap:           1.5,
+        }}
+      >
+        <Typography
+          variant="h6"
+          component="h3"
+          fontWeight={700}
+          sx={{ lineHeight: 1.3, color: "text.primary" }}
+        >
+          {name}
+        </Typography>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <ContactItem>
-            <LocationOn color="primary" />
-            <ContactText>
-              <strong>Konum:</strong> {projectLocation}
-            </ContactText>
-          </ContactItem>
+        {summary && (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              lineHeight:          1.7,
+              flexGrow:            1,
+              display:             "-webkit-box",
+              WebkitLineClamp:     3,
+              WebkitBoxOrient:     "vertical",
+              overflow:            "hidden",
+            }}
+          >
+            {summary}
+          </Typography>
+        )}
 
-          <ContactItem>
-            <CalendarToday color="primary" />
-            <ContactText>
-              <strong>Yıl:</strong> {projectYear || 'Belirtilmedi'}
-            </ContactText>
-          </ContactItem>
+        {!summary && <Box sx={{ flexGrow: 1 }} />}
 
-          <ContactItem>
-            <Engineering color="primary" />
-            <ContactText>
-              <strong>Alan:</strong>
-              <GradientText component="span" sx={{ marginLeft: '5px' }}>
-                {projectArea || '-'}
-              </GradientText>
-            </ContactText>
-          </ContactItem>
-        </Box>
-      </ProjectContent>
-    </StyledProjectCard>
+        <Button
+          variant="outlined"
+          size="small"
+          fullWidth
+          endIcon={<ArrowForward sx={{ fontSize: 15 }} />}
+          onClick={onSelect}
+          sx={{
+            mt:            0.5,
+            borderRadius:  "10px",
+            fontWeight:    700,
+            fontSize:      "0.82rem",
+            textTransform: "none",
+            borderColor:   alpha(orange, 0.45),
+            color:         orange,
+            py:            0.8,
+            "&:hover": {
+              borderColor: orange,
+              bgcolor:     alpha(orange, 0.06),
+            },
+          }}
+        >
+          Projeyi Gör
+        </Button>
+      </Box>
+    </Box>
   );
 };
 

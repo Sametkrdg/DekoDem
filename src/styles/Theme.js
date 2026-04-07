@@ -144,16 +144,25 @@ const createDynamicTheme = ({ primary = {}, secondary = {}, mode = 'light' } = {
         root: {
           backgroundImage: 'none',
           ...(isDark ? {
-            background:  'rgba(13, 17, 23, 0.88)',
+            background:   'rgba(13, 17, 23, 0.90)',
             borderBottom: '1px solid rgba(240,246,252,0.06)',
-            boxShadow:   '0 2px 16px rgba(0,0,0,0.5)',
+            boxShadow:    '0 2px 24px rgba(0,0,0,0.55)',
           } : {
-            background:  'rgba(255, 255, 255, 0.92)',
-            borderBottom: '1px solid rgba(0,0,0,0.06)',
-            boxShadow:   '0 2px 16px rgba(0,0,0,0.07)',
+            background:   'rgba(255, 255, 255, 0.94)',
+            borderBottom: '1px solid rgba(0,0,0,0.05)',
+            boxShadow:    '0 2px 20px rgba(0,0,0,0.06)',
           }),
           backdropFilter:       glass.blur,
           WebkitBackdropFilter: glass.blur,
+          // Construction accent: thin primary→secondary gradient at bottom of nav
+          '&::after': {
+            content:    '""',
+            position:   'absolute',
+            left: 0, right: 0, bottom: 0,
+            height:     '2px',
+            background: `linear-gradient(90deg, ${primaryColor} 0%, ${BRAND_SECONDARY.main} 50%, ${primaryColor} 100%)`,
+            opacity:    isDark ? 0.5 : 0.35,
+          },
         },
       },
     },
@@ -183,8 +192,21 @@ const createDynamicTheme = ({ primary = {}, secondary = {}, mode = 'light' } = {
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          borderRadius:    '16px',
+          borderRadius:    '10px', // Architectural: sharper than default 16
           transition:      'transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease',
+          // Construction-grade accent strip on top edge via ::before
+          position: 'relative',
+          overflow: 'hidden',
+          '&::after': {
+            content:    '""',
+            position:   'absolute',
+            top:        0, left: 0, right: 0,
+            height:     '3px',
+            background: `linear-gradient(90deg, ${BRAND_SECONDARY.main}, ${alpha(BRAND_SECONDARY.dark, 0.6)}, transparent)`,
+            opacity:    0,
+            transition: 'opacity 0.25s ease',
+          },
+          '&:hover::after': { opacity: 1 },
           ...(isDark ? {
             background:           glass.bg,
             backdropFilter:       glass.blur,
@@ -529,29 +551,109 @@ const createDynamicTheme = ({ primary = {}, secondary = {}, mode = 'light' } = {
 
     flexCenter:       { display: 'flex', alignItems: 'center', justifyContent: 'center' },
     flexColumnCenter: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' },
+
+    // ── Construction-specific tokens ────────────────────────────────────────
+
+    // Horizontal accent rule (safety-orange → transparent)
+    // Use as a bottom-border on section headings or card headers.
+    constructionDivider: {
+      display:      'block',
+      width:        '56px',
+      height:       '4px',
+      borderRadius: '2px',
+      background:   `linear-gradient(90deg, ${BRAND_SECONDARY.main}, ${alpha(BRAND_SECONDARY.dark, 0.4)})`,
+      flexShrink:   0,
+    },
+
+    // Sharp-edged card surface — "blueprint" aesthetic
+    // Spread onto any Box that should look like a project card.
+    blueprintCard: {
+      borderRadius: '8px',
+      border:       isDark
+        ? '1px solid rgba(255,255,255,0.06)'
+        : `1px solid rgba(0,0,0,0.07)`,
+      background:   isDark ? glass.bg : '#ffffff',
+      backdropFilter:       glass.blur,
+      WebkitBackdropFilter: glass.blur,
+      overflow: 'hidden',
+      position: 'relative',
+      // Accent strip baked in
+      '&::before': {
+        content:    '""',
+        position:   'absolute',
+        top: 0, left: 0, right: 0,
+        height:     '3px',
+        background: `linear-gradient(90deg, ${primaryColor}, ${BRAND_SECONDARY.main})`,
+      },
+      transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+      '&:hover': {
+        transform:  'translateY(-4px)',
+        boxShadow:  isDark
+          ? `0 16px 40px rgba(0,0,0,0.55), 0 0 0 1px ${alpha(primaryColor, 0.2)}`
+          : `0 12px 32px ${alpha(primaryColor, 0.12)}`,
+      },
+    },
+
+    // Section overline + title + divider — standard construction-page header
+    sectionHeader: {
+      textAlign:  'center',
+      marginBottom: isDark ? '48px' : '56px',
+    },
   };
+
+  // ── Construction-grade heading font ──────────────────────────────────────
+  // Montserrat is loaded in index.html (preconnect + display=swap).
+  // Inter stays as the body/UI fallback — no render-blocking risk.
+  const HEADING_FONT = '"Montserrat", "Inter", "Roboto", "Helvetica", sans-serif';
+  const BODY_FONT    = '"Inter", "Roboto", "Helvetica", "Arial", sans-serif';
 
   return createTheme({
     palette,
     typography: {
-      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+      fontFamily:        BODY_FONT,
       fontWeightLight:   300,
       fontWeightRegular: 400,
       fontWeightMedium:  500,
       fontWeightBold:    700,
-      h1: { fontSize: '3.5rem', fontWeight: 800, lineHeight: 1.15, letterSpacing: '-0.02em', '@media (max-width:900px)': { fontSize: '2.5rem' }, '@media (max-width:600px)': { fontSize: '2rem' } },
-      h2: { fontSize: '2.5rem', fontWeight: 700, lineHeight: 1.2,  letterSpacing: '-0.01em', '@media (max-width:900px)': { fontSize: '2rem'   }, '@media (max-width:600px)': { fontSize: '1.8rem' } },
-      h3: { fontSize: '2rem',   fontWeight: 700, lineHeight: 1.25, '@media (max-width:600px)': { fontSize: '1.5rem' } },
-      h4: { fontSize: '1.5rem', fontWeight: 600, lineHeight: 1.35, '@media (max-width:600px)': { fontSize: '1.3rem' } },
-      h5: { fontSize: '1.3rem', fontWeight: 600, lineHeight: 1.4  },
-      h6: { fontSize: '1.1rem', fontWeight: 600, lineHeight: 1.5  },
-      body1:   { fontSize: '1rem',    lineHeight: 1.65 },
+      // h1–h4 use Montserrat for a structural, "built-to-last" feel
+      h1: {
+        fontFamily: HEADING_FONT,
+        fontSize: '3.5rem', fontWeight: 900, lineHeight: 1.1,
+        letterSpacing: '-0.03em',
+        '@media (max-width:900px)': { fontSize: '2.5rem' },
+        '@media (max-width:600px)': { fontSize: '2rem'   },
+      },
+      h2: {
+        fontFamily: HEADING_FONT,
+        fontSize: '2.5rem', fontWeight: 800, lineHeight: 1.15,
+        letterSpacing: '-0.025em',
+        '@media (max-width:900px)': { fontSize: '2rem'   },
+        '@media (max-width:600px)': { fontSize: '1.75rem' },
+      },
+      h3: {
+        fontFamily: HEADING_FONT,
+        fontSize: '2rem', fontWeight: 800, lineHeight: 1.2,
+        letterSpacing: '-0.02em',
+        '@media (max-width:600px)': { fontSize: '1.5rem' },
+      },
+      h4: {
+        fontFamily: HEADING_FONT,
+        fontSize: '1.5rem', fontWeight: 700, lineHeight: 1.3,
+        letterSpacing: '-0.01em',
+        '@media (max-width:600px)': { fontSize: '1.25rem' },
+      },
+      h5: { fontFamily: HEADING_FONT, fontSize: '1.25rem', fontWeight: 700, lineHeight: 1.4  },
+      h6: { fontFamily: HEADING_FONT, fontSize: '1.1rem',  fontWeight: 700, lineHeight: 1.5  },
+      body1:   { fontSize: '1rem',     lineHeight: 1.65 },
       body2:   { fontSize: '0.875rem', lineHeight: 1.55 },
       caption: { fontSize: '0.75rem',  letterSpacing: '0.02em' },
-      overline: { fontSize: '0.7rem',  letterSpacing: '0.1em', fontWeight: 700, textTransform: 'uppercase' },
+      overline: { fontSize: '0.7rem',  letterSpacing: '0.12em', fontWeight: 700, textTransform: 'uppercase' },
+      // Subtitle variants with Montserrat for sub-headings in cards/sections
+      subtitle1: { fontFamily: HEADING_FONT, fontWeight: 600, lineHeight: 1.45 },
+      subtitle2: { fontFamily: HEADING_FONT, fontWeight: 600, fontSize: '0.875rem', lineHeight: 1.45 },
     },
     spacing: 8,
-    shape: { borderRadius: 12 },
+    shape: { borderRadius: 10 }, // Architectural: tighter than default 12
     breakpoints: { values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 } },
     shadows: buildShadows(isDark, primaryColor),
     transitions: {

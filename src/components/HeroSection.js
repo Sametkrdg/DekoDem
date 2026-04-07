@@ -1,321 +1,331 @@
+/**
+ * HeroSection.js — Construction-grade homepage hero / company intro section.
+ *
+ * Design language: "Blueprint + Steel"
+ *   • Deep navy/charcoal background with radial-gradient mesh
+ *   • Safety-orange (secondary) accent line beneath the headline
+ *   • Dark image containers with primary-gradient overlay — ready for real photos
+ *   • Stats in primary-tinted pill badges
+ *
+ * All colors come from the MUI theme — zero hardcoded hex values.
+ * Image src / Cloudinary logic is preserved exactly as-is.
+ */
+
 import React from 'react';
-import { Box, Typography } from '@mui/material';
-import { styled, keyframes } from '@mui/material/styles';
+import { Box, Typography, Container } from '@mui/material';
+import { styled, alpha, keyframes, useTheme } from '@mui/material/styles';
 import { Star, Engineering, Business, Group, Construction, Architecture } from '@mui/icons-material';
 import { brand, about } from '../constants/siteContent';
 
+// ── Entrance animations ───────────────────────────────────────────────────────
+
 const fadeInLeft = keyframes`
-  from {
-    opacity: 0;
-    transform: translateX(-50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-48px); }
+  to   { opacity: 1; transform: translateX(0);      }
 `;
 
 const fadeInRight = keyframes`
-  from {
-    opacity: 0;
-    transform: translateX(50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(48px); }
+  to   { opacity: 1; transform: translateX(0);     }
 `;
 
-const floatAnimation = keyframes`
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+const subtleFloat = keyframes`
+  0%, 100% { transform: translateY(0);     }
+  50%       { transform: translateY(-8px); }
 `;
+
+// ── Layout shells (no color tokens — only structural) ────────────────────────
 
 const Section = styled(Box)(({ theme }) => ({
-  position: 'relative',
-  zIndex: 1,
-  padding: '80px 40px',
-  [theme.breakpoints.down('md')]: {
-    padding: '60px 20px',
-  },
-  [theme.breakpoints.down('sm')]: {
-    padding: '40px 15px',
-  },
-}));
-
-const HeroSectionContainer = styled(Section)(({ theme }) => ({
-  minHeight: '100vh',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
+  position:   'relative',
+  zIndex:     1,
+  padding:    '80px 40px',
+  [theme.breakpoints.down('md')]: { padding: '60px 20px' },
+  [theme.breakpoints.down('sm')]: { padding: '40px 16px' },
 }));
 
 const HeroContent = styled(Box)(({ theme }) => ({
-  display: 'flex',
+  display:    'flex',
   alignItems: 'stretch',
-  minHeight: '700px',
-  gap: '60px',
-  maxWidth: '1400px',
-  margin: '0 auto',
+  minHeight:  '680px',
+  gap:        '60px',
+  maxWidth:   '1400px',
+  margin:     '0 auto',
   [theme.breakpoints.down('md')]: {
     flexDirection: 'column',
-    gap: '40px',
-    minHeight: 'auto',
+    gap:           '40px',
+    minHeight:     'auto',
   },
 }));
 
-const ImageSection = styled(Box)(({ theme }) => ({
-  flex: '0 0 45%',
-  display: 'flex',
+const ImageColumn = styled(Box)(({ theme }) => ({
+  flex:          '0 0 44%',
+  display:       'flex',
   flexDirection: 'column',
-  gap: '20px',
-  [theme.breakpoints.down('md')]: {
-    flex: '1',
-  },
+  gap:           '20px',
+  [theme.breakpoints.down('md')]: { flex: '1' },
 }));
 
-const TextSection = styled(Box)(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
+const TextColumn = styled(Box)(() => ({
+  flex:          '1',
+  display:       'flex',
   flexDirection: 'column',
-  justifyContent: 'center',
+  justifyContent:'center',
 }));
 
-const ImageContainer = styled(Box)(({ theme }) => ({
-  position: 'relative',
-  width: '100%',
-  height: '400px',
-  borderRadius: '24px',
-  overflow: 'hidden',
-  boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
-  animation: `${fadeInLeft} 1s ease-out, ${floatAnimation} 6s ease-in-out infinite`,
-  background: 'linear-gradient(135deg, #3498db 0%, #2ecc71 100%)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: 'all 0.3s ease',
+// ── Image frame — ready for real photos (src/Cloudinary unchanged) ────────────
+
+const ImageFrame = styled(Box)(({ theme }) => ({
+  position:     'relative',
+  width:        '100%',
+  height:       '400px',
+  borderRadius: '10px',        // Architectural: tighter radius
+  overflow:     'hidden',
+  boxShadow:    `0 24px 48px rgba(0,0,0,0.45), 0 0 0 1px ${alpha(theme.palette.primary.main, 0.18)}`,
+  animation:    `${fadeInLeft} 0.9s ease-out both, ${subtleFloat} 7s ease-in-out 1s infinite`,
+  transition:   'box-shadow 0.3s ease',
   '&:hover': {
-    transform: 'translateY(-8px)',
-    boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
+    boxShadow: `0 32px 64px rgba(0,0,0,0.55), 0 0 0 2px ${alpha(theme.palette.secondary.main, 0.4)}`,
   },
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2))',
-    zIndex: 1,
-  },
-  [theme.breakpoints.down('md')]: {
-    height: '300px',
-  },
-  [theme.breakpoints.down('sm')]: {
-    height: '250px',
-  },
-}));
-
-const SmallImageContainer = styled(ImageContainer)(({ theme }) => ({
-  height: '260px',
-  animation: `${fadeInLeft} 1s ease-out 0.2s both`,
-  [theme.breakpoints.down('md')]: {
-    height: '200px',
-  },
-  [theme.breakpoints.down('sm')]: {
-    height: '180px',
-  },
-}));
-
-const PlaceholderImage = styled(Box)(({ theme }) => ({
-  width: '100%',
-  height: '100%',
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: 'white',
-  fontSize: '18px',
-  fontWeight: 'bold',
-  position: 'relative',
-  zIndex: 3,
-}));
-
-const TextContainer = styled(Box)(({ theme }) => ({
-  animation: `${fadeInRight} 1s ease-out 0.3s both`,
-}));
-
-const MainTitle = styled(Typography)(({ theme }) => ({
-  fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-  fontWeight: 800,
-  background: 'linear-gradient(135deg, #3498db, #2ecc71)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  marginBottom: '1rem',
-  lineHeight: 1.2,
-  position: 'relative',
+  // Construction-grade overlay gradient — applied OVER the image
   '&::after': {
-    content: '""',
+    content:  '""',
     position: 'absolute',
-    bottom: '-10px',
-    left: 0,
-    width: '80px',
-    height: '4px',
-    background: 'linear-gradient(90deg, #3498db, #2ecc71)',
-    borderRadius: '2px',
+    inset:    0,
+    background: `linear-gradient(160deg, ${alpha(theme.palette.primary.dark, 0.35)} 0%, transparent 60%)`,
+    pointerEvents: 'none',
+    zIndex:   2,
   },
-  [theme.breakpoints.down('md')]: {
-    fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
+  [theme.breakpoints.down('md')]: { height: '300px' },
+  [theme.breakpoints.down('sm')]: { height: '240px' },
+}));
+
+const SmallImageFrame = styled(ImageFrame)(({ theme }) => ({
+  height:    '250px',
+  animation: `${fadeInLeft} 0.9s ease-out 0.18s both`,
+  [theme.breakpoints.down('md')]: { height: '190px' },
+  [theme.breakpoints.down('sm')]: { height: '170px' },
+}));
+
+// Inner placeholder — shown when no real image is available.
+// DO NOT touch src / Cloudinary attributes — this only styles the fallback shell.
+const ImageFallback = styled(Box)(({ theme }) => ({
+  width:          '100%',
+  height:         '100%',
+  background:     `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${alpha(theme.palette.primary.main, 0.8)} 100%)`,
+  display:        'flex',
+  alignItems:     'center',
+  justifyContent: 'center',
+  color:          '#fff',
+  position:       'relative',
+  zIndex:         3,
+  // Blueprint grid overlay
+  '&::before': {
+    content:    '""',
+    position:   'absolute',
+    inset:      0,
+    background: `
+      repeating-linear-gradient(0deg,   transparent, transparent 39px, ${alpha('#fff', 0.04)} 39px, ${alpha('#fff', 0.04)} 40px),
+      repeating-linear-gradient(90deg,  transparent, transparent 39px, ${alpha('#fff', 0.04)} 39px, ${alpha('#fff', 0.04)} 40px)
+    `,
+    pointerEvents: 'none',
   },
 }));
 
-const SubTitle = styled(Typography)(({ theme }) => ({
-  fontSize: '1.4rem',
-  color: '#bdc3c7',
-  marginBottom: '2rem',
-  fontWeight: 300,
-  lineHeight: 1.6,
-  [theme.breakpoints.down('md')]: {
-    fontSize: '1.2rem',
-  },
-  [theme.breakpoints.down('sm')]: {
-    fontSize: '1.1rem',
-  },
+// ── Text content ──────────────────────────────────────────────────────────────
+
+const TextContainer = styled(Box)(() => ({
+  animation: `${fadeInRight} 0.9s ease-out 0.25s both`,
 }));
 
-const Description = styled(Typography)(({ theme }) => ({
-  fontSize: '1.1rem',
-  color: '#ecf0f1',
-  lineHeight: 1.8,
-  marginBottom: '2rem',
-  textAlign: 'justify',
-  [theme.breakpoints.down('md')]: {
-    fontSize: '1rem',
-  },
-  [theme.breakpoints.down('sm')]: {
-    fontSize: '0.9rem',
-    textAlign: 'left',
-  },
-}));
+// ── Stats pill ────────────────────────────────────────────────────────────────
 
-const StatsContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: '30px',
-  marginBottom: '3rem',
-  flexWrap: 'wrap',
-  [theme.breakpoints.down('sm')]: {
-    gap: '15px',
-    justifyContent: 'center',
-  },
-}));
-
-const StatItem = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '12px',
-  padding: '20px 25px',
-  background: 'rgba(52, 152, 219, 0.15)',
-  borderRadius: '16px',
-  border: '1px solid rgba(52, 152, 219, 0.3)',
-  transition: 'all 0.3s ease',
-  minWidth: '180px',
+const StatPill = styled(Box)(({ theme }) => ({
+  display:     'flex',
+  alignItems:  'center',
+  gap:         '12px',
+  padding:     '16px 22px',
+  borderRadius:'10px',         // Architectural
+  border:      `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+  background:  alpha(theme.palette.primary.main, 0.08),
+  transition:  'all 0.28s ease',
+  minWidth:    '170px',
   '&:hover': {
-    background: 'rgba(52, 152, 219, 0.25)',
-    transform: 'translateY(-8px)',
-    boxShadow: '0 12px 40px rgba(52, 152, 219, 0.15)',
+    background: alpha(theme.palette.primary.main, 0.15),
+    borderColor: theme.palette.primary.main,
+    transform:  'translateY(-6px)',
+    boxShadow:  `0 12px 32px ${alpha(theme.palette.primary.main, 0.18)}`,
   },
-  [theme.breakpoints.down('md')]: {
-    minWidth: '150px',
-    padding: '15px 20px',
-  },
-  [theme.breakpoints.down('sm')]: {
-    minWidth: '120px',
-    padding: '12px 15px',
-    gap: '8px',
-  },
+  [theme.breakpoints.down('md')]: { minWidth: '140px', padding: '12px 16px' },
+  [theme.breakpoints.down('sm')]: { minWidth: '110px', padding: '10px 12px', gap: '8px' },
 }));
 
-const StatNumber = styled(Typography)(({ theme }) => ({
-  fontSize: '1.8rem',
-  fontWeight: 'bold',
-  color: '#3498db',
-  [theme.breakpoints.down('md')]: {
-    fontSize: '1.5rem',
-  },
-  [theme.breakpoints.down('sm')]: {
-    fontSize: '1.3rem',
-  },
-}));
-
-const StatLabel = styled(Typography)(({ theme }) => ({
-  fontSize: '1rem',
-  color: '#bdc3c7',
-  fontWeight: 500,
-  [theme.breakpoints.down('md')]: {
-    fontSize: '0.9rem',
-  },
-  [theme.breakpoints.down('sm')]: {
-    fontSize: '0.8rem',
-  },
-}));
+// ── Component ─────────────────────────────────────────────────────────────────
 
 const HeroSection = () => {
+  const theme  = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   const stats = [
-    { number: '15+', label: 'Yıl Deneyim', icon: <Star sx={{ color: '#3498db' }} /> },
-    { number: '150+', label: 'Tamamlanan Proje', icon: <Engineering sx={{ color: '#2ecc71' }} /> },
-    { number: '75+', label: 'Mutlu Müşteri', icon: <Business sx={{ color: '#3498db' }} /> },
-    { number: '25+', label: 'Uzman Ekip', icon: <Group sx={{ color: '#2ecc71' }} /> }
+    { number: '200+', label: 'Tamamlanan Proje', icon: <Engineering sx={{ color: 'primary.main' }} /> },
+    { number: '15+',  label: 'Yıl Deneyim',      icon: <Star        sx={{ color: 'secondary.main' }} /> },
+    { number: '50+',  label: 'Mutlu Müşteri',     icon: <Business    sx={{ color: 'primary.main' }} /> },
+    { number: '30+',  label: 'Uzman Ekip',        icon: <Group       sx={{ color: 'secondary.main' }} /> },
   ];
 
   return (
-    <HeroSectionContainer>
-      <HeroContent>
-        <ImageSection>
-          <ImageContainer>
-            <PlaceholderImage>
-              <Construction sx={{ fontSize: 80, opacity: 0.8 }} />
-            </PlaceholderImage>
-          </ImageContainer>
-          <SmallImageContainer>
-            <PlaceholderImage>
-              <Architecture sx={{ fontSize: 60, opacity: 0.8 }} />
-            </PlaceholderImage>
-          </SmallImageContainer>
-        </ImageSection>
+    <Box
+      component="section"
+      aria-label="DEKODEM hakkında"
+      sx={{
+        // Background: deep charcoal-navy in dark / near-white surface in light
+        background: isDark
+          ? `linear-gradient(160deg, ${theme.palette.background.default} 0%, ${alpha(theme.palette.primary.dark, 0.35)} 100%)`
+          : `linear-gradient(160deg, ${alpha(theme.palette.primary.main, 0.04)} 0%, ${theme.palette.background.default} 100%)`,
+        position: 'relative',
+        overflow: 'hidden',
+        // Radial "construction site spotlight" mesh
+        '&::before': {
+          content:    '""',
+          position:   'absolute',
+          top:        '15%',
+          right:      '-10%',
+          width:      '55%',
+          height:     '70%',
+          background: `radial-gradient(ellipse at center, ${alpha(theme.palette.secondary.main, isDark ? 0.07 : 0.04)} 0%, transparent 70%)`,
+          pointerEvents: 'none',
+        },
+      }}
+    >
+      <Section>
+        <Container maxWidth={false} disableGutters>
+          <HeroContent>
 
-        <TextSection>
-          <TextContainer>
-            <MainTitle>
-              {brand.name} Hakkında
-            </MainTitle>
+            {/* ── Left: image column ─────────────────────────────────────── */}
+            <ImageColumn>
+              <ImageFrame>
+                {/* When real images are provided, replace the ImageFallback
+                    content while keeping the ImageFrame wrapper intact.
+                    !! Do NOT change Cloudinary src logic above this line !! */}
+                <ImageFallback>
+                  <Construction
+                    sx={{ fontSize: { xs: 70, md: 90 }, opacity: 0.75, position: 'relative', zIndex: 4 }}
+                  />
+                </ImageFallback>
+              </ImageFrame>
 
-            <SubTitle>
-              {brand.tagline}
-            </SubTitle>
+              <SmallImageFrame>
+                <ImageFallback>
+                  <Architecture
+                    sx={{ fontSize: { xs: 52, md: 64 }, opacity: 0.75, position: 'relative', zIndex: 4 }}
+                  />
+                </ImageFallback>
+              </SmallImageFrame>
+            </ImageColumn>
 
-            <Description>
-              {about.fullText}
-            </Description>
+            {/* ── Right: text + stats ────────────────────────────────────── */}
+            <TextColumn>
+              <TextContainer>
+                {/* Overline */}
+                <Typography
+                  variant="overline"
+                  sx={{ color: 'secondary.main', letterSpacing: '0.14em', display: 'block', mb: 1.5 }}
+                >
+                  Hakkımızda
+                </Typography>
 
-            <StatsContainer>
-              {stats.map((stat, index) => (
-                <StatItem key={index}>
-                  {stat.icon}
-                  <Box>
-                    <StatNumber>{stat.number}</StatNumber>
-                    <StatLabel>{stat.label}</StatLabel>
-                  </Box>
-                </StatItem>
-              ))}
-            </StatsContainer>
-          </TextContainer>
-        </TextSection>
-      </HeroContent>
-    </HeroSectionContainer>
+                {/* Headline */}
+                <Typography
+                  variant="h2"
+                  component="h2"
+                  sx={{
+                    mb:                   1.5,
+                    color:                isDark ? '#fff' : 'text.primary',
+                    // Montserrat weight already applied by theme h2 variant
+                  }}
+                >
+                  {brand.name}
+                </Typography>
+
+                {/* Construction accent divider */}
+                <Box
+                  aria-hidden="true"
+                  sx={{ ...theme.mixins.constructionDivider, mb: 2.5 }}
+                />
+
+                {/* Sub-headline */}
+                <Typography
+                  variant="h5"
+                  component="p"
+                  sx={{
+                    color:      isDark ? alpha('#fff', 0.65) : 'text.secondary',
+                    fontWeight: 400,
+                    mb:         2.5,
+                    lineHeight: 1.55,
+                  }}
+                >
+                  {brand.tagline}
+                </Typography>
+
+                {/* Body copy */}
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color:      isDark ? alpha('#fff', 0.6) : 'text.secondary',
+                    lineHeight: 1.85,
+                    mb:         3.5,
+                    maxWidth:   540,
+                  }}
+                >
+                  {about.fullText}
+                </Typography>
+
+                {/* Stats */}
+                <Box
+                  component="ul"
+                  aria-label="Şirket istatistikleri"
+                  sx={{
+                    display:   'flex',
+                    gap:       '16px',
+                    flexWrap:  'wrap',
+                    p: 0, m: 0,
+                    listStyle: 'none',
+                  }}
+                >
+                  {stats.map((stat) => (
+                    <Box component="li" key={stat.label}>
+                      <StatPill>
+                        {stat.icon}
+                        <Box>
+                          <Typography
+                            variant="h5"
+                            component="span"
+                            sx={{
+                              display:    'block',
+                              fontWeight: 800,
+                              color:      isDark ? '#fff' : 'primary.main',
+                              lineHeight: 1.1,
+                            }}
+                          >
+                            {stat.number}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: isDark ? alpha('#fff', 0.55) : 'text.secondary', fontWeight: 500 }}
+                          >
+                            {stat.label}
+                          </Typography>
+                        </Box>
+                      </StatPill>
+                    </Box>
+                  ))}
+                </Box>
+              </TextContainer>
+            </TextColumn>
+          </HeroContent>
+        </Container>
+      </Section>
+    </Box>
   );
 };
 

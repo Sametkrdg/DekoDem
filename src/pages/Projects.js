@@ -1,237 +1,170 @@
-// pages/Projects.js
-import React, { useMemo, useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+/**
+ * Projects.js — Dynamic listing page.
+ * Real-time Firestore `Projects` collection via onSnapshot.
+ * Schema: { Name, Summary, PhotoUrl, Description, Services[] }
+ */
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  Box, Typography, ToggleButton, ToggleButtonGroup, MenuItem,
-  Select, FormControl, InputLabel, Grid, Pagination, Divider,
+  Box, Container, Grid, Typography, CircularProgress,
 } from "@mui/material";
-import ProjectsHeader from "../components/ProjectsHeader";
+import { alpha, useTheme } from "@mui/material/styles";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { db, isFirebaseConfigured } from "../config/firebase";
+import { buildCloudinaryUrl } from "../services/cloudinary";
 import ProjectCard from "../components/ProjectCard";
-import StatsSection from "../components/StatsSection";
-import { ProjectsGridSkeleton } from "../components/Skeletons";
-import EmptyState from "../components/EmptyState";
-import { useSite } from "../context/SiteContext";
-import { SectionContainer } from "../styles/StyledComponents";
-import defaultProjects from "../data/projects";
-import { Construction } from "@mui/icons-material";
+import { PATHS } from "../constants/navigation";
 
-const PAGE_SIZE = 6;
-
-const STATUS_FILTERS = ["Tümü", "Tamamlandı", "Devam Ediyor", "Planlama"];
-
-const SORT_OPTIONS = [
-  { value: "default",  label: "Varsayılan" },
-  { value: "year-desc", label: "En Yeni" },
-  { value: "year-asc",  label: "En Eski" },
-  { value: "area-desc", label: "Alan (Büyükten Küçüğe)" },
-  { value: "area-asc",  label: "Alan (Küçükten Büyüğe)" },
-];
-
-const parseArea = (areaStr = "") => {
-  const n = parseFloat(areaStr.replace(/[^\d.]/g, ""));
-  return isNaN(n) ? 0 : n;
-};
-
-const normalizeProject = (project, index) => {
-  if (!project) return null;
-  const title = project.ad || project.title || `Proje ${index + 1}`;
-  const slug  = project.slug || project.permalink || `proje-${index + 1}`;
+// ── Shape: Firestore doc → card prop ─────────────────────────────────────────
+const fromDoc = (snap) => {
+  const d = snap.data();
   return {
-    ...project,
-    ad:      title,
-    slug,
-    aciklama: project.aciklama || project.description || "",
-    yer:      project.yer || project.location || "Belirtilmedi",
-    yıl:      project.yıl || project.year || "",
-    durum:    project.durum || project.status || "Devam Ediyor",
-    alan:     project.alan || project.area || "",
-    icon:     project.icon || project.emoji || "🏗️",
-    imageUrl: project.imageUrl || project.coverImage || project.gorsel || "",
+    id:       snap.id,
+    name:     d.Name     ?? "",
+    summary:  d.Summary  ?? "",
+    photoUrl: d.PhotoUrl ?? "",
+    slug:     snap.id,
   };
 };
 
+// ── Page ──────────────────────────────────────────────────────────────────────
 const Projects = () => {
+  const theme    = useTheme();
+  const isDark   = theme.palette.mode === "dark";
+  const orange   = theme.palette.secondary?.main ?? theme.palette.primary.main;
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { siteContent, loading } = useSite();
 
-  // Read filters from URL
-  const urlStatus = searchParams.get("durum") || "Tümü";
-  const urlSort   = searchParams.get("siralama") || "default";
-  const urlPage   = parseInt(searchParams.get("sayfa") || "1", 10);
+  const [projects, setProjects] = useState(null); // null = loading
 
-  const [status, setStatus] = useState(urlStatus);
-  const [sort,   setSort]   = useState(urlSort);
-  const [page,   setPage]   = useState(urlPage);
-
-  // Sync state → URL
   useEffect(() => {
-    const params = {};
-    if (status !== "Tümü")   params.durum    = status;
-    if (sort   !== "default") params.siralama = sort;
-    if (page   !== 1)         params.sayfa    = String(page);
-    setSearchParams(params, { replace: true });
-  }, [status, sort, page, setSearchParams]);
-
-  // Reset page on filter / sort change
-  const handleStatus = (_, val) => { if (val) { setStatus(val); setPage(1); } };
-  const handleSort   = (e)      => { setSort(e.target.value); setPage(1); };
-
-  const availableSlugs = useMemo(
-    () => new Set(defaultProjects.map((p) => p.slug)),
-    []
-  );
-
-  const allProjects = useMemo(() => {
-    const source =
-      siteContent?.projects?.length ? siteContent.projects : defaultProjects;
-    return source
-      .map((p, i) => normalizeProject(p, i))
-      .filter(Boolean)
-      .map((p) => ({ ...p, canNavigate: availableSlugs.has(p.slug) }));
-  }, [siteContent, availableSlugs]);
-
-  // Filter
-  const filtered = useMemo(() => {
-    if (status === "Tümü") return allProjects;
-    return allProjects.filter((p) => p.durum === status);
-  }, [allProjects, status]);
-
-  // Sort
-  const sorted = useMemo(() => {
-    const arr = [...filtered];
-    switch (sort) {
-      case "year-desc": return arr.sort((a, b) => (b.yıl || 0) - (a.yıl || 0));
-      case "year-asc":  return arr.sort((a, b) => (a.yıl || 0) - (b.yıl || 0));
-      case "area-desc": return arr.sort((a, b) => parseArea(b.alan) - parseArea(a.alan));
-      case "area-asc":  return arr.sort((a, b) => parseArea(a.alan) - parseArea(b.alan));
-      default:          return arr;
+    if (!isFirebaseConfigured || !db) {
+      setProjects([]);
+      return;
     }
-  }, [filtered, sort]);
 
-  // Paginate
-  const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
-  const paginated  = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const handleSelect = (project) => {
-    if (project?.slug && availableSlugs.has(project.slug)) {
-      navigate(`/projeler/${project.slug}`);
-    }
-  };
-
-  if (loading) {
-    return (
-      <SectionContainer maxWidth="lg">
-        <ProjectsHeader />
-        <ProjectsGridSkeleton count={6} />
-      </SectionContainer>
+    const q     = query(collection(db, "Projects"), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(
+      q,
+      (snap) => setProjects(snap.docs.map(fromDoc)),
+      (err)  => {
+        console.error("[Projects] onSnapshot error:", err);
+        setProjects([]);
+      }
     );
-  }
+    return unsub;
+  }, []);
+
+  const loading = projects === null;
 
   return (
-    <SectionContainer maxWidth="lg">
-      <ProjectsHeader />
-
-      {/* ── Filters & sort bar ─────────────────────────────────────────────── */}
+    <>
+      {/* ── Hero banner ──────────────────────────────────────────────────── */}
       <Box
+        component="header"
         sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 2,
-          mb: 4,
+          background: isDark
+            ? "linear-gradient(135deg, #0d1117 0%, #1a2235 60%, #0d2137 100%)"
+            : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+          color:    "#fff",
+          pt:       { xs: 12, md: 15 },
+          pb:       { xs: 7,  md: 9  },
+          textAlign:"center",
+          position: "relative",
+          overflow: "hidden",
+          "&::before": {
+            content:    "\"\"",
+            position:   "absolute",
+            inset:      0,
+            background: "radial-gradient(ellipse 70% 55% at 50% 40%, rgba(255,255,255,0.07) 0%, transparent 70%)",
+            pointerEvents: "none",
+          },
         }}
       >
-        {/* Status filter */}
-        <ToggleButtonGroup
-          value={status}
-          exclusive
-          onChange={handleStatus}
-          size="small"
-          sx={{ flexWrap: "wrap" }}
-        >
-          {STATUS_FILTERS.map((s) => (
-            <ToggleButton
-              key={s}
-              value={s}
-              sx={{
-                fontWeight: 600,
-                textTransform: "none",
-                px: 2.5,
-                "&.Mui-selected": {
-                  bgcolor: "primary.main",
-                  color: "#fff",
-                  "&:hover": { bgcolor: "primary.dark" },
-                },
-              }}
-            >
-              {s}
-              {s !== "Tümü" && (
-                <Box
-                  component="span"
-                  sx={{ ml: 0.75, opacity: 0.7, fontSize: "0.75rem" }}
-                >
-                  ({allProjects.filter((p) => p.durum === s).length})
-                </Box>
-              )}
-            </ToggleButton>
-          ))}
-        </ToggleButtonGroup>
-
-        {/* Sort */}
-        <FormControl size="small" sx={{ minWidth: 200 }}>
-          <InputLabel>Sıralama</InputLabel>
-          <Select value={sort} label="Sıralama" onChange={handleSort}>
-            {SORT_OPTIONS.map((o) => (
-              <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <Container maxWidth="md">
+          <Typography
+            variant="overline"
+            sx={{
+              color: alpha(orange, 0.9), fontWeight: 700,
+              letterSpacing: "0.14em", display: "block", mb: 1,
+            }}
+          >
+            PORTFÖYÜMÜz
+          </Typography>
+          <Typography
+            variant="h2"
+            component="h1"
+            fontWeight={800}
+            sx={{ lineHeight: 1.15, fontSize: { xs: "2rem", md: "3rem" } }}
+          >
+            Projelerimiz
+          </Typography>
+          <Typography
+            sx={{
+              color: "rgba(255,255,255,0.75)", mt: 2,
+              maxWidth: 540, mx: "auto", lineHeight: 1.75,
+            }}
+          >
+            Kaliteli tasarım ve mükemmel işçilikle hayata geçirdiğimiz projeleri keşfedin.
+          </Typography>
+        </Container>
       </Box>
 
-      <Divider sx={{ mb: 4 }} />
+      {/* ── Content ──────────────────────────────────────────────────────── */}
+      <Container maxWidth="lg" sx={{ py: { xs: 7, md: 10 } }}>
 
-      {/* ── Results count ──────────────────────────────────────────────────── */}
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        {filtered.length} proje bulundu
-        {status !== "Tümü" && ` — Filtre: ${status}`}
-      </Typography>
+        {/* Loading */}
+        {loading && (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
+            <CircularProgress />
+          </Box>
+        )}
 
-      {/* ── Grid ──────────────────────────────────────────────────────────── */}
-      {paginated.length === 0 ? (
-        <EmptyState
-          icon={<Construction />}
-          title="Proje bulunamadı"
-          description={`"${status}" durumunda henüz proje yok. Filtreyi değiştirmeyi deneyin.`}
-          action={{ label: "Tüm Projeleri Gör", onClick: () => { setStatus("Tümü"); setPage(1); } }}
-        />
-      ) : (
-        <Grid container spacing={4} sx={{ mb: 4 }}>
-          {paginated.map((proje, i) => (
-            <Grid item xs={12} md={6} key={i}>
-              <ProjectCard proje={proje} onSelect={handleSelect} />
-            </Grid>
-          ))}
-        </Grid>
-      )}
+        {/* Empty state */}
+        {!loading && projects.length === 0 && (
+          <Box sx={{ textAlign: "center", py: 12 }}>
+            <Typography variant="h5" fontWeight={700} gutterBottom>
+              Henüz proje eklenmedi
+            </Typography>
+            <Typography color="text.secondary">
+              Admin panelinden yeni proje oluşturun.
+            </Typography>
+          </Box>
+        )}
 
-      {/* ── Pagination ─────────────────────────────────────────────────────── */}
-      {totalPages > 1 && (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 2, mb: 8 }}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={(_, val) => { setPage(val); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-            color="primary"
-            shape="rounded"
-            size="large"
-          />
-        </Box>
-      )}
-
-      <StatsSection />
-    </SectionContainer>
+        {/* Grid */}
+        {!loading && projects.length > 0 && (
+          <Grid container spacing={3}>
+            {projects.map((project, idx) => (
+              <Grid item xs={12} sm={6} lg={4} key={project.id}>
+                <Box
+                  sx={{
+                    height:            "100%",
+                    animationName:     "fadeUp",
+                    animationDuration: "0.4s",
+                    animationDelay:    `${idx * 0.06}s`,
+                    animationFillMode: "both",
+                    "@keyframes fadeUp": {
+                      from: { opacity: 0, transform: "translateY(18px)" },
+                      to:   { opacity: 1, transform: "translateY(0)"    },
+                    },
+                  }}
+                >
+                  <ProjectCard
+                    project={project}
+                    imageUrl={
+                      project.photoUrl
+                        ? buildCloudinaryUrl(project.photoUrl, { width: 600, height: 400, crop: "fill" })
+                        : null
+                    }
+                    onSelect={() => navigate(`${PATHS.PROJECTS}/${project.slug}`)}
+                  />
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </Container>
+    </>
   );
 };
 

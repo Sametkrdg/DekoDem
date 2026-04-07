@@ -10,13 +10,14 @@
 import React, { useEffect, useState } from "react";
 import {
   Box, Grid, TextField, Button, Typography,
-  CircularProgress, Alert, Divider, Avatar,
+  CircularProgress, Alert,
 } from "@mui/material";
-import { Save, Refresh, Settings, Info, Palette } from "@mui/icons-material";
+import { Save, Settings, Info, Palette } from "@mui/icons-material";
 import { AdminCard, FormSection, SectionHeader, SectionTitle } from "../shared";
 import { setDocument, getDocument } from "../adminFirestore";
 import { isFirebaseConfigured } from "../../config/firebase";
 import { hueSaturationToHex, updateThemeFromHex } from "../../styles/Theme";
+import ImageUploader from "../../components/ImageUploader.jsx";
 
 const DEFAULT_THEME = { hue: 8, saturation: 72 };
 
@@ -167,26 +168,17 @@ const GeneralSettingsPanel = ({ settings, setSettings, showSnackbar }) => {
                   placeholder="https://www.instagram.com/dekodem.com.tr/" sx={fieldSx}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth label="Logo URL" value={contact.LogoUrl}
-                  onChange={(e) => handleContactChange("LogoUrl", e.target.value)}
-                  placeholder="https://example.com/logo.png" sx={fieldSx}
+              <Grid item xs={12}>
+                <ImageUploader
+                  label="Firma Logosu (LogoUrl)"
+                  value={contact.LogoUrl}
+                  onChange={(url) => handleContactChange("LogoUrl", url)}
+                  folder="dekodem/brand"
+                  showSnackbar={showSnackbar}
+                  aspectRatio="3/1"
+                  maxSizeMB={5}
                 />
               </Grid>
-              {contact.LogoUrl && (
-                <Grid item xs={12}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <Typography variant="caption" color="text.secondary">Logo önizleme:</Typography>
-                    <Avatar
-                      src={contact.LogoUrl}
-                      variant="rounded"
-                      sx={{ width: 64, height: 64 }}
-                      onError={(e) => { e.target.src = ""; }}
-                    />
-                  </Box>
-                </Grid>
-              )}
               <Grid item xs={12}>
                 <Button
                   variant="contained" startIcon={savingC ? <CircularProgress size={18} color="inherit" /> : <Save />}

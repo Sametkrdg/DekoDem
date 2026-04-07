@@ -8,6 +8,7 @@ import { Article, Home, NavigateNext, CalendarMonth } from "@mui/icons-material"
 import { getBlogs as getPosts } from "../services/firestore";
 import { BlogGridSkeleton } from "../components/Skeletons";
 import EmptyState from "../components/EmptyState";
+import { PATHS } from "../constants/navigation";
 
 const formatDate = (ts) => {
   if (!ts) return "";
@@ -24,8 +25,8 @@ const Blog = () => {
       .then((data) =>
         setPosts(
           (data || []).map((b) => ({
-            id:          b.id,
-            slug:        b.id,                    // doc id used as URL slug
+            id:          b._docId ?? b.id,        // getBlogs() returns _docId
+            slug:        b._docId ?? b.id,        // doc id used as URL slug
             title:       b.Name        ?? '',
             body:        b.Content     ?? '',
             coverImage:  b.CoverImg    ?? '',
@@ -98,7 +99,7 @@ const Blog = () => {
                 >
                   <CardActionArea
                     component={Link}
-                    to={`/haberler/${post.slug}`}
+                    to={`${PATHS.BLOG}/${post.slug}`}
                     sx={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "flex-start" }}
                   >
                     {/* Cover image */}
