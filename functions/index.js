@@ -36,9 +36,9 @@ const https     = require("https");
 const querystring = require("querystring");
 
 // ── CORS — allow requests only from the deployed domain ──────────────────────
-// In production, restrict this to your actual domain, e.g. "https://dekodemyapi.com"
+// In production, restrict this to your actual domain, e.g. "https://dekodemyapı.com"
 const ALLOWED_ORIGINS = [
-  "https://dekodemyapi.com",
+  "https://dekodemyapı.com",
   "http://localhost:3000",          // CRA dev server
   "http://localhost:5000",          // Firebase Hosting emulator
 ];

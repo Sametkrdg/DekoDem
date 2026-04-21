@@ -161,7 +161,7 @@ const PrivacyPolicy = () => {
             ))}
           </Box>
           <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, mt: 2 }}>
-            Bu haklarınızı kullanmak için <strong>dekodemyapi@gmail.com</strong> adresine
+            Bu haklarınızı kullanmak için <strong>dekodemyapı@gmail.com</strong> adresine
             e-posta göndererek veya şirket adresimize yazılı olarak başvurabilirsiniz.
             Talebiniz en geç 30 gün içinde yanıtlanacaktır.
           </Typography>
@@ -193,7 +193,7 @@ const PrivacyPolicy = () => {
         <Section title="11. İletişim">
           <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
             Bu politikayla ilgili sorularınız için:<br />
-            <strong>E-posta:</strong> dekodemyapi@gmail.com<br />
+            <strong>E-posta:</strong> dekodemyapı@gmail.com<br />
             <strong>Adres:</strong> Alikahya Merkez Mah. Sakıp Sabancı Bulv. No: 26/A, İzmit / Kocaeli<br />
             <strong>Telefon:</strong> +90 537 466 71 72
           </Typography>

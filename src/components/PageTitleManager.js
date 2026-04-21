@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const SITE_NAME    = "DEKODEM";
-const PROD_ORIGIN  = "https://dekodemyapi.com";
+const PROD_ORIGIN  = "https://dekodemyapı.com";
 
 /**
  * Per-route SEO metadata.

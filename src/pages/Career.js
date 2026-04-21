@@ -140,7 +140,7 @@ const Career = () => {
             icon={<WorkOutline />}
             title="Şu an aktif bir ilan yok"
             description="Uygun bir pozisyon bulamasanız da özgeçmişinizi bize gönderebilirsiniz. Sizi ilerleyen süreçlerde değerlendiririz."
-            action={{ label: "Özgeçmiş Gönder", href: "mailto:dekodemyapi@gmail.com" }}
+            action={{ label: "Özgeçmiş Gönder", href: "mailto:dekodemyapı@gmail.com" }}
           />
         ) : (
           <Grid container spacing={3}>
@@ -185,7 +185,7 @@ const Career = () => {
                       variant="outlined"
                       fullWidth
                       component="a"
-                      href={`mailto:dekodemyapi@gmail.com?subject=${encodeURIComponent(pos.title)} Başvurusu`}
+                      href={`mailto:dekodemyapı@gmail.com?subject=${encodeURIComponent(pos.title)} Başvurusu`}
                       startIcon={<Send />}
                     >
                       Başvur
@@ -209,7 +209,7 @@ const Career = () => {
             <Button
               variant="contained"
               component="a"
-              href="mailto:dekodemyapi@gmail.com"
+              href="mailto:dekodemyapı@gmail.com"
               startIcon={<Send />}
             >
               Özgeçmiş Gönder

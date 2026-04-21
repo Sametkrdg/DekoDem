@@ -1,4 +1,4 @@
-# robots.txt — DEKODEM (https://dekodemyapi.com)
+# robots.txt — DEKODEM (https://dekodemyapı.com)
 # Specification: https://www.robotstxt.org/robotstxt.html
 
 # ── Allow all major crawlers ─────────────────────────────────────────────────
@@ -27,4 +27,4 @@ Allow: /faaliyet-alanlari/
 # Crawl-delay: 1
 
 # ── Sitemap pointer ──────────────────────────────────────────────────────────
-Sitemap: https://dekodemyapi.com/sitemap.xml
+Sitemap: https://dekodemyapı.com/sitemap.xml

@@ -22,7 +22,7 @@ const BRANCHES = [
     name:    "İzmit Merkez Şube",
     address: "Alikahya Merkez Mah. Sakıp Sabancı Bulv. No: 26/A, İzmit / Kocaeli",
     phone:   "+90 537 466 71 72",
-    email:   "dekodemyapi@gmail.com",
+    email:   "dekodemyapı@gmail.com",
   },
 ];
 
