@@ -6,7 +6,7 @@
  *     <section> Hero banner
  *     <section> Full about text + references card
  *     <section> Work process steps  (tinted bg — contrasts with About section)
- *     <section> Founder vision (Sedat Demir)
+ *     <section> Founders' vision (Sedat Demir & Arda Demir)
  *     <section> Technical standards / fact sheet
  *     <section> Quality claims strip
  *     <section> ValuesSection (core pillars)
@@ -20,7 +20,7 @@ import React from 'react';
 
 import {
   Box, Container, Typography, Grid, Paper,
-  Chip, Divider, Button,
+  Chip, Divider, Button, Fade,
 } from '@mui/material';
 import {
   CheckCircleOutline, Bolt, FormatQuote, ArrowForward,
@@ -35,7 +35,7 @@ import ScrollReveal   from '../components/ScrollReveal';
 
 import {
   brand, about, references, workProcess,
-  founder, technicalStandards, qualityClaims,
+  founders, technicalStandards, qualityClaims,
 } from '../constants/siteContent';
 import { PATHS } from '../constants/navigation';
 import { useSite } from '../context/SiteContext';
@@ -344,67 +344,90 @@ const About = () => {
           py: { xs: 7, md: 10 },
         }}
       >
-        <Container maxWidth="md">
+        <Container maxWidth="lg">
           <Box sx={{ textAlign: 'center', mb: 5 }}>
             <Typography variant="overline" color="primary.main" fontWeight={700} letterSpacing={3}>
               Kurucu Vizyonu
             </Typography>
-            <Typography variant="h4" fontWeight={800} sx={{ mt: 0.5 }}>
-              {founder.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" fontWeight={600} sx={{ mt: 0.5 }}>
-              {founder.title}
+            <Typography variant="h4" fontWeight={800} sx={{ mt: 0.5, letterSpacing: '-0.02em' }}>
+              Kurucularımız
             </Typography>
           </Box>
 
-          <Paper
-            elevation={0}
-            sx={{
-              p: { xs: 3.5, md: '48px 56px' },
-              borderRadius: '24px',
-              border: '1px solid',
-              borderColor: isDark ? 'rgba(255,255,255,0.10)' : alpha(color, 0.15),
-              boxShadow: 'none',
-              position: 'relative',
-              // Apple-system Midnight card — no glass tint
-              bgcolor: isDark ? '#1C1C1E' : 'background.paper',
-            }}
-          >
-            <FormatQuote
-              aria-hidden="true"
-              sx={{
-                fontSize: 64,
-                color: alpha(color, 0.2),
-                position: 'absolute',
-                top: 16, left: { xs: 16, md: 24 },
-                transform: 'scaleX(-1)',
-              }}
-            />
-            <Typography
-              variant="h6"
-              color="text.primary"
-              sx={{
-                fontStyle: 'italic',
-                lineHeight: 1.85,
-                fontWeight: 500,
-                textAlign: 'center',
-                pt: { xs: 3, md: 1 },
-                px: { xs: 0, md: 4 },
-              }}
-            >
-              {founder.vision}
-            </Typography>
+          {/* Equalizer: both founder cards stretch to the taller one */}
+          <Grid container spacing={3} alignItems="stretch">
+            {founders.map((person, idx) => (
+              <Grid size={{ xs: 12, md: 6 }} key={person.name} sx={{ display: 'flex' }}>
+                <Fade in timeout={500} style={{ transitionDelay: `${idx * 100}ms` }}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      width: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      p: { xs: 3.5, md: '44px 40px' },
+                      borderRadius: '24px',
+                      border: '1px solid',
+                      borderColor: isDark ? 'rgba(255,255,255,0.10)' : alpha(color, 0.15),
+                      boxShadow: 'none',
+                      position: 'relative',
+                      // Apple-system Midnight card — no glass tint
+                      bgcolor: isDark ? '#1C1C1E' : 'background.paper',
+                      transition: 'transform 0.3s cubic-bezier(0.4,0,0.2,1), border-color 0.3s ease',
+                      '&:hover': {
+                        transform:   'scale(1.02)',
+                        borderColor: alpha(color, isDark ? 0.55 : 0.45),
+                      },
+                    }}
+                  >
+                    <FormatQuote
+                      aria-hidden="true"
+                      sx={{
+                        fontSize: 56,
+                        color: alpha(color, 0.2),
+                        position: 'absolute',
+                        top: 16, left: { xs: 16, md: 20 },
+                        transform: 'scaleX(-1)',
+                      }}
+                    />
 
-            <Divider sx={{ my: 3 }} />
+                    <Box sx={{ textAlign: 'center', mb: 3 }}>
+                      <Typography variant="h5" component="h3" fontWeight={800} sx={{ letterSpacing: '-0.01em' }}>
+                        {person.name}
+                      </Typography>
+                      <Typography variant="body2" color="primary.main" fontWeight={700} sx={{ mt: 0.5 }}>
+                        {person.title}
+                      </Typography>
+                    </Box>
 
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{ lineHeight: 1.85, textAlign: 'center' }}
-            >
-              {founder.bio}
-            </Typography>
-          </Paper>
+                    <Typography
+                      variant="h6"
+                      color="text.primary"
+                      sx={{
+                        fontStyle: 'italic',
+                        lineHeight: 1.8,
+                        fontWeight: 500,
+                        fontSize: { xs: '1.02rem', md: '1.1rem' },
+                        textAlign: 'center',
+                      }}
+                    >
+                      {person.vision}
+                    </Typography>
+
+                    <Divider sx={{ my: 3 }} />
+
+                    <Typography
+                      variant="body1"
+                      color="text.secondary"
+                      sx={{ lineHeight: 1.8, textAlign: 'center', mt: 'auto' }}
+                    >
+                      {person.bio}
+                    </Typography>
+                  </Paper>
+                </Fade>
+              </Grid>
+            ))}
+          </Grid>
         </Container>
       </Box>
 

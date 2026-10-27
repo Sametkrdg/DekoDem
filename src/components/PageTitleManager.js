@@ -23,7 +23,7 @@ const ROUTE_META = {
   "/hakkimizda": {
     title: "Hakkımızda",
     description:
-      "DEKODEM hakkında: Sedat Demir tarafından kurulan, Kocaeli / İzmit merkezli anahtar teslim dekorasyon ve yapı firması. 200+ kurumsal proje. Referanslar: Algida, Magna, Hyundai.",
+      "DEKODEM hakkında: Sedat Demir ve Arda Demir tarafından kurulan, Kocaeli / İzmit merkezli anahtar teslim dekorasyon ve yapı firması. 200+ kurumsal proje. Referanslar: Algida, Magna, Hyundai.",
   },
   "/iletisim": {
     title: "İletişim",

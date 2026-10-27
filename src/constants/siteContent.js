@@ -44,17 +44,29 @@ export const about = {
   ],
 };
 
-// ── Founder Vision ────────────────────────────────────────────────────────
-export const founder = {
-  name:  'Sedat Demir',
-  title: 'Kurucu & Genel Müdür',
-  vision:
-    '"Bir projenin değeri sadece estetikle değil, zamanında teslim ve uzun ömürlü işçilikle ölçülür. ' +
-    'DEKODEM\'i kurarken hedefim tek bir şeydi: müşterilerimizin anahtarı teslim aldığında hiçbir eksiğin kalmadığından emin olmak."',
-  bio:
-    'Sedat Demir, inşaat ve dekorasyon sektöründeki köklü deneyimini Kocaeli\'nin endüstriyel yapısına taşımak amacıyla DEKODEM\'i kurdu. ' +
-    'Algida, Magna ve Hyundai gibi uluslararası markalarla yürütülen 200\'den fazla kurumsal proje, firmanın kalite ve güvenilirlik referanslarının temelini oluşturmaktadır.',
-};
+// ── Founders' Vision ──────────────────────────────────────────────────────
+export const founders = [
+  {
+    name:  'Sedat Demir',
+    title: 'Kurucu & Genel Müdür',
+    vision:
+      '"Bir projenin değeri sadece estetikle değil, zamanında teslim ve uzun ömürlü işçilikle ölçülür. ' +
+      'DEKODEM\'i kurarken hedefim tek bir şeydi: müşterilerimizin anahtarı teslim aldığında hiçbir eksiğin kalmadığından emin olmak."',
+    bio:
+      'Sedat Demir, inşaat ve dekorasyon sektöründeki köklü deneyimini Kocaeli\'nin endüstriyel yapısına taşımak amacıyla DEKODEM\'i kurdu. ' +
+      'Algida, Magna ve Hyundai gibi uluslararası markalarla yürütülen 200\'den fazla kurumsal proje, firmanın kalite ve güvenilirlik referanslarının temelini oluşturmaktadır.',
+  },
+  {
+    name:  'Arda Demir',
+    title: 'Kurucu & Yönetici',
+    vision:
+      '"Her projeye, sahadaki ilk günden teslim gününe kadar aynı titizlikle yaklaşıyoruz. ' +
+      'Planlamayı, ekip koordinasyonunu ve iletişimi şeffaf tutarak müşterilerimize sürprizsiz, zamanında teslim edilen yapılar sunmak en büyük önceliğimiz."',
+    bio:
+      'Arda Demir, DEKODEM\'in kurucu ortağı olarak proje yönetimi ve saha operasyonlarının koordinasyonunu üstlenmektedir. ' +
+      'Tasarım, tedarik ve uygulama süreçlerinin tek elden yürütülmesini sağlayarak firmanın anahtar teslim yaklaşımını modern iş süreçleriyle güçlendirmektedir.',
+  },
+];
 
 // ── Technical Standards ───────────────────────────────────────────────────
 // Applied across all DEKODEM projects — used in About and service pages.
