@@ -22,7 +22,10 @@ export const hueSaturationToHex = ({ hue, saturation, lightness = 50 }) => {
 export const updateThemeFromHex = (hexColor) => createDynamicTheme({ primary: { main: hexColor } });
 
 // ── Brand constants ────────────────────────────────────────────────────────
-const BRAND_SECONDARY = { main: '#f97316', dark: '#ea580c', light: '#fdba74' };
+// Champagne Gold — luxury accent for icons, hover states, primary actions
+const LUXURY_PRIMARY  = { main: '#C9A961', dark: '#A8893E', light: '#E0C788', lighter: '#F1E2BB' };
+// Platinum Silver — secondary accent
+const BRAND_SECONDARY = { main: '#B8B8B8', dark: '#8E8E93', light: '#D4D4D4' };
 
 // ── Glass tokens ────────────────────────────────────────────────────────────
 // Exported so components can reference them without importing Theme internals
@@ -41,74 +44,57 @@ export const glassTokens = {
   },
 };
 
-// ── Build a full 25-entry shadows array ────────────────────────────────────
-const buildShadows = (isDark, primaryColor) => {
-  const base = isDark
-    ? [
-        'none',
-        `0 2px 6px rgba(0,0,0,0.45)`,
-        `0 4px 10px rgba(0,0,0,0.5)`,
-        `0 6px 14px rgba(0,0,0,0.55)`,
-        `0 8px 20px rgba(0,0,0,0.58)`,
-        `0 12px 28px rgba(0,0,0,0.62)`,
-        `0 16px 36px rgba(0,0,0,0.65)`,
-        `0 20px 44px rgba(0,0,0,0.68)`,
-        `0 8px 40px rgba(0,0,0,0.6), 0 0 24px ${alpha(primaryColor, 0.14)}`,
-        `0 12px 48px rgba(0,0,0,0.65), 0 0 28px ${alpha(primaryColor, 0.16)}`,
-        `0 16px 56px rgba(0,0,0,0.7), 0 0 32px ${alpha(primaryColor, 0.18)}`,
-      ]
-    : [
-        'none',
-        '0 2px 6px rgba(0,0,0,0.06)',
-        '0 4px 10px rgba(0,0,0,0.08)',
-        '0 6px 14px rgba(0,0,0,0.10)',
-        '0 8px 20px rgba(0,0,0,0.12)',
-        '0 12px 28px rgba(0,0,0,0.14)',
-        '0 16px 36px rgba(0,0,0,0.16)',
-        '0 20px 44px rgba(0,0,0,0.18)',
-        `0 8px 32px rgba(0,0,0,0.12), 0 0 20px ${alpha(primaryColor, 0.10)}`,
-        `0 12px 40px rgba(0,0,0,0.14), 0 0 24px ${alpha(primaryColor, 0.12)}`,
-        `0 16px 48px rgba(0,0,0,0.16), 0 0 28px ${alpha(primaryColor, 0.14)}`,
-      ];
-  // MUI requires exactly 25 shadows (index 0-24)
-  const filler = base[base.length - 1];
-  while (base.length < 25) base.push(filler);
-  return base;
+// ── Shadows ────────────────────────────────────────────────────────────────
+// Luxury rule: heavy shadows are removed; depth comes from 1px borders.
+// We keep MUI's required 25-entry shadow array but use only a whisper of shadow.
+const buildShadows = () => {
+  const arr = new Array(25).fill('none');
+  // Reserve a couple of extremely subtle elevations for surfaces that genuinely need lift.
+  arr[1] = '0 1px 2px rgba(0,0,0,0.04)';
+  arr[2] = '0 1px 3px rgba(0,0,0,0.05)';
+  return arr;
 };
 
 // ── Core theme factory ──────────────────────────────────────────────────────
 const createDynamicTheme = ({ primary = {}, secondary = {}, mode = 'light' } = {}) => {
   const isDark = mode === 'dark';
-  const primaryColor = primary.main || '#1a365d';
+  const primaryColor = primary.main || LUXURY_PRIMARY.main;
   const glass = glassTokens[isDark ? 'dark' : 'light'];
+
+  // Thin 1px border tokens (Apple-style hairline contrast)
+  const hairline = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
 
   // ── Palette ──────────────────────────────────────────────────────────────
   const palette = {
     mode,
     primary: {
       main:    primaryColor,
-      dark:    primary.dark  || '#0f2862',
-      light:   primary.light || '#2a4365',
-      lighter: primary.lighter || '#4a5568',
+      dark:    primary.dark    || LUXURY_PRIMARY.dark,
+      light:   primary.light   || LUXURY_PRIMARY.light,
+      lighter: primary.lighter || LUXURY_PRIMARY.lighter,
       ...primary,
     },
     secondary: { ...BRAND_SECONDARY, ...secondary },
+    // Apple-inspired surfaces
     background: isDark
-      ? { default: '#0d1117', paper: '#161b22', elevated: '#21262d' }
-      : { default: '#f8fafc', paper: '#ffffff',  elevated: '#f1f5f9' },
+      ? { default: '#000000', paper: '#1C1C1E', elevated: '#161617' }
+      : { default: '#FBFBFD', paper: '#FFFFFF', elevated: '#F5F5F7' },
+    // WCAG-AA compliant text contrast pairs
+    // Dark secondary #AEAEB2 on #000 ≈ 9.4:1 — far above 4.5:1 minimum
+    // Light secondary #4A4A4F on #FBFBFD ≈ 8.7:1 — far above 4.5:1 minimum
     text: isDark
-      ? { primary: '#e6edf3', secondary: '#8b949e', disabled: '#484f58', white: '#e6edf3' }
-      : { primary: '#1e293b', secondary: '#64748b', disabled: '#94a3b8', white: '#f8fafc' },
-    divider: isDark ? 'rgba(240,246,252,0.08)' : 'rgba(0,0,0,0.08)',
+      ? { primary: '#F5F5F7', secondary: '#AEAEB2', disabled: '#6E6E73', white: '#FFFFFF' }
+      : { primary: '#1D1D1F', secondary: '#4A4A4F', disabled: '#86868B', white: '#FFFFFF' },
+    divider: hairline,
     // Extended custom tokens consumed by mixins & StyledComponents
     gradients: {
       primary:         `linear-gradient(135deg, ${primaryColor}, ${alpha(primaryColor, 0.75)})`,
       primaryReverse:  `linear-gradient(135deg, ${alpha(primaryColor, 0.75)}, ${primaryColor})`,
       background:      isDark
-        ? 'linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)'
+        ? '#000000'
         : 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
       backgroundLight: isDark
-        ? 'linear-gradient(135deg, #161b22 0%, #21262d 100%)'
+        ? '#1C1C1E'
         : 'linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%)',
       hover: `linear-gradient(135deg, ${alpha(primaryColor, 0.9)}, ${primaryColor})`,
     },
@@ -144,7 +130,7 @@ const createDynamicTheme = ({ primary = {}, secondary = {}, mode = 'light' } = {
         root: {
           backgroundImage: 'none',
           ...(isDark ? {
-            background:   'rgba(13, 17, 23, 0.90)',
+            background:   'rgba(0, 0, 0, 0.90)',
             borderBottom: '1px solid rgba(240,246,252,0.06)',
             boxShadow:    '0 2px 24px rgba(0,0,0,0.55)',
           } : {
@@ -172,125 +158,87 @@ const createDynamicTheme = ({ primary = {}, secondary = {}, mode = 'light' } = {
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          borderRadius:    '14px',
-          ...(isDark && {
-            background:           glass.bgSubtle,
-            backdropFilter:       glass.blur,
-            WebkitBackdropFilter: glass.blur,
-            border:               `1px solid ${glass.border}`,
-          }),
+          borderRadius:    '24px',
+          border:          `1px solid ${hairline}`,
+          boxShadow:       'none',
         },
+        // All elevations flattened — luxury rule removes heavy shadows
         elevation0: { boxShadow: 'none' },
-        elevation1: { boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.45)'  : '0 2px 6px rgba(0,0,0,0.06)' },
-        elevation2: { boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.5)'  : '0 4px 10px rgba(0,0,0,0.08)' },
-        elevation3: { boxShadow: isDark ? '0 6px 16px rgba(0,0,0,0.55)' : '0 6px 14px rgba(0,0,0,0.10)' },
+        elevation1: { boxShadow: 'none' },
+        elevation2: { boxShadow: 'none' },
+        elevation3: { boxShadow: 'none' },
       },
     },
 
-    // ── Card (glass + lift-on-hover) ─────────────────────────────────────────
+    // ── Card (Apple-style flat surface, hairline border, scale-on-hover) ─────
     MuiCard: {
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          borderRadius:    '10px', // Architectural: sharper than default 16
-          transition:      'transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease',
-          // Construction-grade accent strip on top edge via ::before
-          position: 'relative',
-          overflow: 'hidden',
-          '&::after': {
-            content:    '""',
-            position:   'absolute',
-            top:        0, left: 0, right: 0,
-            height:     '3px',
-            background: `linear-gradient(90deg, ${BRAND_SECONDARY.main}, ${alpha(BRAND_SECONDARY.dark, 0.6)}, transparent)`,
-            opacity:    0,
-            transition: 'opacity 0.25s ease',
+          borderRadius:    '24px',
+          boxShadow:       'none',
+          border:          `1px solid ${hairline}`,
+          background:      isDark ? '#1C1C1E' : '#FFFFFF',
+          transition:      'transform 0.3s cubic-bezier(0.4,0,0.2,1), border-color 0.3s ease',
+          overflow:        'hidden',
+          '&:hover': {
+            transform:   'scale(1.02)',
+            borderColor: alpha(primaryColor, isDark ? 0.55 : 0.45),
           },
-          '&:hover::after': { opacity: 1 },
-          ...(isDark ? {
-            background:           glass.bg,
-            backdropFilter:       glass.blur,
-            WebkitBackdropFilter: glass.blur,
-            border:               `1px solid ${glass.border}`,
-            boxShadow:            '0 4px 20px rgba(0,0,0,0.45)',
-            '&:hover': {
-              transform:  'translateY(-4px)',
-              boxShadow:  `0 16px 48px rgba(0,0,0,0.6), 0 0 24px ${alpha(primaryColor, 0.18)}`,
-              borderColor: alpha(primaryColor, 0.4),
-            },
-          } : {
-            background:  '#ffffff',
-            boxShadow:   '0 4px 16px rgba(0,0,0,0.07)',
-            border:      '1px solid rgba(0,0,0,0.06)',
-            '&:hover': {
-              transform:  'translateY(-4px)',
-              boxShadow:  `0 16px 40px rgba(0,0,0,0.12), 0 0 20px ${alpha(primaryColor, 0.10)}`,
-              borderColor: alpha(primaryColor, 0.3),
-            },
-          }),
         },
       },
     },
 
-    // ── Dialog (heavy glass) ─────────────────────────────────────────────────
+    // ── Dialog (flat surface) ────────────────────────────────────────────────
     MuiDialog: {
       styleOverrides: {
         paper: {
           backgroundImage: 'none',
-          borderRadius:    '20px',
-          ...(isDark ? {
-            background:           'rgba(13, 19, 33, 0.94)',
-            backdropFilter:       'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-            border:               '1px solid rgba(255,255,255,0.09)',
-            boxShadow:            '0 24px 60px rgba(0,0,0,0.75)',
-          } : {
-            background: '#ffffff',
-            boxShadow:  '0 16px 48px rgba(0,0,0,0.14)',
-          }),
+          borderRadius:    '24px',
+          border:          `1px solid ${hairline}`,
+          boxShadow:       'none',
+          background:      isDark ? '#1C1C1E' : '#FFFFFF',
         },
       },
     },
 
-    // ── Button ────────────────────────────────────────────────────────────────
+    // ── Button (24px radius, flat, no shadows) ───────────────────────────────
     MuiButton: {
+      defaultProps: { disableElevation: true },
       styleOverrides: {
         root: {
           textTransform: 'none',
-          borderRadius:  '12px',
-          padding:       '10px 22px',
+          borderRadius:  '24px',
+          padding:       '10px 24px',
           fontSize:      '0.95rem',
           fontWeight:    600,
-          transition:    'transform 0.2s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s ease, background-color 0.2s ease',
-          '&:hover':  { transform: 'translateY(-2px)' },
-          '&:active': { transform: 'translateY(0) scale(0.98)' },
+          letterSpacing: '-0.01em',
+          boxShadow:     'none',
+          transition:    'transform 0.2s cubic-bezier(0.4,0,0.2,1), background-color 0.2s ease, border-color 0.2s ease',
+          '&:hover':  { boxShadow: 'none' },
+          '&:active': { transform: 'scale(0.98)' },
         },
         contained: {
-          background: `linear-gradient(135deg, ${primaryColor}, ${alpha(primaryColor, 0.82)})`,
-          color:      '#fff',
-          boxShadow:  isDark
-            ? `0 4px 18px ${alpha(primaryColor, 0.45)}, 0 0 0 1px ${alpha(primaryColor, 0.2)}`
-            : `0 4px 14px ${alpha(primaryColor, 0.3)}`,
+          background: primaryColor,
+          color:      isDark ? '#000000' : '#FFFFFF',
+          boxShadow:  'none',
           '&:hover': {
-            background: `linear-gradient(135deg, ${alpha(primaryColor, 0.9)}, ${primaryColor})`,
-            boxShadow:  isDark
-              ? `0 8px 28px ${alpha(primaryColor, 0.55)}, 0 0 0 1px ${alpha(primaryColor, 0.3)}`
-              : `0 8px 24px ${alpha(primaryColor, 0.4)}`,
+            background: LUXURY_PRIMARY.dark,
+            boxShadow:  'none',
           },
           '&:disabled': {
-            background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.12)',
-            color:       isDark ? 'rgba(255,255,255,0.3)'  : 'rgba(0,0,0,0.38)',
+            background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+            color:      isDark ? 'rgba(255,255,255,0.3)'  : 'rgba(0,0,0,0.38)',
           },
         },
         outlined: {
-          borderColor: alpha(primaryColor, 0.6),
-          borderWidth: '1.5px',
-          color:       primaryColor,
-          ...(isDark && { color: alpha(primaryColor, 0.9) }),
+          borderColor: hairline,
+          borderWidth: '1px',
+          color:       isDark ? '#F5F5F7' : '#1D1D1F',
           '&:hover': {
-            borderWidth:     '1.5px',
+            borderWidth:     '1px',
             borderColor:     primaryColor,
-            backgroundColor: alpha(primaryColor, isDark ? 0.12 : 0.06),
+            backgroundColor: alpha(primaryColor, isDark ? 0.10 : 0.06),
           },
         },
         text: {
@@ -318,7 +266,9 @@ const createDynamicTheme = ({ primary = {}, secondary = {}, mode = 'light' } = {
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: '12px',
+          borderRadius: '24px',
+          // Multi-line textareas read better with a softer curve
+          '&.MuiInputBase-multiline': { borderRadius: '16px' },
           ...(isDark && {
             backgroundColor: 'rgba(255,255,255,0.04)',
           }),
@@ -390,7 +340,7 @@ const createDynamicTheme = ({ primary = {}, secondary = {}, mode = 'light' } = {
         paper: {
           backgroundImage: 'none',
           ...(isDark && {
-            background:           'rgba(13, 17, 23, 0.95)',
+            background:           'rgba(0, 0, 0, 0.95)',
             backdropFilter:       'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
             borderRight:          `1px solid ${glass.border}`,
@@ -433,22 +383,22 @@ const createDynamicTheme = ({ primary = {}, secondary = {}, mode = 'light' } = {
         html: { scrollBehavior: 'smooth' },
         body: {
           transition: 'background-color 0.3s ease, color 0.3s ease',
-          // Deep charcoal-navy gradient anchored to viewport so sections scroll over it
+          // Pure black anchored to the viewport — Apple-system dark canvas
           ...(isDark && {
-            background:           'linear-gradient(160deg, #0a0e1a 0%, #0d1117 45%, #111827 100%)',
+            background:           '#000000',
             backgroundAttachment: 'fixed',
           }),
         },
         // Graceful backdropFilter fallback
         '@supports not (backdrop-filter: blur(1px))': {
           '.glass-fallback': {
-            background: isDark ? 'rgba(13,17,35,0.97) !important' : 'rgba(255,255,255,0.97) !important',
+            background: isDark ? 'rgba(0,0,0,0.97) !important' : 'rgba(255,255,255,0.97) !important',
           },
         },
         // Custom scrollbar (dark mode)
         ...(isDark && {
           '::-webkit-scrollbar': { width: '8px', height: '8px' },
-          '::-webkit-scrollbar-track': { background: '#0d1117' },
+          '::-webkit-scrollbar-track': { background: '#000000' },
           '::-webkit-scrollbar-thumb': {
             background:   'rgba(255,255,255,0.15)',
             borderRadius: '4px',
@@ -461,8 +411,9 @@ const createDynamicTheme = ({ primary = {}, secondary = {}, mode = 'light' } = {
 
   // ── Mixins (mode-aware) ───────────────────────────────────────────────────
   const mixins = {
-    gradientBackground:      { background: isDark ? 'linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)' : 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)' },
-    gradientBackgroundLight: { background: isDark ? 'linear-gradient(135deg, #161b22 0%, #21262d 100%)' : 'linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%)' },
+    // Apple-system dark surfaces: pure black canvas, midnight cards
+    gradientBackground:      { background: isDark ? '#000000' : 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)' },
+    gradientBackgroundLight: { background: isDark ? '#1C1C1E' : 'linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%)' },
     gradientText: {
       background:             `linear-gradient(135deg, ${primaryColor}, ${alpha(primaryColor, 0.75)})`,
       WebkitBackgroundClip:   'text',
@@ -601,11 +552,11 @@ const createDynamicTheme = ({ primary = {}, secondary = {}, mode = 'light' } = {
     },
   };
 
-  // ── Construction-grade heading font ──────────────────────────────────────
-  // Montserrat is loaded in index.html (preconnect + display=swap).
-  // Inter stays as the body/UI fallback — no render-blocking risk.
-  const HEADING_FONT = '"Montserrat", "Inter", "Roboto", "Helvetica", sans-serif';
-  const BODY_FONT    = '"Inter", "Roboto", "Helvetica", "Arial", sans-serif';
+  // ── Apple-inspired typography ────────────────────────────────────────────
+  // Inter primary, Plus Jakarta Sans alt — both load via Google Fonts.
+  // Headings: bold, tight letter-spacing. Body: 1.6 line-height for readability.
+  const HEADING_FONT = '"Inter", "Plus Jakarta Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif';
+  const BODY_FONT    = '"Inter", "Plus Jakarta Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif';
 
   return createTheme({
     palette,
@@ -644,8 +595,8 @@ const createDynamicTheme = ({ primary = {}, secondary = {}, mode = 'light' } = {
       },
       h5: { fontFamily: HEADING_FONT, fontSize: '1.25rem', fontWeight: 700, lineHeight: 1.4  },
       h6: { fontFamily: HEADING_FONT, fontSize: '1.1rem',  fontWeight: 700, lineHeight: 1.5  },
-      body1:   { fontSize: '1rem',     lineHeight: 1.65 },
-      body2:   { fontSize: '0.875rem', lineHeight: 1.55 },
+      body1:   { fontSize: '1rem',     lineHeight: 1.6 },
+      body2:   { fontSize: '0.875rem', lineHeight: 1.6 },
       caption: { fontSize: '0.75rem',  letterSpacing: '0.02em' },
       overline: { fontSize: '0.7rem',  letterSpacing: '0.12em', fontWeight: 700, textTransform: 'uppercase' },
       // Subtitle variants with Montserrat for sub-headings in cards/sections
@@ -653,9 +604,11 @@ const createDynamicTheme = ({ primary = {}, secondary = {}, mode = 'light' } = {
       subtitle2: { fontFamily: HEADING_FONT, fontWeight: 600, fontSize: '0.875rem', lineHeight: 1.45 },
     },
     spacing: 8,
-    shape: { borderRadius: 10 }, // Architectural: tighter than default 12
+    // Base unit for numeric sx radii: `borderRadius: 3` → 24px (Apple-style curvature).
+    // Components needing exactly 24px set it explicitly in their overrides above.
+    shape: { borderRadius: 8 },
     breakpoints: { values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 } },
-    shadows: buildShadows(isDark, primaryColor),
+    shadows: buildShadows(),
     transitions: {
       duration: { shortest: 150, shorter: 200, short: 250, standard: 300, complex: 375 },
       easing:   { easeInOut: 'cubic-bezier(0.4,0,0.2,1)', sharp: 'cubic-bezier(0.4,0,0.6,1)', easeOut: 'cubic-bezier(0,0,0.2,1)' },

@@ -127,7 +127,7 @@ const DashboardPanel = ({ settings }) => {
       {/* Stats Grid */}
       <Grid container spacing={2.5}>
         {STAT_CONFIG.map(({ key, label, icon, color }) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={key}>
+          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={key}>
             <StatCard
               label={label}
               count={stats[key]}
@@ -151,7 +151,7 @@ const DashboardPanel = ({ settings }) => {
             { label: "Yeni Şube Ekle",          tab: 5 },
             { label: "Yeni İş İlanı Ekle",      tab: 8 },
           ].map(({ label }) => (
-            <Grid item xs={12} sm={6} md={3} key={label}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={label}>
               <Button
                 fullWidth
                 variant="outlined"

@@ -1,5 +1,5 @@
 // React
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from "react-router-dom";
 
 // Context & Layout
@@ -54,6 +54,20 @@ const CategorySlugRedirect = () => {
  */
 const AppContent = () => {
   const { settings, loading, siteContent, setSettings, setSiteContent, loadSiteContent } = useSite();
+
+  // Dynamically inject favicon from Firestore settings, with cache-busting
+  useEffect(() => {
+    const faviconUrl = settings?.faviconUrl;
+    if (!faviconUrl) return;
+
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "icon";
+      document.head.appendChild(link);
+    }
+    link.href = `${faviconUrl}?v=${Date.now()}`;
+  }, [settings?.faviconUrl]);
 
   return (
     <ThemeModeProvider primaryColor={settings?.color}>

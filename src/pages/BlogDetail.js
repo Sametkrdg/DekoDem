@@ -84,22 +84,7 @@ const RecentCard = ({ post }) => {
         to={`${PATHS.BLOG}/${post.id}`}
         sx={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "flex-start" }}
       >
-        {post.coverImage && (
-          <Box
-            component="img"
-            src={post.coverImage}
-            alt={post.title}
-            loading="lazy"
-            sx={{
-              width:        "100%",
-              height:       160,
-              objectFit:    "cover",
-              borderRadius: "12px 12px 0 0",
-              flexShrink:   0,
-            }}
-          />
-        )}
-        <CardContent sx={{ flex: 1, p: 2.5 }}>
+        <CardContent sx={{ flex: 1, p: 2.5, width: "100%", display: "flex", flexDirection: "column" }}>
           {post.category && (
             <Chip label={post.category} size="small" color="primary" variant="outlined" sx={{ mb: 1 }} />
           )}
@@ -128,7 +113,7 @@ const NotFound = ({ recentPosts }) => {
       <Box
         sx={{
           background: isDark
-            ? "linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)"
+            ? "#000000"
             : "linear-gradient(135deg, #1a365d 0%, #2c5282 100%)",
           py: { xs: 10, md: 14 },
         }}
@@ -173,7 +158,7 @@ const NotFound = ({ recentPosts }) => {
             </Typography>
             <Grid container spacing={3}>
               {recentPosts.map((p) => (
-                <Grid item xs={12} sm={4} key={p.id}>
+                <Grid size={{ xs: 12, sm: 4 }} key={p.id}>
                   <RecentCard post={p} />
                 </Grid>
               ))}
@@ -272,13 +257,13 @@ const BlogDetail = () => {
           position: "relative",
           height:   { xs: 300, sm: 400, md: 520 },
           overflow: "hidden",
-          bgcolor:  isDark ? "#0d1117" : "#1a365d",
+          bgcolor:  isDark ? "#000000" : "#1a365d",
         }}
       >
         {post.coverImage && (
           <Box
             component="img"
-            src={buildCloudinaryUrl(post.coverImage, { width: 1200, height: 500, crop: "fill" })}
+            src={buildCloudinaryUrl(post.coverImage, { width: 1600, crop: "limit" })}
             alt={post.title}
             fetchpriority="high"
             sx={{
@@ -504,7 +489,7 @@ const BlogDetail = () => {
 
             <Grid container spacing={3}>
               {recentPosts.map((p) => (
-                <Grid item xs={12} sm={4} key={p.id}>
+                <Grid size={{ xs: 12, sm: 4 }} key={p.id}>
                   <RecentCard post={p} />
                 </Grid>
               ))}

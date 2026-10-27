@@ -214,7 +214,7 @@ const FAQ = () => {
         aria-label="SSS başlığı"
         sx={{
           background: isDark
-            ? "linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)"
+            ? "#000000"
             : "linear-gradient(135deg, #1a365d 0%, #2c5282 100%)",
           color: "#fff",
           py: { xs: 9, md: 12 },
@@ -372,7 +372,7 @@ const FAQ = () => {
             p: { xs: "36px 24px", md: "52px 48px" },
             textAlign: "center",
             background: isDark
-              ? "linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)"
+              ? "#000000"
               : "linear-gradient(135deg, #1a365d 0%, #2c5282 100%)",
             borderRadius: 3,
             color: "#fff",

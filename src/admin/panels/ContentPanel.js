@@ -395,7 +395,7 @@ const ContentPanel = ({ showSnackbar }) => {
                 });
 
                 return (
-                  <Grid item xs={6} sm={4} md={3} key={photo.id}>
+                  <Grid size={{ xs: 6, sm: 4, md: 3 }} key={photo.id}>
                     <Box
                       sx={{
                         position:     "relative",

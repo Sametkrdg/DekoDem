@@ -82,7 +82,7 @@ const CodeReviewSection = () => {
 
         <Grid container spacing={4}>
           {focusAreas.map(({ icon: IconComponent, title, description }) => (
-            <Grid item xs={12} md={4} key={title}>
+            <Grid size={{ xs: 12, md: 4 }} key={title}>
               <Card
                 elevation={0}
                 sx={{

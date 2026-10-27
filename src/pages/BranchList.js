@@ -151,7 +151,7 @@ const BranchList = () => {
         aria-label="Şubelerimiz başlığı"
         sx={{
           background: isDark
-            ? 'linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)'
+            ? '#000000'
             : 'linear-gradient(135deg, #1a365d 0%, #2c5282 100%)',
           color:    '#fff',
           py:       { xs: 9, md: 12 },
@@ -212,7 +212,7 @@ const BranchList = () => {
       <Container maxWidth="lg" component="section" aria-label="Şube kartları" sx={{ py: { xs: 6, md: 9 } }}>
         <Grid container spacing={3}>
           {BRANCHES.map((branch, idx) => (
-            <Grid item xs={12} sm={6} lg={4} key={branch.id}>
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={branch.id}>
               <BranchCard branch={branch} index={idx} />
             </Grid>
           ))}

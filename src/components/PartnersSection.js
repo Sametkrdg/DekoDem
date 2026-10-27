@@ -11,41 +11,36 @@ import { getReferences } from '../services/firestore';
 // Static fallback
 import { references as staticReferences } from '../constants/siteContent';
 
-// ── Brand tile ────────────────────────────────────────────────────────────────
+// ── Brand tile — "The Vault" capsule for independent partner logos ──────────
+// 3:2 aspect ratio, soft-grey/soft-black backdrop, logo contained at ~70%
+// of the frame so non-transparent logos (e.g. Sadık Enerji) look intentional.
 const BrandTile = ({ BrandName, LogoUrl }) => {
   const theme  = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const gold   = theme.palette.primary.main;
+
+  const hairline = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
+  const vaultBg  = isDark ? '#161617' : '#F2F2F4';
 
   return (
     <Box
       aria-label={BrandName}
       sx={{
-        display:        'flex',
-        alignItems:     'center',
-        justifyContent: 'center',
-        px:             { xs: 3.5, md: 5 },
-        py:             { xs: 2,   md: 2.5 },
-        minWidth:       { xs: 150, md: 190 },
-        height:         { xs: 70,  md: 80  },
-        flexShrink:     0,
-        borderRadius:   '16px',
-        border:         '1px solid',
-        borderColor:    isDark
-          ? 'rgba(255,255,255,0.1)'
-          : alpha(theme.palette.primary.main, 0.14),
-        bgcolor:        isDark
-          ? 'rgba(255,255,255,0.04)'
-          : alpha(theme.palette.primary.main, 0.03),
-        backdropFilter: 'blur(10px)',
-        transition:     'all 0.25s ease',
-        cursor:         'default',
+        position:     'relative',
+        width:        { xs: 180, md: 210 },
+        aspectRatio:  '3 / 2',          // Strict Vault ratio
+        flexShrink:   0,
+        overflow:     'hidden',
+        borderRadius: '24px',
+        border:       '1px solid',
+        borderColor:  hairline,
+        bgcolor:      vaultBg,
+        boxShadow:    'none',
+        transition:   'transform 0.3s cubic-bezier(0.4,0,0.2,1), border-color 0.3s ease',
+        cursor:       'default',
         '&:hover': {
-          borderColor: alpha(theme.palette.primary.main, isDark ? 0.45 : 0.4),
-          bgcolor:     isDark
-            ? 'rgba(255,255,255,0.08)'
-            : alpha(theme.palette.primary.main, 0.07),
-          transform:   'translateY(-3px)',
-          boxShadow:   `0 10px 28px ${alpha(theme.palette.primary.main, 0.1)}`,
+          transform:   'scale(1.02)',
+          borderColor: alpha(gold, isDark ? 0.55 : 0.45),
         },
       }}
     >
@@ -54,29 +49,44 @@ const BrandTile = ({ BrandName, LogoUrl }) => {
           component="img"
           src={LogoUrl}
           alt={BrandName}
-          sx={{
-            maxHeight:  44,
-            maxWidth:   130,
-            objectFit:  'contain',
-            filter:     isDark ? 'brightness(0) invert(0.85)' : 'none',
-            transition: 'filter 0.25s',
-          }}
+          loading="lazy"
           onError={(e) => { e.target.style.display = 'none'; }}
+          sx={{
+            position:  'absolute',
+            inset:     0,
+            width:     '100%',
+            height:    '100%',
+            // ~70% padding so the logo is strictly framed inside the capsule
+            padding:   '15%',
+            objectFit: 'contain',
+            display:   'block',
+            filter:    isDark ? 'brightness(0) invert(0.85)' : 'none',
+          }}
         />
       ) : (
-        <Typography
-          variant="body1"
-          fontWeight={700}
+        <Box
           sx={{
-            textAlign:   'center',
-            letterSpacing: '0.03em',
-            color:       isDark ? 'rgba(255,255,255,0.75)' : alpha(theme.palette.text.primary, 0.75),
-            userSelect:  'none',
-            transition:  'color 0.25s',
+            position:       'absolute',
+            inset:          0,
+            display:        'flex',
+            alignItems:     'center',
+            justifyContent: 'center',
+            padding:        '15%',
           }}
         >
-          {BrandName}
-        </Typography>
+          <Typography
+            variant="body1"
+            fontWeight={700}
+            sx={{
+              textAlign:     'center',
+              letterSpacing: '0.03em',
+              color:         isDark ? 'rgba(255,255,255,0.75)' : alpha(theme.palette.text.primary, 0.75),
+              userSelect:    'none',
+            }}
+          >
+            {BrandName}
+          </Typography>
+        </Box>
       )}
     </Box>
   );
@@ -148,7 +158,7 @@ const PartnersSection = () => {
       aria-label="Çalıştığımız markalar"
       sx={{
         py:          { xs: 7, md: 9 },
-        bgcolor:     isDark ? alpha('#0d1117', 0.8) : '#f8fafc',
+        bgcolor:     isDark ? '#000000' : '#f8fafc',
         borderTop:   '1px solid',
         borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'divider',
         position:    'relative',
@@ -181,7 +191,7 @@ const PartnersSection = () => {
             sx={{
               position:   'absolute', left: 0, top: 0, bottom: 0, width: { xs: 40, md: 80 },
               background: isDark
-                ? 'linear-gradient(to right, rgba(13,17,23,0.9), transparent)'
+                ? 'linear-gradient(to right, rgba(0,0,0,0.9), transparent)'
                 : 'linear-gradient(to right, #f8fafc, transparent)',
               zIndex: 1, pointerEvents: 'none',
             }}
@@ -190,7 +200,7 @@ const PartnersSection = () => {
             sx={{
               position:   'absolute', right: 0, top: 0, bottom: 0, width: { xs: 40, md: 80 },
               background: isDark
-                ? 'linear-gradient(to left, rgba(13,17,23,0.9), transparent)'
+                ? 'linear-gradient(to left, rgba(0,0,0,0.9), transparent)'
                 : 'linear-gradient(to left, #f8fafc, transparent)',
               zIndex: 1, pointerEvents: 'none',
             }}

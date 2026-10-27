@@ -80,8 +80,10 @@ const ActivityDetail = ({ activity }) => {
 
   const title       = activity.Name        ?? '';
   const description = activity.Description ?? '';
+  // Detail page: deliver the full image, no CDN-side crop.
+  // `crop:'limit'` resizes without changing the aspect ratio.
   const photoUrl    = activity.PhotoUrl
-    ? buildCloudinaryUrl(activity.PhotoUrl, { width: 800, height: 600, crop: 'fill' })
+    ? buildCloudinaryUrl(activity.PhotoUrl, { width: 1400, crop: 'limit' })
     : null;
 
   const phoneHref = contactSettings.Phone
@@ -98,7 +100,7 @@ const ActivityDetail = ({ activity }) => {
         aria-label={`${title} hero`}
         sx={{
           background: isDark
-            ? 'linear-gradient(135deg, #0d1117 0%, #1a2235 50%, #0d2137 100%)'
+            ? '#000000'
             : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${navy} 60%, ${alpha(theme.palette.primary.light, 0.85)} 100%)`,
           color:    '#fff',
           pt:       { xs: 10, md: 13 },
@@ -164,14 +166,23 @@ const ActivityDetail = ({ activity }) => {
 
       {/* ── Split body ────────────────────────────────────────────────────── */}
       <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
-        <Grid
-          container
-          spacing={{ xs: 4, md: 8 }}
-          alignItems="flex-start"
+        <Box
+          sx={{
+            display:       'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems:    { md: 'center' },
+            gap:           { xs: 5, md: '40px' },
+          }}
         >
 
-          {/* ── TEXT COLUMN — left on desktop, bottom on mobile ───────── */}
-          <Grid item xs={12} md={7} sx={{ order: { xs: 2, md: 1 } }}>
+          {/* ── TEXT COLUMN — left on desktop, below image on mobile ─── */}
+          <Box
+            sx={{
+              flex:     { xs: '1 1 100%', md: '55 1 0' },
+              order:    { xs: 2, md: 1 },
+              minWidth: 0,
+            }}
+          >
 
             {/* Back link */}
             <Button
@@ -285,10 +296,16 @@ const ActivityDetail = ({ activity }) => {
                 </Button>
               )}
             </Paper>
-          </Grid>
+          </Box>
 
           {/* ── IMAGE COLUMN — right on desktop, top on mobile ────────── */}
-          <Grid item xs={12} md={5} sx={{ order: { xs: 1, md: 2 } }}>
+          <Box
+            sx={{
+              flex:     { xs: '1 1 100%', md: '45 1 0' },
+              order:    { xs: 1, md: 2 },
+              minWidth: 0,
+            }}
+          >
             <Box sx={{ position: { md: 'sticky' }, top: { md: '90px' } }}>
               {photoUrl ? (
                 <Box
@@ -299,19 +316,12 @@ const ActivityDetail = ({ activity }) => {
                   sx={{
                     display:      'block',
                     width:        '100%',
-                    aspectRatio:  '4 / 3',
-                    objectFit:    'cover',
-                    borderRadius: '20px',
-                    boxShadow:    isDark
-                      ? `0 20px 56px rgba(0,0,0,0.55), 0 0 0 1px ${alpha(navy, 0.25)}`
-                      : `0 16px 48px ${alpha(navy, 0.18)}, 0 4px 12px ${alpha(navy, 0.08)}`,
-                    transition:   'transform 0.4s ease, box-shadow 0.4s ease',
-                    '&:hover': {
-                      transform:  'translateY(-4px) scale(1.01)',
-                      boxShadow:  isDark
-                        ? `0 28px 68px rgba(0,0,0,0.65), 0 0 0 1px ${alpha(orange, 0.3)}`
-                        : `0 24px 60px ${alpha(navy, 0.22)}, 0 0 0 2px ${alpha(orange, 0.35)}`,
-                    },
+                    height:       'auto',
+                    objectFit:    'contain', // Full image, no crop on the detail page
+                    borderRadius: '24px',
+                    border:       '1px solid',
+                    borderColor:  isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)',
+                    boxShadow:    'none',
                   }}
                 />
               ) : (
@@ -320,7 +330,7 @@ const ActivityDetail = ({ activity }) => {
                   sx={{
                     width:        '100%',
                     aspectRatio:  '4 / 3',
-                    borderRadius: '20px',
+                    borderRadius: '16px',
                     border:       '1px solid',
                     borderColor:  isDark ? 'rgba(255,255,255,0.08)' : alpha(navy, 0.1),
                     bgcolor:      isDark ? 'rgba(255,255,255,0.04)' : alpha(navy, 0.04),
@@ -353,8 +363,8 @@ const ActivityDetail = ({ activity }) => {
                 }}
               />
             </Box>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Container>
 
       {/* ── Related static activities ──────────────────────────────────────── */}
@@ -375,7 +385,7 @@ const ActivityDetail = ({ activity }) => {
             </Typography>
             <Grid container spacing={3}>
               {related.map((rel) => (
-                <Grid item xs={12} sm={4} key={rel.id}>
+                <Grid size={{ xs: 12, sm: 4 }} key={rel.id}>
                   <RelatedCard field={rel} />
                 </Grid>
               ))}

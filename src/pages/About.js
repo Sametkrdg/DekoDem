@@ -31,6 +31,7 @@ import { Link as RouterLink } from 'react-router-dom';
 
 import ValuesSection  from '../components/ValueSection';
 import ContactSection from '../components/ContactSection';
+import ScrollReveal   from '../components/ScrollReveal';
 
 import {
   brand, about, references, workProcess,
@@ -90,7 +91,7 @@ const About = () => {
         aria-label="Sayfa başlığı"
         sx={{
           background: isDark
-            ? 'linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)'
+            ? '#000000'
             : 'linear-gradient(135deg, #1a365d 0%, #2c5282 100%)',
           color: '#fff',
           py: { xs: 9, md: 12 },
@@ -140,7 +141,7 @@ const About = () => {
         <Grid container spacing={6} alignItems="flex-start">
 
           {/* Left — full about text */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Box
               sx={{
                 mb: 4, p: 3,
@@ -201,19 +202,17 @@ const About = () => {
           </Grid>
 
           {/* Right — references card */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Paper
               elevation={0}
               component="aside"
               aria-label="Referans markalarımız"
               sx={{
                 p: { xs: 3, md: 4 },
-                border: '1px solid', borderColor: 'divider', borderRadius: 3,
-                ...(isDark && {
-                  background:          theme.glass?.bgSubtle,
-                  backdropFilter:      'blur(16px)',
-                  WebkitBackdropFilter:'blur(16px)',
-                }),
+                border: '1px solid', borderColor: 'divider', borderRadius: '24px',
+                boxShadow: 'none',
+                // Apple-system dark surface — Midnight card, no glass tint
+                bgcolor:   isDark ? '#1C1C1E' : 'background.paper',
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
@@ -292,15 +291,15 @@ const About = () => {
       </Container>
 
       {/* ── Work Process strip ───────────────────────────────────────────────── */}
-      {/* Sits on a tinted surface to visually separate it from the plain About section above */}
       <Box
         component="section"
         aria-label="Çalışma sürecimiz"
         sx={{
-          bgcolor:    isDark ? alpha(color, 0.05) : alpha(color, 0.04),
-          borderTop:  '1px solid',
+          // Apple-system dark canvas — strictly Pure Black in dark mode
+          bgcolor:      isDark ? '#000000' : alpha(color, 0.04),
+          borderTop:    '1px solid',
           borderBottom: '1px solid',
-          borderColor: 'divider',
+          borderColor:  'divider',
           py: { xs: 7, md: 9 },
         }}
       >
@@ -324,7 +323,7 @@ const About = () => {
           </Box>
           <Grid container spacing={{ xs: 3, md: 2 }} justifyContent="center" component="ol" sx={{ listStyle: 'none', p: 0, m: 0 }}>
             {workProcess.map((proc) => (
-              <Grid item xs={6} sm={4} md={2} key={proc.step} component="li">
+              <Grid size={{ xs: 6, sm: 4, md: 2 }} key={proc.step} component="li">
                 <ProcessCard step={proc.step} label={proc.label} />
               </Grid>
             ))}
@@ -337,8 +336,11 @@ const About = () => {
         component="section"
         aria-label="Kurucu vizyonu"
         sx={{
-          bgcolor: isDark ? alpha(color, 0.05) : alpha(color, 0.03),
-          borderTop: '1px solid', borderBottom: '1px solid', borderColor: 'divider',
+          // Apple-system dark canvas — strictly Pure Black in dark mode
+          bgcolor:      isDark ? '#000000' : alpha(color, 0.03),
+          borderTop:    '1px solid',
+          borderBottom: '1px solid',
+          borderColor:  'divider',
           py: { xs: 7, md: 10 },
         }}
       >
@@ -359,14 +361,13 @@ const About = () => {
             elevation={0}
             sx={{
               p: { xs: 3.5, md: '48px 56px' },
-              borderRadius: 4,
-              border: '1px solid', borderColor: alpha(color, isDark ? 0.2 : 0.15),
+              borderRadius: '24px',
+              border: '1px solid',
+              borderColor: isDark ? 'rgba(255,255,255,0.10)' : alpha(color, 0.15),
+              boxShadow: 'none',
               position: 'relative',
-              ...(isDark && {
-                background:          theme.glass?.bgSubtle,
-                backdropFilter:      'blur(16px)',
-                WebkitBackdropFilter:'blur(16px)',
-              }),
+              // Apple-system Midnight card — no glass tint
+              bgcolor: isDark ? '#1C1C1E' : 'background.paper',
             }}
           >
             <FormatQuote
@@ -412,7 +413,7 @@ const About = () => {
         <Grid container spacing={6} alignItems="flex-start">
 
           {/* Left: Quality claims */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
               <Box
                 aria-hidden="true"
@@ -441,8 +442,10 @@ const About = () => {
                   sx={{
                     display: 'flex', alignItems: 'flex-start', gap: 1.5,
                     p: 2, borderRadius: '12px',
-                    border: '1px solid', borderColor: alpha(color, isDark ? 0.15 : 0.1),
-                    bgcolor: alpha(color, isDark ? 0.05 : 0.03),
+                    border: '1px solid',
+                    borderColor: isDark ? 'rgba(255,255,255,0.08)' : alpha(color, 0.1),
+                    // Apple-system Midnight card (no gold tint)
+                    bgcolor:     isDark ? '#1C1C1E' : alpha(color, 0.03),
                   }}
                 >
                   <CheckCircleOutline
@@ -469,17 +472,15 @@ const About = () => {
           </Grid>
 
           {/* Right: Technical standards */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Paper
               elevation={0}
               sx={{
                 p: { xs: 3, md: 4 },
-                border: '1px solid', borderColor: 'divider', borderRadius: 3,
-                ...(isDark && {
-                  background:          theme.glass?.bgSubtle,
-                  backdropFilter:      'blur(16px)',
-                  WebkitBackdropFilter:'blur(16px)',
-                }),
+                border: '1px solid', borderColor: 'divider', borderRadius: '24px',
+                boxShadow: 'none',
+                // Apple-system Midnight card — no glass tint
+                bgcolor:   isDark ? '#1C1C1E' : 'background.paper',
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
@@ -508,8 +509,10 @@ const About = () => {
                     sx={{
                       display: 'flex', alignItems: 'flex-start', gap: 2,
                       p: 2, borderRadius: '12px',
-                      bgcolor: isDark ? 'rgba(255,255,255,0.04)' : alpha(color, 0.03),
-                      border: '1px solid', borderColor: isDark ? 'rgba(255,255,255,0.06)' : alpha(color, 0.08),
+                      // Inner tiles use the elevated Midnight tone for hierarchy on Apple-system dark
+                      bgcolor:     isDark ? '#161617' : alpha(color, 0.03),
+                      border:      '1px solid',
+                      borderColor: isDark ? 'rgba(255,255,255,0.08)' : alpha(color, 0.08),
                     }}
                   >
                     <Box sx={{ flexShrink: 0 }}>
@@ -547,10 +550,10 @@ const About = () => {
       </Container>
 
       {/* ── Values Section (core pillars + full process) ─────────────────────── */}
-      <ValuesSection />
+      <ScrollReveal><ValuesSection /></ScrollReveal>
 
       {/* ── Contact CTA ────────────────────────────────────────────────────── */}
-      <ContactSection />
+      <ScrollReveal><ContactSection /></ScrollReveal>
 
     </Box>
   );

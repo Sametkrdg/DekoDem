@@ -96,7 +96,7 @@ const BranchDetail = () => {
         <Box
           sx={{
             background: isDark
-              ? 'linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)'
+              ? '#000000'
               : 'linear-gradient(135deg, #1a365d 0%, #2c5282 100%)',
             py: { xs: 10, md: 14 },
           }}
@@ -129,7 +129,7 @@ const BranchDetail = () => {
         aria-label={`${branch.name} başlığı`}
         sx={{
           background: isDark
-            ? 'linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)'
+            ? '#000000'
             : 'linear-gradient(135deg, #1a365d 0%, #2c5282 100%)',
           color:    '#fff',
           py:       { xs: 9, md: 12 },
@@ -204,7 +204,7 @@ const BranchDetail = () => {
         <Grid container spacing={5}>
 
           {/* Contact info */}
-          <Grid item xs={12} md={5}>
+          <Grid size={{ xs: 12, md: 5 }}>
             <Button
               component={Link}
               to={PATHS.BRANCHES}
@@ -244,7 +244,7 @@ const BranchDetail = () => {
           </Grid>
 
           {/* Map placeholder */}
-          <Grid item xs={12} md={7}>
+          <Grid size={{ xs: 12, md: 7 }}>
             <Box
               sx={{
                 borderRadius:   3,

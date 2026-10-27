@@ -15,12 +15,15 @@ export const ContentWrapper = styled(Box)(({ theme }) => ({
 }));
 
 // ===== FOOTER COMPONENTS =====
+// Footer is always dark — pure-black surface in dark mode (matches Apple system),
+// soft-near-black slate in light mode so the inverted text stays readable.
 export const FooterContainer = styled(Box)(({ theme }) => ({
-  ...theme.mixins.gradientBackground,
-  color: theme.palette.text.white,
+  background: theme.palette.mode === 'dark' ? '#000000' : '#161617',
+  color: '#FFFFFF',
   marginTop: 'auto',
   position: 'relative',
   overflow: 'hidden',
+  borderTop: '1px solid rgba(255,255,255,0.10)',
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -28,7 +31,7 @@ export const FooterContainer = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     height: '1px',
-    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)',
   }
 }));
 
@@ -146,28 +149,31 @@ export const SocialButton = styled(IconButton)(({ theme }) => ({
 }));
 
 // ===== INTERACTIVE COMPONENTS =====
+// Footer items live on a near-black surface — use rgba(255,255,255,0.78) for
+// body text (~12:1 contrast → passes WCAG AAA). The previous `neutral.gray`
+// (#30363d) only achieved ~2.4:1 against #000 which failed AA.
 export const ServiceItem = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(1.5),
   marginBottom: theme.spacing(2),
-  color: theme.palette.neutral.gray,
+  color: 'rgba(255,255,255,0.78)',
   padding: theme.spacing(1, 0),
   borderRadius: theme.shape.borderRadius,
   transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
   cursor: 'pointer',
   '&:hover': {
-    color: theme.palette.primary.light,
+    color: '#FFFFFF',
     transform: 'translateX(8px)',
     paddingLeft: theme.spacing(1),
-    background: alpha(theme.palette.primary.main, 0.05),
+    background: alpha(theme.palette.primary.main, 0.10),
   },
   '& .MuiSvgIcon-root': {
     transition: 'all 0.3s ease',
     fontSize: '1.2rem',
   },
   '&:hover .MuiSvgIcon-root': {
-    color: theme.palette.secondary.main,
+    color: theme.palette.primary.main, // Champagne Gold
     transform: 'scale(1.1)',
   }
 }));
@@ -177,32 +183,32 @@ export const ContactItem = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(1.5),
   marginBottom: theme.spacing(2),
-  color: theme.palette.neutral.gray,
+  color: 'rgba(255,255,255,0.78)',
   padding: theme.spacing(1.5),
   borderRadius: theme.shape.borderRadius,
   transition: 'all 0.3s ease',
   '&:hover': {
-    background: 'rgba(255,255,255,0.05)',
+    background: 'rgba(255,255,255,0.06)',
     transform: 'translateX(5px)',
   },
   '& .MuiSvgIcon-root': {
-    color: theme.palette.primary.light,
+    color: theme.palette.primary.main, // Champagne Gold
     fontSize: '1.3rem',
   }
 }));
 
 // ===== TEXT COMPONENTS =====
-export const ContactText = styled(Typography)(({ theme }) => ({
+export const ContactText = styled(Typography)(() => ({
   fontSize: '0.95rem',
   lineHeight: 1.6,
   fontWeight: 400,
+  color: 'inherit', // Inherits the WCAG-AA color from parent ContactItem
 }));
 
-export const CopyrightText = styled(Typography)(({ theme }) => ({
-  color: theme.palette.neutral.gray,
+export const CopyrightText = styled(Typography)(() => ({
+  color: 'rgba(255,255,255,0.78)', // ~12:1 on black — WCAG AAA
   fontSize: '0.9rem',
   textAlign: 'center',
-  opacity: 0.8,
 }));
 
 export const GradientText = styled(Typography)(({ theme }) => ({

@@ -129,7 +129,7 @@ const PartnersPanel = ({ showSnackbar }) => {
 
           <Grid container spacing={2}>
             {items.map((item) => (
-              <Grid item xs={12} sm={6} md={4} key={item.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.id}>
                 <Box
                   sx={{
                     p: 2, borderRadius: 3, border: "1px solid", borderColor: "divider",
@@ -194,7 +194,7 @@ const PartnersPanel = ({ showSnackbar }) => {
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ pt: 1 }}>
             {/* Brand name */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label="Marka Adı * (BrandName)"
@@ -207,7 +207,7 @@ const PartnersPanel = ({ showSnackbar }) => {
             </Grid>
 
             {/* Logo — Cloudinary upload */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <ImageUploader
                 label="Marka Logosu (LogoUrl)"
                 value={form.LogoUrl}

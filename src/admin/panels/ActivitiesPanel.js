@@ -124,7 +124,7 @@ const ActivitiesPanel = ({ showSnackbar }) => {
 
           <Grid container spacing={2}>
             {items.map((item) => (
-              <Grid item xs={12} sm={6} md={4} key={item.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.id}>
                 <Box
                   sx={{
                     p: 2.5, borderRadius: 3, border: "1px solid", borderColor: "divider",
@@ -163,21 +163,21 @@ const ActivitiesPanel = ({ showSnackbar }) => {
         <DialogTitle fontWeight={700}>{editItem ? "Faaliyeti Düzenle" : "Yeni Faaliyet Alanı"}</DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ pt: 1 }}>
-            <Grid item xs={12} sm={3}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <TextField
                 fullWidth label="Sıra No (Id)" type="number" value={form.Id}
                 onChange={(e) => handleChange("Id", e.target.value)}
                 helperText="Sıralama için" sx={fieldSx}
               />
             </Grid>
-            <Grid item xs={12} sm={9}>
+            <Grid size={{ xs: 12, sm: 9 }}>
               <TextField
                 fullWidth label="Faaliyet Adı *" value={form.Name}
                 onChange={(e) => handleChange("Name", e.target.value)}
                 placeholder="İç Mimari & Tasarım" sx={fieldSx}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth label="Açıklama (Description)" value={form.Description}
                 onChange={(e) => handleChange("Description", e.target.value)}
@@ -186,7 +186,7 @@ const ActivitiesPanel = ({ showSnackbar }) => {
                 sx={fieldSx}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <ImageUploadField
                 label="Fotoğraf (PhotoUrl)"
                 value={form.PhotoUrl}

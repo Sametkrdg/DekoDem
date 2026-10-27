@@ -19,7 +19,7 @@ import ImageUploadField from "../../components/ImageUploadField";
 
 const COLLECTION = "Projects";
 
-const EMPTY = { Name: "", Summary: "", Description: "", Services: "", PhotoUrl: "" };
+const EMPTY = { Name: "", Summary: "", Description: "", Services: "", PhotoUrl: "", LogoUrl: "" };
 
 // "Taşıyıcı Sistem, İzolasyon" ↔ ["Taşıyıcı Sistem","İzolasyon"]
 const arrayToInput = (arr) => (Array.isArray(arr) ? arr.join(", ") : arr ?? "");
@@ -60,6 +60,7 @@ const ProjectsPanel = ({ showSnackbar }) => {
       Description: item.Description || "",
       Services:    arrayToInput(item.Services),
       PhotoUrl:    item.PhotoUrl    || "",
+      LogoUrl:     item.LogoUrl     || "",
     });
     setDialogOpen(true);
   };
@@ -76,6 +77,7 @@ const ProjectsPanel = ({ showSnackbar }) => {
         Description: form.Description.trim(),
         Services:    inputToArray(form.Services),
         PhotoUrl:    form.PhotoUrl.trim(),
+        LogoUrl:     form.LogoUrl.trim(),
       };
       if (editItem) {
         await updateCollectionItem(COLLECTION, editItem.id, payload);
@@ -130,7 +132,7 @@ const ProjectsPanel = ({ showSnackbar }) => {
           {/* ── List ──────────────────────────────────────────────────── */}
           <Grid container spacing={2}>
             {items.map((item) => (
-              <Grid item xs={12} sm={6} key={item.id}>
+              <Grid size={{ xs: 12, sm: 6 }} key={item.id}>
                 <Box
                   sx={{
                     p: 2.5, borderRadius: 3, border: "1px solid", borderColor: "divider",
@@ -205,7 +207,7 @@ const ProjectsPanel = ({ showSnackbar }) => {
           <Grid container spacing={2} sx={{ pt: 1 }}>
 
             {/* 1 — Project Name */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label="Proje Adı *"
@@ -217,7 +219,7 @@ const ProjectsPanel = ({ showSnackbar }) => {
             </Grid>
 
             {/* 2 — Summary */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label="Kısa Özet"
@@ -232,7 +234,7 @@ const ProjectsPanel = ({ showSnackbar }) => {
             </Grid>
 
             {/* 3 — Services */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label="Verilen Hizmetler"
@@ -244,20 +246,40 @@ const ProjectsPanel = ({ showSnackbar }) => {
               />
             </Grid>
 
-            {/* 4 — Photo via Cloudinary */}
-            <Grid item xs={12}>
+            {/* 4 — Cover photo via Cloudinary */}
+            <Grid size={{ xs: 12 }}>
               <ImageUploadField
-                label="Proje Fotoğrafı"
+                label="Kapak Fotoğrafı (PhotoUrl)"
                 value={form.PhotoUrl}
                 onChange={(url) => handleChange("PhotoUrl", url)}
                 folder="dekodem/projects"
                 showSnackbar={showSnackbar}
                 aspectRatio="16/9"
               />
+              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.75, ml: 0.5 }}>
+                Detay sayfasında sağ kolonda kırpılmadan (<strong>contain</strong>) gösterilir; listedeki kartlarda görsel yoktur.
+                En az <strong>1200 × 675 px</strong> tamamlanmış iş fotoğrafı yükleyin — logo için aşağıdaki alanı kullanın.
+              </Typography>
+            </Grid>
+
+            {/* 4b — Brand logo via Cloudinary */}
+            <Grid size={{ xs: 12 }}>
+              <ImageUploadField
+                label="Marka / Proje Logosu (LogoUrl)"
+                value={form.LogoUrl}
+                onChange={(url) => handleChange("LogoUrl", url)}
+                folder="dekodem/projects"
+                showSnackbar={showSnackbar}
+                aspectRatio="4/3"
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.75, ml: 0.5 }}>
+                Detay sayfasında başlığın yanında <strong>contain</strong> ile gösterilir — kırpılmaz.
+                PNG / SVG logo için uygundur.
+              </Typography>
             </Grid>
 
             {/* 5 — Detailed Info */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label="Detaylı Bilgi"

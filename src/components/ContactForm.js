@@ -1,6 +1,31 @@
 // components/ContactForm.js
+//
+// Contact form — EmailJS delivery, optional reCAPTCHA v3 verification.
+//
+// Required env vars (loaded at build time by CRA):
+//   REACT_APP_EMAILJS_SERVICE_ID
+//   REACT_APP_EMAILJS_TEMPLATE_ID
+//   REACT_APP_EMAILJS_PUBLIC_KEY
+//   REACT_APP_RECAPTCHA_SITE_KEY   (optional but recommended)
+//
+// If the reCAPTCHA "invalid domain for site key" error appears in production:
+//   1. The site key must be created in Google reCAPTCHA admin
+//      (https://www.google.com/recaptcha/admin) as a v3 key.
+//   2. The exact production domain (e.g. dekodem.com.tr) MUST be listed in the
+//      key's allowed domains — including www.dekodem.com.tr if used.
+//   3. After updating the admin console, hard-refresh; no rebuild is needed.
+//   4. The .env file then needs the matching site key. After editing .env you
+//      MUST restart `npm start` — CRA does not hot-reload env vars.
+
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { Box, TextField, MenuItem, Alert, CircularProgress } from "@mui/material";
+import {
+  Box,
+  TextField,
+  MenuItem,
+  Alert,
+  CircularProgress,
+  Snackbar,
+} from "@mui/material";
 import { Send } from "@mui/icons-material";
 import emailjs from "@emailjs/browser";
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from "react-google-recaptcha-v3";
@@ -10,18 +35,51 @@ import {
   CTAButton,
 } from "../styles/StyledComponents";
 
+// ─── Env vars (resolved once at module load) ───────────────────────────────────
+const EMAILJS_SERVICE_ID  = process.env.REACT_APP_EMAILJS_SERVICE_ID;
+const EMAILJS_TEMPLATE_ID = process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
+const EMAILJS_PUBLIC_KEY  = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
+const RECAPTCHA_SITE_KEY  = process.env.REACT_APP_RECAPTCHA_SITE_KEY;
+
+const EMAILJS_CONFIGURED  = Boolean(EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY);
+const RECAPTCHA_CONFIGURED = Boolean(RECAPTCHA_SITE_KEY);
+
+// Surface misconfiguration loudly during development so it doesn't manifest
+// as a cryptic Google error in production.
+if (!EMAILJS_CONFIGURED) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[ContactForm] EmailJS environment variables are missing. " +
+    "Submissions will fail until REACT_APP_EMAILJS_SERVICE_ID, " +
+    "REACT_APP_EMAILJS_TEMPLATE_ID, and REACT_APP_EMAILJS_PUBLIC_KEY " +
+    "are set in .env (and the dev server restarted)."
+  );
+}
+if (!RECAPTCHA_CONFIGURED) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[ContactForm] REACT_APP_RECAPTCHA_SITE_KEY not set — submitting without reCAPTCHA verification."
+  );
+}
+
 // ─── Rate limiting ─────────────────────────────────────────────────────────────
 const RATE_LIMIT_KEY = "sdyapi_form_last_submit";
 const RATE_LIMIT_SECONDS = 60;
 
 const isRateLimited = () => {
-  const last = localStorage.getItem(RATE_LIMIT_KEY);
-  if (!last) return false;
-  return (Date.now() - parseInt(last, 10)) < RATE_LIMIT_SECONDS * 1000;
+  try {
+    const last = localStorage.getItem(RATE_LIMIT_KEY);
+    if (!last) return false;
+    return (Date.now() - parseInt(last, 10)) < RATE_LIMIT_SECONDS * 1000;
+  } catch {
+    return false;
+  }
 };
 
 const recordSubmission = () => {
-  localStorage.setItem(RATE_LIMIT_KEY, String(Date.now()));
+  try {
+    localStorage.setItem(RATE_LIMIT_KEY, String(Date.now()));
+  } catch { /* storage blocked */ }
 };
 
 // ─── Form fields config ────────────────────────────────────────────────────────
@@ -38,18 +96,23 @@ const INITIAL_FORM = { name: "", email: "", phone: "", subject: "", message: "" 
 const validateEmail = (email) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase());
 
-// ─── Inner form (needs to be inside GoogleReCaptchaProvider) ──────────────────
+// ─── Inner form (lives inside GoogleReCaptchaProvider when reCAPTCHA is on) ───
 const ContactFormInner = () => {
   const [formData, setFormData] = useState(INITIAL_FORM);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showError, setShowError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationError, setValidationError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+  // Snackbar feedback: severity ∈ "success" | "error" | "warning"
+  const [snack, setSnack] = useState({ open: false, severity: "success", message: "" });
   const resetTimerRef = useRef(null);
 
+  // useGoogleReCaptcha returns { executeRecaptcha: undefined } when no provider
+  // is in the tree — safe to call from either branch.
   const { executeRecaptcha } = useGoogleReCaptcha();
-  const recaptchaEnabled = Boolean(process.env.REACT_APP_RECAPTCHA_SITE_KEY);
+
+  const showSnack = useCallback((severity, message) => {
+    setSnack({ open: true, severity, message });
+  }, []);
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
@@ -72,8 +135,15 @@ const ContactFormInner = () => {
     async (e) => {
       e.preventDefault();
       setValidationError("");
-      setShowSuccess(false);
-      setShowError(false);
+
+      // Hard guard — EmailJS env not configured
+      if (!EMAILJS_CONFIGURED) {
+        showSnack(
+          "error",
+          "Form servisi şu anda yapılandırılmamış. Lütfen telefon veya e-posta ile iletişime geçin."
+        );
+        return;
+      }
 
       // Rate limiting
       if (isRateLimited()) {
@@ -100,16 +170,52 @@ const ContactFormInner = () => {
 
       setIsSubmitting(true);
 
-      try {
-        // reCAPTCHA v3 token (skipped gracefully if key not configured)
-        let recaptchaToken = "";
-        if (recaptchaEnabled && executeRecaptcha) {
-          recaptchaToken = await executeRecaptcha("contact_form");
+      // ── 1. reCAPTCHA v3 token (skipped if not configured) ──────────────────
+      let recaptchaToken = "";
+      if (RECAPTCHA_CONFIGURED) {
+        if (typeof executeRecaptcha !== "function") {
+          // Provider hasn't initialized — common cause: site key invalid for
+          // this domain. Surface a clear message instead of silently failing.
+          setIsSubmitting(false);
+          showSnack(
+            "error",
+            "Doğrulama servisi yüklenemedi. Lütfen sayfayı yenileyin veya bizi doğrudan arayın."
+          );
+          // eslint-disable-next-line no-console
+          console.error(
+            "[ContactForm] executeRecaptcha is not a function. " +
+            "Likely cause: REACT_APP_RECAPTCHA_SITE_KEY is invalid, or the " +
+            "current domain is not whitelisted in the Google reCAPTCHA admin console."
+          );
+          return;
         }
+        try {
+          recaptchaToken = await executeRecaptcha("contact_form");
+        } catch (recaptchaErr) {
+          setIsSubmitting(false);
+          showSnack(
+            "error",
+            "Güvenlik doğrulaması başarısız oldu. Lütfen sayfayı yenileyip tekrar deneyin."
+          );
+          // eslint-disable-next-line no-console
+          console.error("[ContactForm] reCAPTCHA execute failed:", recaptchaErr);
+          return;
+        }
+        if (!recaptchaToken) {
+          setIsSubmitting(false);
+          showSnack(
+            "error",
+            "Güvenlik doğrulama belirteci alınamadı. Lütfen tekrar deneyin."
+          );
+          return;
+        }
+      }
 
+      // ── 2. EmailJS delivery ────────────────────────────────────────────────
+      try {
         await emailjs.send(
-          process.env.REACT_APP_EMAILJS_SERVICE_ID,
-          process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+          EMAILJS_SERVICE_ID,
+          EMAILJS_TEMPLATE_ID,
           {
             name: formData.name,
             from_name: formData.name,
@@ -120,23 +226,29 @@ const ContactFormInner = () => {
             message: formData.message,
             recaptcha_token: recaptchaToken,
           },
-          process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+          EMAILJS_PUBLIC_KEY
         );
 
         recordSubmission();
-        setShowSuccess(true);
         setFormData(INITIAL_FORM);
+        showSnack(
+          "success",
+          "Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağız."
+        );
 
         if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
-        resetTimerRef.current = setTimeout(() => setShowSuccess(false), 5000);
       } catch (error) {
-        console.error("EmailJS Error:", error);
-        setShowError(true);
+        // eslint-disable-next-line no-console
+        console.error("[ContactForm] EmailJS error:", error);
+        showSnack(
+          "error",
+          "Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin veya bizi doğrudan arayın."
+        );
       } finally {
         setIsSubmitting(false);
       }
     },
-    [formData, executeRecaptcha, recaptchaEnabled]
+    [formData, executeRecaptcha, showSnack]
   );
 
   useEffect(
@@ -145,6 +257,11 @@ const ContactFormInner = () => {
     },
     []
   );
+
+  const closeSnack = (_e, reason) => {
+    if (reason === "clickaway") return;
+    setSnack((prev) => ({ ...prev, open: false }));
+  };
 
   const fieldSx = {
     "& .MuiOutlinedInput-root": {
@@ -163,23 +280,11 @@ const ContactFormInner = () => {
         Bize Ulaşın
       </SectionTitle>
 
-      {/* aria-live="polite" announces status changes to screen readers */}
+      {/* Inline validation — stays visible while the user fixes the field */}
       <div aria-live="polite" aria-atomic="true">
         {validationError && (
           <Alert severity="warning" sx={{ mb: 3 }}>
             {validationError}
-          </Alert>
-        )}
-
-        {showError && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            Şu an teknik bir sorun var, lütfen bizi arayın.
-          </Alert>
-        )}
-
-        {showSuccess && (
-          <Alert severity="success" sx={{ mb: 3, "& .MuiAlert-message": { fontWeight: 500 } }}>
-            Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağız.
           </Alert>
         )}
       </div>
@@ -187,6 +292,7 @@ const ContactFormInner = () => {
       <Box
         component="form"
         onSubmit={handleSubmit}
+        noValidate
         sx={{ display: "flex", flexDirection: "column", gap: "20px" }}
       >
         <TextField
@@ -282,25 +388,45 @@ const ContactFormInner = () => {
           {isSubmitting ? "Gönderiliyor..." : "Mesaj Gönder"}
         </CTAButton>
       </Box>
+
+      {/* Minimal MUI Snackbar — auto-dismisses, replaces the previous Alert blocks */}
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={snack.severity === "success" ? 5000 : 7000}
+        onClose={closeSnack}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={closeSnack}
+          severity={snack.severity}
+          variant="filled"
+          sx={{
+            borderRadius: "24px",
+            boxShadow:    "none",
+            fontWeight:   500,
+            alignItems:   "center",
+          }}
+        >
+          {snack.message}
+        </Alert>
+      </Snackbar>
     </ServiceCard>
   );
 };
 
-// ─── Public export — wraps the form in reCAPTCHA provider ─────────────────────
+// ─── Public export — only mounts GoogleReCaptchaProvider when the site key
+// ─── is actually configured. Mounting it with a placeholder key was the root
+// ─── cause of the "invalid domain for site key" error in production.
 const ContactForm = () => {
-  const siteKey = process.env.REACT_APP_RECAPTCHA_SITE_KEY;
-
-  if (!siteKey) {
-    // reCAPTCHA not configured yet — render form without it
-    return (
-      <GoogleReCaptchaProvider reCaptchaKey="placeholder" useEnterprise={false}>
-        <ContactFormInner />
-      </GoogleReCaptchaProvider>
-    );
+  if (!RECAPTCHA_CONFIGURED) {
+    return <ContactFormInner />;
   }
 
   return (
-    <GoogleReCaptchaProvider reCaptchaKey={siteKey}>
+    <GoogleReCaptchaProvider
+      reCaptchaKey={RECAPTCHA_SITE_KEY}
+      scriptProps={{ async: true, defer: true, appendTo: "head" }}
+    >
       <ContactFormInner />
     </GoogleReCaptchaProvider>
   );

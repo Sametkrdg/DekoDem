@@ -215,7 +215,7 @@ const CategoryDetail = () => {
         aria-label={`${field.title} hero`}
         sx={{
           background: isDark
-            ? 'linear-gradient(135deg, #0d1117 0%, #1a2235 50%, #0d2137 100%)'
+            ? '#000000'
             : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 60%, ${alpha(theme.palette.primary.light, 0.85)} 100%)`,
           color:       '#fff',
           pt:          { xs: 10, md: 13 },
@@ -309,7 +309,7 @@ const CategoryDetail = () => {
         <Grid container spacing={5}>
 
           {/* ── Left: description + sub-services ───────────────────────── */}
-          <Grid item xs={12} lg={8}>
+          <Grid size={{ xs: 12, lg: 8 }}>
 
             {/* Back button */}
             <Button
@@ -343,7 +343,7 @@ const CategoryDetail = () => {
 
             <Grid container spacing={2}>
               {field.subServices.map((service, i) => (
-                <Grid item xs={12} sm={6} key={service}>
+                <Grid size={{ xs: 12, sm: 6 }} key={service}>
                   <ServiceCard label={service} index={i} />
                 </Grid>
               ))}
@@ -351,7 +351,7 @@ const CategoryDetail = () => {
           </Grid>
 
           {/* ── Right: CTA sidebar ──────────────────────────────────────── */}
-          <Grid item xs={12} lg={4}>
+          <Grid size={{ xs: 12, lg: 4 }}>
             <Box sx={{ position: { lg: 'sticky' }, top: { lg: '90px' }, display: 'flex', flexDirection: 'column', gap: 3 }}>
 
               {/* Primary CTA card */}
@@ -474,7 +474,7 @@ const CategoryDetail = () => {
             </Typography>
             <Grid container spacing={3}>
               {related.map((rel) => (
-                <Grid item xs={12} sm={4} key={rel.id}>
+                <Grid size={{ xs: 12, sm: 4 }} key={rel.id}>
                   <Box
                     component={RouterLink}
                     to={`${PATHS.ACTIVITIES}/${rel.slug}`}

@@ -85,7 +85,7 @@ function Footer() {
           <Grid container spacing={4}>
 
             {/* ── Col 1: Brand + short summary + social ─────────────── */}
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <FooterSection>
                 {/* Logo + brand name */}
                 <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -109,11 +109,12 @@ function Footer() {
                   </Typography>
                 </Box>
 
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.65)', lineHeight: 1.75, mb: 3 }}>
+                {/* WCAG-AA: 0.78 alpha on near-black ≈ 12:1 contrast — passes AAA */}
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.78)', lineHeight: 1.75, mb: 3 }}>
                   {about.shortSummary}
                 </Typography>
 
-                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', mb: 1.5 }}>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.78)', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', mb: 1.5 }}>
                   Bizi Takip Edin
                 </Typography>
 
@@ -132,7 +133,7 @@ function Footer() {
             </Grid>
 
             {/* ── Col 2: Activity fields (linked to detail pages) ────── */}
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <FooterSection>
                 <SectionTitle>Faaliyet Alanlarımız</SectionTitle>
 
@@ -172,8 +173,9 @@ function Footer() {
                   variant="outlined"
                   size="small"
                   sx={{
-                    mt: 2, borderRadius: '50px', color: 'rgba(255,255,255,0.8)',
-                    borderColor: 'rgba(255,255,255,0.3)',
+                    mt: 2, borderRadius: '50px',
+                    color:       'rgba(255,255,255,0.92)', // ~14:1 contrast on near-black
+                    borderColor: 'rgba(255,255,255,0.45)', // ~5.5:1 — visible hairline
                     '&:hover': { borderColor: '#fff', color: '#fff', bgcolor: 'rgba(255,255,255,0.08)' },
                   }}
                 >
@@ -183,7 +185,7 @@ function Footer() {
             </Grid>
 
             {/* ── Col 3: Quick links (Kurumsal) ──────────────────────── */}
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <FooterSection>
                 <SectionTitle>Kurumsal</SectionTitle>
 
@@ -209,7 +211,7 @@ function Footer() {
             </Grid>
 
             {/* ── Col 4: Contact ─────────────────────────────────────── */}
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <FooterSection>
                 <SectionTitle>İletişim</SectionTitle>
 
@@ -272,7 +274,7 @@ function Footer() {
               component={Link}
               to={PATHS.PRIVACY}
               variant="caption"
-              sx={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', '&:hover': { color: '#fff' } }}
+              sx={{ color: 'rgba(255,255,255,0.78)', textDecoration: 'none', '&:hover': { color: '#fff' } }}
             >
               Gizlilik Politikası
             </Typography>
@@ -280,7 +282,7 @@ function Footer() {
               component={Link}
               to={PATHS.TERMS}
               variant="caption"
-              sx={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', '&:hover': { color: '#fff' } }}
+              sx={{ color: 'rgba(255,255,255,0.78)', textDecoration: 'none', '&:hover': { color: '#fff' } }}
             >
               Kullanım Koşulları
             </Typography>

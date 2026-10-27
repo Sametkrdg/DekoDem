@@ -10,7 +10,7 @@ const SiteContext = createContext();
 // ── Admin colour/title fallback (localStorage-driven, NOT from Firestore schema) ──
 const DEFAULT_SETTINGS = {
     title:              "DEKODEM",
-    color:              "#1976d2",
+    color:              "#C9A961", // Champagne Gold — luxury primary
     logoUrl:            "",
     description:        "Profesyonel yapı çözümleri",
     codeReviewEnabled:  true,
@@ -18,11 +18,14 @@ const DEFAULT_SETTINGS = {
 
 // ── Contact info fallback (mirrors Settings doc schema) ───────────────────────
 const DEFAULT_CONTACT_SETTINGS = {
-    Phone:    staticContact.phone1,
-    Email:    staticContact.email,
-    Address:  staticContact.address,
-    InstaUrl: staticContact.instagramUrl,
-    LogoUrl:  "",
+    Phone:         staticContact.phone1,
+    Email:         staticContact.email,
+    Address:       staticContact.address,
+    InstaUrl:      staticContact.instagramUrl,
+    LogoUrl:       "",
+    LogoDarkModeUrl: "",
+    FaviconUrl:    "",
+    HeroImageUrl:  "", // Cloudinary URL; empty = Unsplash fallback shown
 };
 
 // ── About content fallback (mirrors About doc schema) ────────────────────────
@@ -58,12 +61,16 @@ export const SiteProvider = ({ children }) => {
                     fetchSiteContent(),
                 ]);
 
-                // --- Settings document → contactSettings + merge logo into admin settings ---
+                // --- Settings document → contactSettings + merge logo/favicon into admin settings ---
                 if (remoteSettings) {
                     setContactSettings((prev) => ({ ...prev, ...remoteSettings }));
-                    // Also push LogoUrl into admin settings so Navbar still works via settings.logoUrl
+                    // Push LogoUrl into admin settings so Navbar still works via settings.logoUrl
                     if (remoteSettings.LogoUrl) {
                         setSettings((prev) => ({ ...prev, logoUrl: remoteSettings.LogoUrl }));
+                    }
+                    // Push FaviconUrl into admin settings so App.js can inject it into <head>
+                    if (remoteSettings.FaviconUrl) {
+                        setSettings((prev) => ({ ...prev, faviconUrl: remoteSettings.FaviconUrl }));
                     }
                 }
 
@@ -111,6 +118,9 @@ export const SiteProvider = ({ children }) => {
                 setContactSettings((prev) => ({ ...prev, ...remoteSettings }));
                 if (remoteSettings.LogoUrl) {
                     setSettings((prev) => ({ ...prev, logoUrl: remoteSettings.LogoUrl }));
+                }
+                if (remoteSettings.FaviconUrl) {
+                    setSettings((prev) => ({ ...prev, faviconUrl: remoteSettings.FaviconUrl }));
                 }
             }
             if (remoteAbout) {

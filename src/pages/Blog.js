@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {
   Container, Typography, Grid, Card, CardContent, CardActionArea,
-  Box, Chip, Breadcrumbs,
+  Box, Chip, Breadcrumbs, Fade,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import { Article, Home, NavigateNext, CalendarMonth } from "@mui/icons-material";
 import { getBlogs as getPosts } from "../services/firestore";
@@ -17,6 +18,8 @@ const formatDate = (ts) => {
 };
 
 const Blog = () => {
+  const theme  = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,13 +43,16 @@ const Blog = () => {
   }, []);
 
   return (
-    <Box sx={{ bgcolor: "#f8fafc", minHeight: "60vh" }}>
+    <Box sx={{ bgcolor: "background.default", minHeight: "60vh" }}>
       {/* ─── Hero ─────────────────────────────────────────────────── */}
+      {/* Pure Black in dark mode (matches every other page hero) — navy gradient in light. */}
       <Box
         sx={{
-          background: "linear-gradient(135deg, #1a365d 0%, #2c5282 100%)",
-          color: "#fff",
-          py: { xs: 8, md: 11 },
+          background:   isDark ? "#000000" : "linear-gradient(135deg, #1a365d 0%, #2c5282 100%)",
+          color:        "#fff",
+          py:           { xs: 8, md: 11 },
+          borderBottom: isDark ? "1px solid" : "none",
+          borderColor:  "divider",
         }}
       >
         <Container maxWidth="lg">
@@ -83,53 +89,81 @@ const Blog = () => {
             description="Yeni içerikler yakında eklenecek. Takipte kalın!"
           />
         ) : (
-          <Grid container spacing={4}>
-            {posts.map((post) => (
-              <Grid item xs={12} sm={6} md={4} key={post.id}>
+          <Grid container spacing={4} alignItems="stretch">
+            {posts.map((post, idx) => (
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={post.id} sx={{ display: "flex" }}>
+                <Fade in timeout={500} style={{ transitionDelay: `${idx * 100}ms` }}>
                 <Card
                   elevation={0}
                   sx={{
-                    height: "100%",
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: 3,
-                    transition: "box-shadow 0.2s, transform 0.2s",
-                    "&:hover": { boxShadow: 6, transform: "translateY(-4px)" },
+                    width:         "100%",
+                    height:        "100%",
+                    display:       "flex",
+                    flexDirection: "column",
+                    bgcolor:       "background.paper",
+                    border:        "1px solid",
+                    borderColor:   "divider",
+                    borderRadius:  "24px",
+                    boxShadow:     "none",
+                    transition:    "transform 0.3s cubic-bezier(0.4,0,0.2,1), border-color 0.3s ease",
+                    "&:hover":     {
+                      transform:   "scale(1.02)",
+                      borderColor: "primary.main",
+                    },
                   }}
                 >
                   <CardActionArea
                     component={Link}
                     to={`${PATHS.BLOG}/${post.slug}`}
-                    sx={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "flex-start" }}
+                    sx={{
+                      height:        "100%",
+                      display:       "flex",
+                      flexDirection: "column",
+                      alignItems:    "stretch",
+                    }}
                   >
-                    {/* Cover image */}
-                    {post.coverImage && (
-                      <Box
-                        component="img"
-                        src={post.coverImage}
-                        alt={post.title}
-                        loading="lazy"
-                        sx={{ width: "100%", height: 200, objectFit: "cover", borderRadius: "12px 12px 0 0" }}
-                      />
-                    )}
-
-                    <CardContent sx={{ flex: 1, p: 3 }}>
+                    <CardContent
+                      sx={{
+                        flex:          1,
+                        p:             { xs: 3, md: 3.5 },
+                        display:       "flex",
+                        flexDirection: "column",
+                      }}
+                    >
                       {post.category && (
-                        <Chip label={post.category} size="small" color="primary" variant="outlined" sx={{ mb: 1.5 }} />
+                        <Chip label={post.category} size="small" color="primary" variant="outlined" sx={{ mb: 1.5, alignSelf: "flex-start" }} />
                       )}
-                      <Typography variant="h6" fontWeight={700} gutterBottom sx={{ lineHeight: 1.4 }}>
+                      <Typography
+                        variant="h6"
+                        fontWeight={700}
+                        gutterBottom
+                        sx={{ lineHeight: 1.4, letterSpacing: "-0.01em" }}
+                      >
                         {post.title}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.7 }}>
-                        {post.excerpt || post.body?.slice(0, 120) + "…"}
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          mb:              2,
+                          lineHeight:      1.6,
+                          display:         "-webkit-box",
+                          WebkitBoxOrient: "vertical",
+                          WebkitLineClamp: 4,
+                          overflow:        "hidden",
+                        }}
+                      >
+                        {post.excerpt || post.body?.slice(0, 160) + "…"}
                       </Typography>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.disabled" }}>
+                      {/* Equalizer: meta row pinned to bottom */}
+                      <Box sx={{ mt: "auto", display: "flex", alignItems: "center", gap: 0.5, color: "text.disabled" }}>
                         <CalendarMonth sx={{ fontSize: 16 }} />
                         <Typography variant="caption">{formatDate(post.publishedAt)}</Typography>
                       </Box>
                     </CardContent>
                   </CardActionArea>
                 </Card>
+                </Fade>
               </Grid>
             ))}
           </Grid>

@@ -94,7 +94,7 @@ const ContactSection = () => {
         overflow: 'hidden',
         // Deep navy gradient — consistent with hero & CTA sections across the project
         background: isDark
-          ? 'linear-gradient(135deg, #080d14 0%, #0d1a2e 50%, #071523 100%)'
+          ? '#000000'
           : 'linear-gradient(135deg, #0d1a2e 0%, #1a365d 50%, #0d2137 100%)',
         py: { xs: 11, md: 15 },
         // 60% black overlay for maximum contrast

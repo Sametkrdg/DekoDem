@@ -133,7 +133,7 @@ const BlogPanel = ({ showSnackbar }) => {
 
           <Grid container spacing={2}>
             {items.map((item) => (
-              <Grid item xs={12} key={item.id}>
+              <Grid size={{ xs: 12 }} key={item.id}>
                 <Box
                   sx={{
                     p: 2.5, borderRadius: 3, border: "1px solid", borderColor: "divider",
@@ -166,20 +166,20 @@ const BlogPanel = ({ showSnackbar }) => {
         <DialogTitle fontWeight={700}>{editItem ? "Yazıyı Düzenle" : "Yeni Blog Yazısı"}</DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ pt: 1 }}>
-            <Grid item xs={12} sm={8}>
+            <Grid size={{ xs: 12, sm: 8 }}>
               <TextField
                 fullWidth label="Başlık (Name) *" value={form.Name}
                 onChange={(e) => handleChange("Name", e.target.value)} sx={fieldSx}
               />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <TextField
                 fullWidth label="Yayın Tarihi (Date)" type="date" value={form.Date}
                 onChange={(e) => handleChange("Date", e.target.value)}
                 InputLabelProps={{ shrink: true }} sx={fieldSx}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <ImageUploadField
                 label="Kapak Görseli (CoverImg)"
                 value={form.CoverImg}
@@ -189,7 +189,7 @@ const BlogPanel = ({ showSnackbar }) => {
                 aspectRatio="2/1"
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth label="İçerik (Content)" value={form.Content}
                 onChange={(e) => handleChange("Content", e.target.value)}

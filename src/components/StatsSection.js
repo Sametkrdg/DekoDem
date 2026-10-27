@@ -53,7 +53,7 @@ const StatsSection = () => {
           justifyContent="center"
         >
           {whyUs.map((principle) => (
-            <Grid item xs={12} sm={6} md={4} key={principle} component="li">
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={principle} component="li">
               <Box
                 sx={{
                   display:    'flex',

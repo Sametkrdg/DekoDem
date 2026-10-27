@@ -42,7 +42,7 @@ const Career = () => {
       <Box
         sx={{
           background: isDark
-            ? "linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)"
+            ? "#000000"
             : "linear-gradient(135deg, #1a365d 0%, #2c5282 100%)",
           color: "#fff",
           py: { xs: 8, md: 11 },
@@ -92,7 +92,7 @@ const Career = () => {
 
         <Grid container spacing={3} sx={{ mb: 8 }}>
           {VALUES.map((v) => (
-            <Grid item xs={12} sm={6} md={3} key={v.title}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={v.title}>
               <Card
                 elevation={0}
                 sx={{ height: "100%", border: "1px solid", borderColor: "divider", borderRadius: 3, p: 1 }}
@@ -119,7 +119,7 @@ const Career = () => {
           <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", mb: 3 }} />
           <Grid container spacing={1.5}>
             {BENEFITS.map((b) => (
-              <Grid item xs={12} sm={6} key={b}>
+              <Grid size={{ xs: 12, sm: 6 }} key={b}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <Typography sx={{ color: "rgba(255,255,255,0.7)", fontSize: 18 }}>✓</Typography>
                   <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.9)" }}>{b}</Typography>
@@ -145,7 +145,7 @@ const Career = () => {
         ) : (
           <Grid container spacing={3}>
             {positions.map((pos) => (
-              <Grid item xs={12} md={6} key={pos.id}>
+              <Grid size={{ xs: 12, md: 6 }} key={pos.id}>
                 <Card
                   elevation={0}
                   sx={{

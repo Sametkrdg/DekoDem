@@ -94,7 +94,7 @@ const SettingsPanel = ({ settings, setSettings, showSnackbar }) => {
   return (
     <Grid container spacing={3}>
       {/* Left column */}
-      <Grid item xs={12} lg={8}>
+      <Grid size={{ xs: 12, lg: 8 }}>
         {/* Site Title */}
         <AdminCard>
           <FormSection>
@@ -121,7 +121,7 @@ const SettingsPanel = ({ settings, setSettings, showSnackbar }) => {
               <SectionTitle variant="h5">Renk Ayarları</SectionTitle>
             </SectionHeader>
             <Grid container spacing={3} alignItems="center">
-              <Grid item xs={12} md={8}>
+              <Grid size={{ xs: 12, md: 8 }}>
                 <TextField
                   fullWidth
                   label="Temel Renk (Hex)"
@@ -135,7 +135,7 @@ const SettingsPanel = ({ settings, setSettings, showSnackbar }) => {
                   sx={fieldSx}
                 />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <input
                   type="color"
                   value={color}
@@ -198,7 +198,7 @@ const SettingsPanel = ({ settings, setSettings, showSnackbar }) => {
               Arama motorlarına ve sosyal medya paylaşımlarına görünen başlık, açıklama ve resim bilgileri.
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth
                   label="Meta Başlık (SEO Title)"
@@ -210,7 +210,7 @@ const SettingsPanel = ({ settings, setSettings, showSnackbar }) => {
                   sx={fieldSx}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth
                   label="Meta Açıklama (SEO Description)"
@@ -224,7 +224,7 @@ const SettingsPanel = ({ settings, setSettings, showSnackbar }) => {
                   sx={fieldSx}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth
                   label="OG Image URL (Sosyal Medya Görseli)"
@@ -263,7 +263,7 @@ const SettingsPanel = ({ settings, setSettings, showSnackbar }) => {
         <AdminCard>
           <FormSection>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Button
                   fullWidth
                   variant="contained"
@@ -275,7 +275,7 @@ const SettingsPanel = ({ settings, setSettings, showSnackbar }) => {
                   Ayarları Kaydet
                 </Button>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Button
                   fullWidth
                   variant="outlined"
@@ -294,7 +294,7 @@ const SettingsPanel = ({ settings, setSettings, showSnackbar }) => {
       </Grid>
 
       {/* Right column — Preview */}
-      <Grid item xs={12} lg={4}>
+      <Grid size={{ xs: 12, lg: 4 }}>
         <AdminCard sx={{ position: { lg: "sticky" }, top: { lg: 24 } }}>
           <FormSection>
             <SectionHeader>

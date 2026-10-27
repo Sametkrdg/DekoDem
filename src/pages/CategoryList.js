@@ -276,7 +276,7 @@ const CategoryList = () => {
         aria-label="Faaliyet alanları başlığı"
         sx={{
           background: isDark
-            ? 'linear-gradient(135deg, #0d1117 0%, #1a1f35 100%)'
+            ? '#000000'
             : 'linear-gradient(135deg, #1a365d 0%, #2c5282 100%)',
           color:    '#fff',
           py:       { xs: 9, md: 12 },
@@ -344,7 +344,7 @@ const CategoryList = () => {
       >
         <Grid container spacing={3}>
           {fields.map((field, idx) => (
-            <Grid item xs={12} sm={6} lg={4} key={field._docId ?? field.id}>
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={field._docId ?? field.id}>
               <ActivityCard field={field} index={idx} />
             </Grid>
           ))}

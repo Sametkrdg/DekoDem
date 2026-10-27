@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Container, Typography, Grid, Paper, Chip } from "@mui/material";
+import { Box, Container, Typography, Grid, Paper, Chip, Fade } from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
 import {
   Verified, EmojiEvents, WorkspacePremium, Shield,
   Groups, Engineering,
@@ -62,7 +63,13 @@ const TAG_COLORS = {
   "Üyelik": "info",
 };
 
-const CertificationsSection = () => (
+const CertificationsSection = () => {
+  const theme    = useTheme();
+  const isDark   = theme.palette.mode === "dark";
+  const hairline = isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)";
+  const gold     = theme.palette.primary.main;
+
+  return (
   <Box component="section" sx={{ py: { xs: 8, md: 12 }, bgcolor: "background.paper" }}>
     <Container maxWidth="lg">
       {/* Header */}
@@ -82,22 +89,26 @@ const CertificationsSection = () => (
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={3} alignItems="stretch">
         {CERTS.map((cert, i) => (
-          <Grid item xs={12} sm={6} md={4} key={i}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i} sx={{ display: "flex" }}>
+            <Fade in timeout={500} style={{ transitionDelay: `${i * 100}ms` }}>
             <Paper
               elevation={0}
               sx={{
                 p: 3.5,
+                width: "100%",
                 height: "100%",
+                display: "flex",
+                flexDirection: "column",
                 border: "1px solid",
-                borderColor: "divider",
-                borderRadius: 3,
-                transition: "all 0.25s",
+                borderColor: hairline,
+                borderRadius: "24px",
+                boxShadow: "none",
+                transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1), border-color 0.3s ease",
                 "&:hover": {
-                  borderColor: cert.color,
-                  boxShadow: `0 8px 32px ${cert.color}20`,
-                  transform: "translateY(-4px)",
+                  transform:   "scale(1.02)",
+                  borderColor: alpha(gold, isDark ? 0.55 : 0.45),
                 },
               }}
             >
@@ -123,11 +134,13 @@ const CertificationsSection = () => (
                 {cert.desc}
               </Typography>
             </Paper>
+            </Fade>
           </Grid>
         ))}
       </Grid>
     </Container>
   </Box>
-);
+  );
+};
 
 export default CertificationsSection;

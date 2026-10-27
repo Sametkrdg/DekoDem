@@ -38,10 +38,11 @@ import { NAV_ITEMS, PATHS } from '../constants/navigation';
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   justifyContent: 'space-between',
   padding:        '0 24px',
-  minHeight:      '70px',
+  // Taller toolbar to host the enlarged transparent brand logo with breathing room
+  minHeight:      '112px',
   [theme.breakpoints.down('md')]: {
     padding:   '0 16px',
-    minHeight: '60px',
+    minHeight: '88px',
   },
 }));
 
@@ -196,15 +197,19 @@ function Navbar({ settings }) {
   const siteTitle    = settings?.title || 'DEKODEM';
   const logoInitials = siteTitle.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || 'SD';
 
-  // ── Real-time logo — onSnapshot listener on Settings/main ────────────────
-  // logo state holds the Cloudinary-optimised URL, or null when no logo is set.
-  const [logo, setLogo] = useState(null);
+  // ── Real-time dual-logo — onSnapshot listener on Settings/main ──────────
+  // logoLight → LogoUrl (shown in light mode)
+  // logoDark  → LogoDarkModeUrl (shown in dark mode; falls back to logoLight)
+  const [logoLight, setLogoLight] = useState(null);
+  const [logoDark,  setLogoDark]  = useState(null);
 
   useEffect(() => {
-    // When Firebase is unavailable, fall back to the prop value immediately
+    // 2× the target render width so the logo stays crisp on retina/HiDPI displays
+    const opt = { width: 560, crop: 'limit' };
+    const toUrl = (raw) => raw ? buildCloudinaryUrl(raw, opt) : null;
+
     if (!isFirebaseConfigured || !db) {
-      const fallback = settings?.logoUrl || null;
-      setLogo(fallback ? buildCloudinaryUrl(fallback, { width: 200, crop: 'limit' }) : null);
+      setLogoLight(toUrl(settings?.logoUrl || null));
       return;
     }
 
@@ -214,26 +219,23 @@ function Navbar({ settings }) {
     const unsubscribe = onSnapshot(
       doc(db, 'Settings', 'main'),
       (snap) => {
-        const rawUrl = snap.exists() ? (snap.data()?.LogoUrl ?? null) : null;
-        setLogo(rawUrl
-          ? buildCloudinaryUrl(rawUrl, { width: 200, crop: 'limit' })
-          : null
-        );
+        const data = snap.exists() ? snap.data() : {};
+        setLogoLight(toUrl(data?.LogoUrl          ?? null));
+        setLogoDark (toUrl(data?.LogoDarkModeUrl  ?? null));
       },
       (err) => {
         console.error('[Navbar] Firestore logo listener error:', err);
-        // Degrade to prop value so the Navbar stays functional
-        const fallback = settings?.logoUrl || null;
-        setLogo(fallback ? buildCloudinaryUrl(fallback, { width: 200, crop: 'limit' }) : null);
+        setLogoLight(toUrl(settings?.logoUrl || null));
       }
     );
 
-    // Cleanup: unsubscribe the Firestore listener on component unmount to
-    // prevent memory leaks and ghost listeners on hot-reloads.
     return unsubscribe;
-    // Intentionally empty deps — the listener self-manages updates via Firestore.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Pick the correct logo for the active theme; dark falls back to light logo
+  // if no dark-specific asset has been uploaded yet.
+  const logo = isDark ? (logoDark || logoLight) : logoLight;
 
   const handleDrawerToggle = () => setMobileOpen((o) => !o);
 
@@ -268,7 +270,13 @@ function Navbar({ settings }) {
               component="img"
               src={logo}
               alt={siteTitle}
-              sx={{ maxHeight: '40px', width: 'auto', display: 'block', objectFit: 'contain' }}
+              sx={{
+                maxHeight: { xs: '60px', sm: '70px' },
+                maxWidth:  { xs: '210px', sm: '260px' },
+                width:     'auto',
+                display:   'block',
+                objectFit: 'contain',
+              }}
             />
           ) : (
             <>
@@ -386,7 +394,11 @@ function Navbar({ settings }) {
                 src={logo}
                 alt={siteTitle}
                 sx={{
-                  maxHeight:  '50px',
+                  // Enlarged transparent brand logo — responsive across breakpoints.
+                  // Desktop ~72px tall, mobile ~56px tall. maxWidth caps horizontal
+                  // bleed on wide/landscape logos so the navbar stays balanced.
+                  maxHeight:  { xs: '64px', sm: '76px', md: '88px' },
+                  maxWidth:   { xs: '230px', sm: '300px', md: '380px' },
                   width:      'auto',
                   display:    'block',
                   objectFit:  'contain',
@@ -475,8 +487,8 @@ function Navbar({ settings }) {
         {drawer}
       </StyledDrawer>
 
-      {/* Spacer for fixed AppBar */}
-      <Box sx={{ height: { xs: '60px', md: '70px' } }} />
+      {/* Spacer for fixed AppBar — must match StyledToolbar minHeight */}
+      <Box sx={{ height: { xs: '88px', md: '112px' } }} />
     </>
   );
 }

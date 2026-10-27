@@ -166,18 +166,16 @@ const ValueSection = () => {
         <Grid
           container
           spacing={3}
+          alignItems="stretch"
           component="ul"
           aria-label="Değer önerileri"
           sx={{ listStyle: "none", p: 0, mb: { xs: 8, md: 11 } }}
         >
           {coreValues.map((val) => (
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              lg={3}
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}
               key={val.id}
               component="li"
+              sx={{ display: "flex" }}
             >
               <ValueCard
                 icon={ICON_MAP[val.icon] ?? <Engineering />}

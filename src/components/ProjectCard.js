@@ -1,157 +1,96 @@
 /**
- * ProjectCard.js — Clean listing card for the Projects page.
+ * ProjectCard.js — Text-only luxury listing card for the Projects page.
  *
- * Props:
- *   project   { id, name, summary }
- *   imageUrl  pre-transformed Cloudinary URL (or null for placeholder)
+ * Props (unchanged for caller compatibility):
+ *   project   { id, name, summary? }
+ *   imageUrl  IGNORED — kept in the signature so existing call sites don't break.
+ *             Project photos are now shown only on the Detail page.
  *   onSelect  () => void — navigate to detail page
+ *
+ * Design rules applied:
+ *   - Text-only: no Vault, no image, no Cloudinary call in the card
+ *   - "The Equalizer": flex column, height:100%, CTA pinned via mt:auto
+ *   - 24px radius, 1px hairline border, no heavy shadows
+ *   - Hover: scale(1.02) + Champagne Gold border shift
  */
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
-import { ArrowForward, Apartment } from "@mui/icons-material";
+import { ArrowForward } from "@mui/icons-material";
 
+// eslint-disable-next-line no-unused-vars
 const ProjectCard = ({ project, imageUrl, onSelect }) => {
   const theme  = useTheme();
   const isDark = theme.palette.mode === "dark";
-  const orange = theme.palette.secondary?.main ?? theme.palette.primary.main;
-  const navy   = theme.palette.primary.main;
+  const gold   = theme.palette.primary.main;
 
-  const name    = project?.name    || "Proje";
-  const summary = project?.summary || "";
+  const name = project?.name || "Proje";
+
+  const hairline = isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)";
 
   return (
     <Box
       component="article"
       sx={{
         height:        "100%",
+        width:         "100%",
         display:       "flex",
         flexDirection: "column",
-        borderRadius:  "16px",
+        borderRadius:  "24px",
         overflow:      "hidden",
         border:        "1px solid",
-        borderColor:   isDark ? "rgba(255,255,255,0.08)" : alpha(navy, 0.12),
-        bgcolor:       isDark ? "rgba(255,255,255,0.03)" : "#fff",
-        transition:    "transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease",
-        // Orange accent strip at top
-        "&::before": {
-          content:  "\"\"",
-          display:  "block",
-          height:   "3px",
-          background: `linear-gradient(90deg, ${navy}, ${orange})`,
-        },
+        borderColor:   hairline,
+        bgcolor:       "background.paper",
+        boxShadow:     "none",
+        p:             { xs: "26px 24px", md: "32px 28px" },
+        transition:    "transform 0.3s cubic-bezier(0.4,0,0.2,1), border-color 0.3s ease",
         "&:hover": {
-          transform:   "translateY(-5px)",
-          borderColor: alpha(orange, isDark ? 0.4 : 0.3),
-          boxShadow:   isDark
-            ? `0 18px 44px rgba(0,0,0,0.55)`
-            : `0 14px 38px ${alpha(navy, 0.13)}`,
+          transform:   "scale(1.02)",
+          borderColor: alpha(gold, isDark ? 0.55 : 0.45),
         },
       }}
     >
-      {/* ── Cover image ──────────────────────────────────────────────────── */}
-      <Box
+      {/* ── Title only — extreme minimalism per the luxury rules ─────────── */}
+      <Typography
+        variant="h6"
+        component="h3"
+        fontWeight={700}
         sx={{
-          height:   "200px",
-          flexShrink: 0,
-          overflow: "hidden",
-          position: "relative",
-          bgcolor:  isDark ? alpha(navy, 0.2) : alpha(navy, 0.06),
+          lineHeight:    1.3,
+          letterSpacing: "-0.01em",
+          color:         "text.primary",
         }}
       >
-        {imageUrl ? (
-          <Box
-            component="img"
-            src={imageUrl}
-            alt={name}
-            loading="lazy"
-            sx={{
-              width:      "100%",
-              height:     "100%",
-              objectFit:  "cover",
-              display:    "block",
-              transition: "transform 0.45s ease",
-              "article:hover &": { transform: "scale(1.06)" },
-            }}
-          />
-        ) : (
-          <Box
-            sx={{
-              width:          "100%",
-              height:         "100%",
-              display:        "flex",
-              alignItems:     "center",
-              justifyContent: "center",
-              background:     `linear-gradient(135deg, ${alpha(navy, 0.55)}, ${alpha(orange, 0.35)})`,
-            }}
-          >
-            <Apartment sx={{ fontSize: 52, color: "rgba(255,255,255,0.5)" }} />
-          </Box>
-        )}
-      </Box>
+        {name}
+      </Typography>
 
-      {/* ── Body ─────────────────────────────────────────────────────────── */}
-      <Box
+      {/* ── CTA — pinned to the bottom by Equalizer rule (mt:auto) ──────── */}
+      <Button
+        variant="outlined"
+        size="small"
+        fullWidth
+        endIcon={<ArrowForward sx={{ fontSize: 15 }} />}
+        onClick={onSelect}
         sx={{
-          p:             "22px 24px",
-          flexGrow:      1,
-          display:       "flex",
-          flexDirection: "column",
-          gap:           1.5,
+          mt:            "auto",
+          borderRadius:  "24px",
+          fontWeight:    600,
+          fontSize:      "0.85rem",
+          textTransform: "none",
+          borderColor:   hairline,
+          color:         "text.primary",
+          py:            0.9,
+          boxShadow:     "none",
+          "&:hover": {
+            borderColor: gold,
+            color:       gold,
+            bgcolor:     alpha(gold, isDark ? 0.10 : 0.06),
+            boxShadow:   "none",
+          },
         }}
       >
-        <Typography
-          variant="h6"
-          component="h3"
-          fontWeight={700}
-          sx={{ lineHeight: 1.3, color: "text.primary" }}
-        >
-          {name}
-        </Typography>
-
-        {summary && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              lineHeight:          1.7,
-              flexGrow:            1,
-              display:             "-webkit-box",
-              WebkitLineClamp:     3,
-              WebkitBoxOrient:     "vertical",
-              overflow:            "hidden",
-            }}
-          >
-            {summary}
-          </Typography>
-        )}
-
-        {!summary && <Box sx={{ flexGrow: 1 }} />}
-
-        <Button
-          variant="outlined"
-          size="small"
-          fullWidth
-          endIcon={<ArrowForward sx={{ fontSize: 15 }} />}
-          onClick={onSelect}
-          sx={{
-            mt:            0.5,
-            borderRadius:  "10px",
-            fontWeight:    700,
-            fontSize:      "0.82rem",
-            textTransform: "none",
-            borderColor:   alpha(orange, 0.45),
-            color:         orange,
-            py:            0.8,
-            "&:hover": {
-              borderColor: orange,
-              bgcolor:     alpha(orange, 0.06),
-            },
-          }}
-        >
-          Projeyi Gör
-        </Button>
-      </Box>
+        Projeyi Gör
+      </Button>
     </Box>
   );
 };

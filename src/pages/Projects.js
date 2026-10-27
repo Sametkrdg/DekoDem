@@ -6,12 +6,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Box, Container, Grid, Typography, CircularProgress,
+  Box, Container, Grid, Typography, CircularProgress, Fade,
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "../config/firebase";
-import { buildCloudinaryUrl } from "../services/cloudinary";
 import ProjectCard from "../components/ProjectCard";
 import { PATHS } from "../constants/navigation";
 
@@ -63,7 +62,7 @@ const Projects = () => {
         component="header"
         sx={{
           background: isDark
-            ? "linear-gradient(135deg, #0d1117 0%, #1a2235 60%, #0d2137 100%)"
+            ? "#000000"
             : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
           color:    "#fff",
           pt:       { xs: 12, md: 15 },
@@ -133,32 +132,17 @@ const Projects = () => {
 
         {/* Grid */}
         {!loading && projects.length > 0 && (
-          <Grid container spacing={3}>
+          <Grid container spacing={3} alignItems="stretch">
             {projects.map((project, idx) => (
-              <Grid item xs={12} sm={6} lg={4} key={project.id}>
-                <Box
-                  sx={{
-                    height:            "100%",
-                    animationName:     "fadeUp",
-                    animationDuration: "0.4s",
-                    animationDelay:    `${idx * 0.06}s`,
-                    animationFillMode: "both",
-                    "@keyframes fadeUp": {
-                      from: { opacity: 0, transform: "translateY(18px)" },
-                      to:   { opacity: 1, transform: "translateY(0)"    },
-                    },
-                  }}
-                >
-                  <ProjectCard
-                    project={project}
-                    imageUrl={
-                      project.photoUrl
-                        ? buildCloudinaryUrl(project.photoUrl, { width: 600, height: 400, crop: "fill" })
-                        : null
-                    }
-                    onSelect={() => navigate(`${PATHS.PROJECTS}/${project.slug}`)}
-                  />
-                </Box>
+              <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={project.id} sx={{ display: "flex" }}>
+                <Fade in timeout={500} style={{ transitionDelay: `${idx * 100}ms` }}>
+                  <Box sx={{ width: "100%", display: "flex" }}>
+                    <ProjectCard
+                      project={project}
+                      onSelect={() => navigate(`${PATHS.PROJECTS}/${project.slug}`)}
+                    />
+                  </Box>
+                </Fade>
               </Grid>
             ))}
           </Grid>

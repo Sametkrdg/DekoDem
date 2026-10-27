@@ -23,7 +23,7 @@ const ThemeModeContext = createContext({
  *
  * Must be mounted INSIDE <SiteProvider> so the parent can pass settings.color.
  */
-export const ThemeModeProvider = ({ children, primaryColor = '#1a365d' }) => {
+export const ThemeModeProvider = ({ children, primaryColor = '#C9A961' }) => {
   const [mode, setMode] = useState(() => {
     try {
       return localStorage.getItem('themeMode') || 'light';

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Box, Container, Typography, Avatar,
-  IconButton, Skeleton,
+  IconButton, Skeleton, useTheme,
 } from "@mui/material";
 import { ChevronLeft, ChevronRight, FormatQuote } from "@mui/icons-material";
 import { getTestimonials } from "../services/firestore";
@@ -34,19 +34,22 @@ const FALLBACK = [
   },
 ];
 
-const TestimonialCard = ({ item }) => (
+const TestimonialCard = ({ item }) => {
+  const theme  = useTheme();
+  const isDark = theme.palette.mode === "dark";
+  return (
   <Box
     sx={{
-      bgcolor: "background.paper",
+      bgcolor:      "background.paper",
       borderRadius: 3,
-      p: { xs: 3, md: 5 },
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
-      boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
-      border: "1px solid",
-      borderColor: "divider",
-      position: "relative",
+      p:            { xs: 3, md: 5 },
+      height:       "100%",
+      display:      "flex",
+      flexDirection:"column",
+      boxShadow:    "none",
+      border:       "1px solid",
+      borderColor:  isDark ? "rgba(255,255,255,0.10)" : "divider",
+      position:     "relative",
     }}
   >
     {/* Quote icon */}
@@ -87,7 +90,8 @@ const TestimonialCard = ({ item }) => (
       </Box>
     </Box>
   </Box>
-);
+  );
+};
 
 const VISIBLE = 3; // cards visible at once on desktop
 
@@ -129,7 +133,7 @@ const TestimonialsSection = () => {
   return (
     <Box
       component="section"
-      sx={{ py: { xs: 8, md: 12 }, bgcolor: "#f8fafc" }}
+      sx={{ py: { xs: 8, md: 12 }, bgcolor: "background.default" }}
     >
       <Container maxWidth="lg">
         {/* Header */}

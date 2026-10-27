@@ -299,28 +299,71 @@ export const uploadLogo = async (file) => {
 // ── URL transformation ────────────────────────────────────────────────────────
 
 /**
+ * Crop modes that DO NOT crop the source — applying an aspect ratio to these
+ * would be a no-op (or worse, produce inconsistent output across CDN edges),
+ * so we skip the `ar_*` directive when one of these is in effect.
+ */
+const NON_CROPPING_MODES = new Set(["limit", "fit", "scale", "mfit", "lfit"]);
+
+/**
  * Insert Cloudinary transformation parameters into a stored secure_url.
  * Non-Cloudinary URLs are returned unchanged.
  *
+ * Luxury-grid defaults
+ * ─────────────────────────────────────────────────────────────────────────────
+ * To support the Dekodem Yapı "Equalizer" card grid, this builder now enforces
+ * a strict 3:2 aspect ratio and high-fidelity output by default:
+ *   - c_fill            crop to fill the requested frame
+ *   - ar_3:2            uniform aspect ratio — every card image lands identical
+ *   - g_auto            content-aware gravity so subjects stay centered
+ *   - q_auto:best       luxury-tier perceptual quality
+ *   - f_auto, dpr_auto  modern format + retina/HiDPI delivery
+ *
+ * Opt-outs (kept for hero, blog covers, lightbox originals, navbar logos):
+ *   - Pass `crop: 'limit' | 'fit' | 'scale'`  → aspect ratio is skipped
+ *   - Pass explicit `height`                  → overrides ar with exact h_
+ *   - Pass `aspectRatio: null`                → suppresses the ar_ directive
+ *
  * @param {string} url
  * @param {object} [opts]
- * @param {number} [opts.width=800]
- * @param {number} [opts.height]      omit for auto height
- * @param {"fill"|"crop"|"scale"|"fit"} [opts.crop="fill"]
+ * @param {number}              [opts.width=1200]
+ * @param {number}              [opts.height]              omit to let ar_ derive height
+ * @param {string|null}         [opts.aspectRatio='3:2']   e.g. '3:2', '16:9', '1:1', or null
+ * @param {string}              [opts.crop='fill']         Cloudinary c_ mode
+ * @param {string}              [opts.gravity='auto']      Cloudinary g_ mode
+ * @param {"good"|"best"|"eco"|"low"|number} [opts.quality='best']  q_auto tier or numeric
  * @returns {string}
  */
 export const buildCloudinaryUrl = (url, opts = {}) => {
   if (!url || !url.includes("cloudinary.com")) return url;
 
-  const { width = 800, height, crop = "fill" } = opts;
+  const {
+    width        = 1200,
+    height,
+    aspectRatio  = "3:2",
+    crop         = "fill",
+    gravity      = "auto",
+    quality      = "best",
+  } = opts;
+
+  const isCropping = !NON_CROPPING_MODES.has(crop);
+  // Only emit ar_ when it is actually meaningful: a cropping mode, no explicit
+  // height, and the caller hasn't suppressed it.
+  const applyAspectRatio = isCropping && !height && Boolean(aspectRatio);
+
+  const qualityToken = typeof quality === "number"
+    ? `q_${quality}`
+    : `q_auto:${quality}`;
 
   const transforms = [
-    "f_auto",         // serve WebP / AVIF automatically
-    "q_auto:good",    // perceptual quality compression
+    "f_auto",                                         // modern formats (WebP / AVIF)
+    qualityToken,                                     // luxury-tier perceptual quality
     `c_${crop}`,
+    ...(applyAspectRatio ? [`ar_${aspectRatio}`] : []),
+    ...(isCropping ? [`g_${gravity}`] : []),          // content-aware gravity only when cropping
     `w_${width}`,
     ...(height ? [`h_${height}`] : []),
-    "dpr_auto",       // retina / HiDPI displays
+    "dpr_auto",                                       // retina / HiDPI displays
   ].join(",");
 
   // Insert after /upload/ — works with or without a version segment (v123456/)

@@ -4,8 +4,8 @@
  * Schema (exact casing used in Firestore):
  *
  * Singleton documents
- *   Settings/main  → { Address, Email, Phone, InstaUrl, LogoUrl }
- *   About/main     → { AboutShort, AboutLong }
+ *   Settings/main  → { Address, Email, Phone, InstaUrl, LogoUrl, LogoDarkModeUrl, FaviconUrl, HeroImageUrl }
+ *   About/main     → { AboutShort, AboutLong, AboutImageUrl }
  *
  * Collections
  *   Activities     → { Id (int64), Name, Description, PhotoUrl }

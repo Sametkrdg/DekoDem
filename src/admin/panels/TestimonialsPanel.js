@@ -125,7 +125,7 @@ const TestimonialsPanel = ({ showSnackbar }) => {
 
           <Grid container spacing={2}>
             {items.map((item) => (
-              <Grid item xs={12} sm={6} key={item.id}>
+              <Grid size={{ xs: 12, sm: 6 }} key={item.id}>
                 <Box
                   sx={{
                     p: 2.5, borderRadius: 3, border: "1px solid", borderColor: "divider",
@@ -165,21 +165,21 @@ const TestimonialsPanel = ({ showSnackbar }) => {
         <DialogTitle fontWeight={700}>{editItem ? "Yorumu Düzenle" : "Yeni Müşteri Yorumu"}</DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ pt: 1 }}>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth label="Müşteri Adı * (clientName)" value={form.clientName}
                 onChange={(e) => handleChange("clientName", e.target.value)}
                 placeholder="Ahmet Yılmaz" sx={fieldSx}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth label="Şirket (Company)" value={form.Company}
                 onChange={(e) => handleChange("Company", e.target.value)}
                 placeholder="Yılmaz Holding" sx={fieldSx}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth label="Yorum (Comment) *" value={form.Comment}
                 onChange={(e) => handleChange("Comment", e.target.value)}

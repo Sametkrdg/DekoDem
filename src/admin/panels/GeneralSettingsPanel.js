@@ -12,7 +12,7 @@ import {
   Box, Grid, TextField, Button, Typography,
   CircularProgress, Alert,
 } from "@mui/material";
-import { Save, Settings, Info, Palette } from "@mui/icons-material";
+import { Save, Settings, Info, Palette, Panorama } from "@mui/icons-material";
 import { AdminCard, FormSection, SectionHeader, SectionTitle } from "../shared";
 import { setDocument, getDocument } from "../adminFirestore";
 import { isFirebaseConfigured } from "../../config/firebase";
@@ -21,7 +21,7 @@ import ImageUploader from "../../components/ImageUploader.jsx";
 
 const DEFAULT_THEME = { hue: 8, saturation: 72 };
 
-const EMPTY_CONTACT = { Phone: "", Email: "", Address: "", InstaUrl: "", LogoUrl: "" };
+const EMPTY_CONTACT = { Phone: "", Email: "", Address: "", InstaUrl: "", LogoUrl: "", LogoDarkModeUrl: "", FaviconUrl: "", HeroImageUrl: "" };
 const EMPTY_ABOUT   = { AboutShort: "", AboutLong: "" };
 
 const fieldSx = { "& .MuiOutlinedInput-root": { borderRadius: "12px" } };
@@ -140,37 +140,37 @@ const GeneralSettingsPanel = ({ settings, setSettings, showSnackbar }) => {
             <Box sx={{ textAlign: "center", py: 4 }}><CircularProgress /></Box>
           ) : (
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth label="Telefon" value={contact.Phone}
                   onChange={(e) => handleContactChange("Phone", e.target.value)}
                   placeholder="+90 537 466 71 72" sx={fieldSx}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth label="E-posta" value={contact.Email}
                   onChange={(e) => handleContactChange("Email", e.target.value)}
                   placeholder="info@dekodem.com.tr" sx={fieldSx}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth label="Adres" value={contact.Address}
                   onChange={(e) => handleContactChange("Address", e.target.value)}
                   placeholder="Organize Sanayi Bölgesi, İzmit / Kocaeli" sx={fieldSx}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth label="Instagram URL" value={contact.InstaUrl}
                   onChange={(e) => handleContactChange("InstaUrl", e.target.value)}
                   placeholder="https://www.instagram.com/dekodem.com.tr/" sx={fieldSx}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <ImageUploader
-                  label="Firma Logosu (LogoUrl)"
+                  label="Firma Logosu — Açık Mod (LogoUrl)"
                   value={contact.LogoUrl}
                   onChange={(url) => handleContactChange("LogoUrl", url)}
                   folder="dekodem/brand"
@@ -179,7 +179,63 @@ const GeneralSettingsPanel = ({ settings, setSettings, showSnackbar }) => {
                   maxSizeMB={5}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <ImageUploader
+                  label="Firma Logosu — Karanlık Mod (LogoDarkModeUrl)"
+                  value={contact.LogoDarkModeUrl}
+                  onChange={(url) => handleContactChange("LogoDarkModeUrl", url)}
+                  folder="dekodem/brand"
+                  showSnackbar={showSnackbar}
+                  aspectRatio="3/1"
+                  maxSizeMB={5}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <ImageUploader
+                  label="Favicon (Tarayıcı Sekmesi İkonu)"
+                  value={contact.FaviconUrl}
+                  onChange={(url) => handleContactChange("FaviconUrl", url)}
+                  folder="dekodem/brand"
+                  showSnackbar={showSnackbar}
+                  aspectRatio="1/1"
+                  maxSizeMB={1}
+                />
+              </Grid>
+              {/* ── Hero Banner sub-section ─────────────────────────────── */}
+              <Grid size={{ xs: 12 }}>
+                <Box
+                  sx={{
+                    display:     'flex',
+                    alignItems:  'center',
+                    gap:         1.5,
+                    pt:          2,
+                    pb:          1,
+                    borderTop:   '1px solid',
+                    borderColor: 'divider',
+                    mt:          1,
+                  }}
+                >
+                  <Panorama sx={{ color: "primary.main", fontSize: 22 }} />
+                  <Typography variant="subtitle1" fontWeight={700}>
+                    Anasayfa Hero Görseli
+                  </Typography>
+                </Box>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                  Önerilen boyut: <strong>1920 × 1080 px</strong> (16:9, yatay).
+                  Yüksek çözünürlüklü, geniş açılı bir görsel en iyi sonucu verir.
+                </Typography>
+                <ImageUploader
+                  label="Hero (Karşılama) Görseli — HeroImageUrl"
+                  value={contact.HeroImageUrl}
+                  onChange={(url) => handleContactChange("HeroImageUrl", url)}
+                  folder="dekodem/hero"
+                  showSnackbar={showSnackbar}
+                  aspectRatio="16/9"
+                  maxSizeMB={10}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12 }}>
                 <Button
                   variant="contained" startIcon={savingC ? <CircularProgress size={18} color="inherit" /> : <Save />}
                   onClick={saveContact} disabled={savingC || !isFirebaseConfigured}
@@ -208,7 +264,7 @@ const GeneralSettingsPanel = ({ settings, setSettings, showSnackbar }) => {
             <Box sx={{ textAlign: "center", py: 4 }}><CircularProgress /></Box>
           ) : (
             <Grid container spacing={2}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth label="Kısa Açıklama (AboutShort)"
                   value={about.AboutShort}
@@ -219,7 +275,7 @@ const GeneralSettingsPanel = ({ settings, setSettings, showSnackbar }) => {
                   sx={fieldSx}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth label="Uzun Açıklama (AboutLong)"
                   value={about.AboutLong}
@@ -229,7 +285,7 @@ const GeneralSettingsPanel = ({ settings, setSettings, showSnackbar }) => {
                   sx={fieldSx}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Button
                   variant="contained" startIcon={savingA ? <CircularProgress size={18} color="inherit" /> : <Save />}
                   onClick={saveAbout} disabled={savingA || !isFirebaseConfigured}
@@ -254,14 +310,14 @@ const GeneralSettingsPanel = ({ settings, setSettings, showSnackbar }) => {
             Yalnızca tarayıcıda (localStorage) saklanır. Tema rengi ve panel başlığı.
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth label="Site Başlığı" value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="DEKODEM" sx={fieldSx}
               />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <TextField
                 fullWidth label="Tema Rengi (Hex)" value={color}
                 onChange={(e) => setColor(e.target.value)}
@@ -273,14 +329,14 @@ const GeneralSettingsPanel = ({ settings, setSettings, showSnackbar }) => {
                 sx={fieldSx}
               />
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <input
                 type="color" value={color}
                 onChange={(e) => setColor(e.target.value)}
                 style={{ width: "100%", height: 52, borderRadius: 8, border: "1px solid #ccc", cursor: "pointer" }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Button
                 variant="contained" startIcon={<Save />}
                 onClick={saveAdminUI}

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 // MUI
-import { Box, Container, Typography, Grid, Button, Chip } from '@mui/material';
+import { Box, Container, Typography, Grid, Button, Fade } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 import {
   ArrowForward, Architecture, Construction, ViewComfy, Brush,
@@ -59,41 +59,32 @@ const ActivityCard = ({ field, index }) => {
     ? activityPath(field.slug)
     : field._docId ? activityPath(field._docId) : PATHS.ACTIVITIES;
 
+  const hairline = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
+  const gold     = theme.palette.primary.main;
+
   return (
     <Box
       component={Link}
       to={linkTo}
       sx={{
-        display:              'flex',
-        flexDirection:        'column',
-        height:               '100%',
-        borderRadius:         '20px',
-        border:               '1px solid',
-        borderColor:          isDark ? theme.glass.border : alpha(theme.palette.primary.main, 0.12),
-        background:           isDark ? theme.glass.bg : alpha(theme.palette.primary.main, 0.02),
-        backdropFilter:       theme.glass.blur,
-        WebkitBackdropFilter: theme.glass.blur,
-        overflow:             'hidden',
-        textDecoration:       'none',
-        color:                'text.primary',
-        transition:           'transform 0.28s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.28s ease, border-color 0.28s ease',
+        display:        'flex',
+        flexDirection:  'column',
+        height:         '100%',
+        width:          '100%',
+        borderRadius:   '24px',
+        border:         '1px solid',
+        borderColor:    hairline,
+        bgcolor:        'background.paper',
+        overflow:       'hidden',
+        textDecoration: 'none',
+        color:          'text.primary',
+        boxShadow:      'none',
+        transition:     'transform 0.3s cubic-bezier(0.4,0,0.2,1), border-color 0.3s ease',
         '&:hover': {
-          borderColor: alpha(theme.palette.primary.main, isDark ? 0.45 : 0.35),
-          transform:   'translateY(-6px)',
-          boxShadow:   isDark
-            ? `0 20px 48px rgba(0,0,0,0.62), 0 0 0 1px ${alpha(theme.palette.primary.main, 0.25)}`
-            : `0 16px 40px ${alpha(theme.palette.primary.main, 0.12)}`,
-          '& .card-arrow': { transform: 'translateX(4px)', opacity: 1 },
+          transform:   'scale(1.02)',
+          borderColor: alpha(gold, isDark ? 0.55 : 0.45),
+          '& .card-arrow':  { transform: 'translateX(4px)', opacity: 1 },
           '& .card-accent': { opacity: 1 },
-        },
-        // Stagger entrance
-        animationName:     'cardFadeUp',
-        animationDuration: '0.45s',
-        animationDelay:    `${index * 0.06}s`,
-        animationFillMode: 'both',
-        '@keyframes cardFadeUp': {
-          from: { opacity: 0, transform: 'translateY(20px)' },
-          to:   { opacity: 1, transform: 'translateY(0)' },
         },
       }}
     >
@@ -123,75 +114,24 @@ const ActivityCard = ({ field, index }) => {
             color:          '#fff',
             mb:             2.5,
             flexShrink:     0,
-            boxShadow:      `0 6px 16px ${alpha(theme.palette.primary.main, 0.25)}`,
           }}
         >
           <IconComponent sx={{ fontSize: 26 }} />
         </Box>
 
-        {/* Title */}
+        {/* Title only — extreme minimalism per the luxury rules */}
         <Typography
           variant="subtitle1"
           fontWeight={700}
-          sx={{ lineHeight: 1.35, mb: 1.5 }}
+          sx={{ lineHeight: 1.35 }}
         >
           {field.title}
         </Typography>
 
-        {/* Sub-service chips (static data) or description snippet (Firestore data) */}
-        {field.subServices && field.subServices.length > 0 ? (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2.5 }}>
-            {field.subServices.slice(0, 2).map((s) => (
-              <Chip
-                key={s}
-                label={s}
-                size="small"
-                sx={{
-                  fontSize:    '0.7rem',
-                  height:      22,
-                  bgcolor:     isDark
-                    ? 'rgba(255,255,255,0.07)'
-                    : alpha(theme.palette.primary.main, 0.07),
-                  color:       'text.secondary',
-                  border:      '1px solid',
-                  borderColor: isDark ? 'rgba(255,255,255,0.1)' : alpha(theme.palette.primary.main, 0.15),
-                }}
-              />
-            ))}
-            {field.subServices.length > 2 && (
-              <Chip
-                label={`+${field.subServices.length - 2}`}
-                size="small"
-                sx={{
-                  fontSize:    '0.7rem',
-                  height:      22,
-                  bgcolor:     'transparent',
-                  color:       'primary.main',
-                  border:      '1px solid',
-                  borderColor: alpha(theme.palette.primary.main, 0.3),
-                  fontWeight:  600,
-                }}
-              />
-            )}
-          </Box>
-        ) : field.description ? (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mb: 2.5, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
-          >
-            {field.description}
-          </Typography>
-        ) : (
-          <Box sx={{ mb: 2.5 }} />
-        )}
-
-        {/* Spacer */}
-        <Box sx={{ flexGrow: 1 }} />
-
-        {/* "View details" footer */}
+        {/* "View details" footer — Equalizer: pinned to bottom via mt:auto */}
         <Box
           sx={{
+            mt:         'auto',
             display:    'flex',
             alignItems: 'center',
             gap:        0.75,
@@ -289,11 +229,15 @@ const ActivitiesSection = () => {
           </Typography>
         </Box>
 
-        {/* Card grid — all activity fields, 3 cols desktop / 2 tablet / 1 mobile */}
-        <Grid container spacing={3}>
+        {/* Card grid — Equalizer: alignItems stretch so every card in a row matches height */}
+        <Grid container spacing={3} alignItems="stretch">
           {fields.map((field, index) => (
-            <Grid item xs={12} sm={6} md={4} key={field.id || index}>
-              <ActivityCard field={field} index={index} />
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={field.id || index} sx={{ display: 'flex' }}>
+              <Fade in timeout={500} style={{ transitionDelay: `${index * 100}ms` }}>
+                <Box sx={{ width: '100%', display: 'flex' }}>
+                  <ActivityCard field={field} index={index} />
+                </Box>
+              </Fade>
             </Grid>
           ))}
         </Grid>

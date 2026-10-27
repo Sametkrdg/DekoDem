@@ -9,7 +9,7 @@ const ActivityAreas = ({ siteContent }) => {
   );
 
   return (
-    <Box sx={{ background: 'linear-gradient(135deg, #f8fbff 0%, #eef3f9 100%)' }}>
+    <Box sx={{ bgcolor: 'background.default' }}>
       <ActivityShowcase activities={activities} />
     </Box>
   );

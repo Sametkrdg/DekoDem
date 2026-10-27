@@ -64,7 +64,7 @@ const AboutSection = ({ photos = [] }) => {
         <Grid container spacing={{ xs: 5, md: 8 }} alignItems="center">
 
           {/* ── Left: Text content ────────────────────────────────────────── */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
 
             <Typography
               variant="overline"
@@ -133,7 +133,7 @@ const AboutSection = ({ photos = [] }) => {
           </Grid>
 
           {/* ── Right: optional photo + CoreValue 2×2 grid ───────────────── */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             {primaryPhoto && (
               <Box
                 component="img"
@@ -160,7 +160,7 @@ const AboutSection = ({ photos = [] }) => {
               sx={{ listStyle: 'none', p: 0, m: 0 }}
             >
               {coreValues.map((val) => (
-                <Grid item xs={6} key={val.id} component="li">
+                <Grid size={{ xs: 6 }} key={val.id} component="li">
                   <ValueCard
                     icon={ICON_MAP[val.icon] ?? <Engineering />}
                     title={val.title}
