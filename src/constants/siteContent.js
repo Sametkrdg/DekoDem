@@ -18,7 +18,7 @@ export const brand = {
 export const contact = {
   address:     'Alikahya Merkez Mah. Sakıp Sabancı Bulv. No: 26/A, İzmit / Kocaeli',
   phone1:      '+90 537 466 71 72',
-  email:       'dekodemyapı@gmail.com',
+  email:       'dekodemyapi@gmail.com',
   instagramUrl:'https://www.instagram.com/dekodem.com.tr/',
   mapsUrl:     'https://maps.app.goo.gl/1gcVpx786BypBLcW7',
   // Formatted hrefs

@@ -147,7 +147,7 @@ const TermsOfService = () => {
         <Section title="10. İletişim">
           <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
             Bu kullanım koşullarına ilişkin sorularınız için:<br />
-            <strong>E-posta:</strong> dekodemyapı@gmail.com<br />
+            <strong>E-posta:</strong> dekodemyapi@gmail.com<br />
             <strong>Adres:</strong> Alikahya Merkez Mah. Sakıp Sabancı Bulv. No: 26/A, İzmit / Kocaeli<br />
             <strong>Telefon:</strong> +90 537 466 71 72
           </Typography>

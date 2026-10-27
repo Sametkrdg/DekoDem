@@ -3,7 +3,7 @@ import { useSite } from "../context/SiteContext";
 import { brand, about } from "../constants/siteContent";
 
 const SCHEMA_ID   = "ld-local-business";
-const PROD_ORIGIN = "https://dekodemyapı.com";
+const PROD_ORIGIN = "https://dekodemyapi.com";
 
 /**
  * LocalBusinessSchema
